@@ -1,0 +1,6 @@
+module Pods_SplitnestProj {
+  umbrella header "Pods-SplitnestProj-umbrella.h"
+
+  export *
+  module * { export * }
+}

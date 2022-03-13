@@ -5,7 +5,6 @@ import {createStackNavigator} from 'react-navigation-stack';
 import LoginScreen from './src/screens/LoginScreen';
 import CameraScreen from './src/screens/CameraScreen';
 import {LogBox} from 'react-native';
-import AsyncStorage from '@react-native-community/async-storage';
 import {YellowBox} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 

@@ -123,6 +123,7 @@ const RegisterScreen = ({ navigation }) => {
             navigation.navigate('Camera');
           })
           .catch(error => {
+            const errorCode = re.code;
             Alert.alert(error);
           });
           
@@ -142,6 +143,12 @@ const RegisterScreen = ({ navigation }) => {
         {
           Alert.alert('Error', 'Please insert a password');
         }
+
+        if(errorCode ==='auth/invalid-email')
+        {
+          Alert.alert('Error', 'Please insert a valid email');
+        }
+
         console.log(re);
       });
     

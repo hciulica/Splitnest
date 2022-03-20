@@ -3,6 +3,7 @@ import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import ImagePicker from 'react-native-image-crop-picker';
 import {getStorage, uploadBytes, ref, getDownloadURL} from 'firebase/storage';
 import {updateProfile} from 'firebase/auth';
+import {storage} from '../api/firebase/firebase-config';
 
 import {
   View,
@@ -85,26 +86,37 @@ const CameraScreen = ({ navigation }) => {
       path: 'images',
       includeBase64: true
     }).then(image => {
-      // console.log(image.path);
-      setImageUri(image.path);
+      uploadImageCloud(image.path);
+    });
+  }
+
+  const openCameraWithCrop = async () => {
+    
+    await ImagePicker.openCamera({
+      width: 300,
+      height: 400,
+      cropping: true,
+      mediaType: 'photo',
+      path: 'images',
+      includeBase64: true
+    }).then(image => {
+      uploadImageCloud(image.path);
     });
   }
 
 
+  const uploadImageCloud = async(imagePath) => {
 
-  const funct = async() => {
-
-    console.log(imageUri);
-    const storage = getStorage();
+    console.log(imagePath);
+    //const storage = getStorage();
     const folderName = authentication.currentUser.email;
-
-    const storageRef = ref(storage, `${folderName}/profileImage.jpg`);
-    const img = await fetch(imageUri);
+    const storageRef = ref(storage, `${folderName}/Profile/Profile_Image.jpg`);
+    const img = await fetch(imagePath);
     const bytes = await img.blob();
     await uploadBytes(storageRef, bytes);
     getDownloadURL(storageRef)
     .then((url) => {
-        setUrl1(url);
+        updateImage(url);
     })
     .catch((error) => {
           switch (error.code) {
@@ -118,8 +130,6 @@ const CameraScreen = ({ navigation }) => {
               // User canceled the upload
               break;
 
-            // ...
-
             case 'storage/unknown':
               // Unknown error occurred, inspect the server response
               break;
@@ -127,9 +137,9 @@ const CameraScreen = ({ navigation }) => {
       });
   }
 
-  const updateImage = async() => {
+  const updateImage = async(imageUrl) => {
     await updateProfile(authentication.currentUser, {
-    displayName: "Horica", photoURL: url1
+      photoURL: imageUrl
     }).then(() => {
       
       Alert.alert("Profile updated!");
@@ -140,24 +150,20 @@ const CameraScreen = ({ navigation }) => {
       // An error occurred
       // ...
     });
-    console.log(url1);
+    console.log(imageUrl);
     setUrl1(authentication.currentUser.photoURL);
+    console.log(JSON.stringify(authentication.currentUser, null, 3));
     // console.log(authentication.currentUser);
-  }
-
-  const getObject = () => {
-    console.log(authentication.currentUser);
   }
 
   return (
     <View>
       <Button title="Select from gallery" onPress={selectFromGallery} />
       <Button title="Select from gallery with crop" onPress={selectFromGalleryWithCrop}/>
-      <Button title="Open camera" onPress={openCamera} />
-      <Button title="Upload" onPress={funct} />
-      <Button title="Select image crop" onPress={selectGalleryImageCrop} />
-      <Button title="Update profile image" onPress={updateImage} />
-      <Button title="User objects" onPress={getObject} />
+      <Button title="Open camera" onPress={openCameraWithCrop} />
+      {/* <Button title="Upload" onPress={funct} /> */}
+      {/* <Button title="Select image crop" onPress={selectGalleryImageCrop} /> */}
+      {/* <Button title="Update profile image" onPress={updateImage} /> */}
       <View style = {styles.imageStyle}>
         <Image
           // source={{ uri: url1 }}

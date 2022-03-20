@@ -41,7 +41,7 @@ const LoginScreen = ({ navigation }) => {
         switch(errorCode)
         {
           case 'auth/wrong-password':
-             Alert.alert('Wrong password');
+             Alert.alert('Error','Wrong password');
           break;
 
           case 'auth/too-many-requests':
@@ -53,11 +53,15 @@ const LoginScreen = ({ navigation }) => {
           break;
 
           case 'auth/invalid-email':
-            Alert.alert('This mail is invalid');
+            Alert.alert('Error','Please insert a valid email');
           break;
 
           case 'auth/user-not-found':
-            Alert.alert('User not found');
+            Alert.alert('Error', 'There is no account with the credentials entered');
+          break;
+
+          case 'auth/internal-error':
+            Alert.alert('Error', 'Please insert password of your email');
           break;
         }
         console.log(re);
@@ -89,8 +93,8 @@ const LoginScreen = ({ navigation }) => {
      sendPasswordResetEmail(authentication, emailReset)
       .then(() => {
         Alert.alert(
-          'Password reset',
-          'Please check your email for the reset password');
+          'Email for password reset sent',
+          'Please check your email inbox for the reset password');
       })
       .catch(error => {
         const errorCode = error.code;
@@ -132,7 +136,7 @@ const LoginScreen = ({ navigation }) => {
         case 'auth/invalid-email':
          Alert.alert(
               'Error',
-              'Invalid Email',
+              'Please enter a valid email',
               [{ text: "Try again", onPress: () => resetPassInputMail() },
                { text: "Cancel", onPress: () => console.log("Cancel Pressed"),
                 style: "cancel" }]

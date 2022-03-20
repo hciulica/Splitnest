@@ -14,8 +14,7 @@ target 'SplitnestProj' do
 
 
 
-  pod 'react-native-image-picker', :path => '../node_modules/react-native-image-picker'
-
+  
   target 'SplitnestProjTests' do
     inherit! :complete
     # Pods for testing

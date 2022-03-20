@@ -24,135 +24,130 @@ import {
   RecaptchaVerifier,
 } from 'firebase/auth';
 
-const LoginScreen = () => {
-  const [isSignedIn, setIsSignedIn] = useState(false);
-  const [username, setUsername] = useState('');
-  const [phone, setPhone] = useState('');
+const LoginScreen = ({ navigation }) => {
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [emailLoggedIn, setEmailLoggedIn] = useState(false);
-  const [confirmationResult1, setConfirmationResult1] = useState('');
-  const [code, setCode] = useState('');
-  let provider = '';
+  const [forgotPassMail, setForgotPassMail] = useState('');
 
-  const signInUser = () => {
+   const signInUser = () => {
     signInWithEmailAndPassword(authentication, email, password)
       .then(re => {
         Alert.alert('Authentication');
+        navigation.navigate('Camera');
       })
       .catch(re => {
         const errorCode = re.code;
-        if (errorCode === 'auth/wrong-password') {
-          Alert.alert('Wrong password!');
-        }
+        switch(errorCode)
+        {
+          case 'auth/wrong-password':
+             Alert.alert('Wrong password');
+          break;
 
-        if (errorCode === 'auth/too-many-requests') {
-          Alert.alert('Too many requests!');
-        }
+          case 'auth/too-many-requests':
+            Alert.alert('Too many attempts failed');
+          break;
 
+          case 'auth/user-disabled':
+            Alert.alert('This account has been banned');
+          break;
+
+          case 'auth/invalid-email':
+            Alert.alert('This mail is invalid');
+          break;
+
+          case 'auth/user-not-found':
+            Alert.alert('User not found');
+          break;
+        }
         console.log(re);
       });
   };
 
-  const getNameConnected = () => {
-    const user = authentication.currentUser;
-    if (user) {
-      Alert.alert(user.displayName);
-    } else {
-      Alert.alert('No one is connected');
-    }
-  };
+   const resetPassInputMail = () => {
+    Alert.prompt(
+      "Forgot password",
+      "Enter your email to send you a reset email",
+      [
+        {
+          text: "Send email",
+          // onPress: mail => setForgotPassMail(mail)
+          onPress: mail => resetPassword(mail),
+          style: "default"
+        },
+        {
+          text: "Cancel",
+          onPress: () => console.log("Cancel Pressed"),
+          style: "cancel"
+        }  
+      ],
+    );
+  }
 
-  const createAccount = () => {
-    createUserWithEmailAndPassword(authentication, email, password)
+   const resetPassword = (emailReset) => {
+     
+     sendPasswordResetEmail(authentication, emailReset)
       .then(() => {
         Alert.alert(
-          'Created user with email: ' + email + ' and password:' + password,
-        );
-        // updateProf();
-        updateProfile(authentication.currentUser, {
-          displayName: username,
-        })
-          .then(() => {
-            console.log('Updated phoneNumber');
-          })
-          .catch(error => {
-            Alert.alert(error);
-          });
-      })
-      .catch(re => {
-        const errorCode = re.code;
-        if (errorCode === 'auth/email-already-in-use') {
-          Alert.alert('Email is already in use');
-        }
-      });
-  };
-
-  const stateChange = () => {
-    //Functie ciclica care se apeleaza automat cand se schimba un state
-    onAuthStateChanged(authentication, user => {
-      if (user) {
-        setEmailLoggedIn(true);
-      } else {
-        setEmailLoggedIn(false);
-      }
-    });
-  };
-
-  const signOutUser = () => {
-    const user = authentication.currentUser;
-
-    if (user) {
-      const email = authentication.currentUser.email;
-      console.log(user);
-      signOut(authentication)
-        .then(() => {
-          Alert.alert('User with email ' + email + ' has been signout');
-        })
-        .catch(re => {
-          Alert.alert(re);
-        });
-    } else {
-      Alert.alert('You are not signed in');
-    }
-  };
-
-  const resetPassword = () => {
-    sendPasswordResetEmail(authentication, email)
-      .then(() => {
-        // Password reset email sent!
-        // ..
-        Alert.alert('Password reset email success');
+          'Password reset',
+          'Please check your email for the reset password');
       })
       .catch(error => {
         const errorCode = error.code;
-        if (errorCode === 'auth/user-not-found') {
-          Alert.alert('There is not an account created with this email');
-        }
+        switch(errorCode)
+        {
+        case 'auth/user-not-found':
+        
+        Alert.alert(
+              'Error',
+              'There is not an account created with this email',
+              [{ text: "Try again", onPress: () => resetPassInputMail() },
+               { text: "Cancel", onPress: () => console.log("Cancel Pressed"),
+                style: "cancel" }]
+        );
+        
+         break;
+        
+          case 'auth/missing-email':
+        Alert.alert(
+              'Error',
+              'Please enter an email',
+              [{ text: "Try again", onPress: () => resetPassInputMail() },
+               { text: "Cancel", onPress: () => console.log("Cancel Pressed"),
+                style: "cancel" }]
+        );
+        break;
+
+        case 'auth/network-request-failed':
+          Alert.alert(
+              'Error',
+              'Network error',
+              [{ text: "Try again", onPress: () => resetPassInputMail() },
+               { text: "Cancel", onPress: () => console.log("Cancel Pressed"),
+                style: "cancel" }]
+        );
+        break;
+
+
+        case 'auth/invalid-email':
+         Alert.alert(
+              'Error',
+              'Invalid Email',
+              [{ text: "Try again", onPress: () => resetPassInputMail() },
+               { text: "Cancel", onPress: () => console.log("Cancel Pressed"),
+                style: "cancel" }]
+        );
+        break;
+        
+      }
         console.log(error);
         //Alert.alert(errorCode);
-      });
+      })
   };
 
   return (
-    <View>
-      <TextInput
-        style={styles.textField}
-        placeholder="Username"
-        value={username}
-        autoCapitalize="none"
-        autoCorrect={false}
-        onChangeText={text => setUsername(text)}
-      />
-      <TextInput
-        style={styles.textField}
-        placeholder="Phone"
-        value={phone}
-        autoCapitalize="none"
-        autoCorrect={false}
-        onChangeText={text => setPhone(text)}
-      />
-      <TextInput
+      <View>
+          <TextInput
         style={styles.textField}
         placeholder="Email"
         value={email}
@@ -167,20 +162,21 @@ const LoginScreen = () => {
         secureTextEntry
         onChangeText={text => setPassword(text)}
       />
-      <TouchableOpacity onPress={resetPassword}>
+      <TouchableOpacity
+      style={styles.forgotpass}
+       onPress={resetPassInputMail}>
         <Text>Forgot password</Text>
       </TouchableOpacity>
-      <TextInput
-        style={styles.textField}
-        placeholder="CodeSMS"
-        value={code}
-        onChangeText={text => setCode(text)}
-      />
-      <Button title="Get user connected" onPress={getNameConnected} />
-      <Button title="Sign up" onPress={createAccount} />
+
       <Button title="Sign in" onPress={signInUser} />
-      <Button title="Sign out" onPress={signOutUser} />
-    </View>
+      <Text>Don't have an account?</Text>
+      <TouchableOpacity
+        style={styles.touchableOpac}
+        onPress={() => navigation.navigate('Register')}>
+        <Text style={styles.touchableOpac}>Sign up</Text>
+      
+      </TouchableOpacity>
+      </View>
   );
 };
 
@@ -190,6 +186,12 @@ const styles = StyleSheet.create({
     margin: 12,
     borderWidth: 1,
     padding: 10,
+  },
+  text: {
+    fontSize: 50,
+  },
+  touchableOpac: {
+    color: 0x12EFEF
   },
   forgotpass: {
     color: 0xa6a6a6,

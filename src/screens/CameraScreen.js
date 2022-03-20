@@ -1,6 +1,8 @@
 import React, {useState} from 'react';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
+import ImagePicker from 'react-native-image-crop-picker';
 import {getStorage, uploadBytes, ref, getDownloadURL} from 'firebase/storage';
+import {updateProfile} from 'firebase/auth';
 
 import {
   View,
@@ -13,12 +15,12 @@ import {
   Image
 } from 'react-native';
 
-import {authentication} from '../api/firebase/firebase-config';
+import {authentication, db} from '../api/firebase/firebase-config';
 
-const CameraScreen = () => {
+const CameraScreen = ({ navigation }) => {
 
-  const [imageUri, setImageUri] = useState('../../assets/images/SplitLogo.svg');
-  const [url1, setUrl1] = useState('../../assets/images/SplitLogo.svg');
+  const [imageUri, setImageUri] = useState('');
+  const [url1, setUrl1] = useState('');
 
   const selectGalleryImageCrop = async () =>{
     ImagePicker.openPicker({
@@ -71,18 +73,32 @@ const CameraScreen = () => {
       setImageUri(response.assets[0].uri);
       }
     });
-
-
-
-
   };
+
+  const selectFromGalleryWithCrop = async () => {
+    
+    await ImagePicker.openPicker({
+      width: 300,
+      height: 400,
+      cropping: true,
+      mediaType: 'photo',
+      path: 'images',
+      includeBase64: true
+    }).then(image => {
+      // console.log(image.path);
+      setImageUri(image.path);
+    });
+  }
+
 
 
   const funct = async() => {
 
     console.log(imageUri);
     const storage = getStorage();
-    const storageRef = ref(storage, 'Ceva/image.jpg');
+    const folderName = authentication.currentUser.email;
+
+    const storageRef = ref(storage, `${folderName}/profileImage.jpg`);
     const img = await fetch(imageUri);
     const bytes = await img.blob();
     await uploadBytes(storageRef, bytes);
@@ -111,15 +127,41 @@ const CameraScreen = () => {
       });
   }
 
+  const updateImage = async() => {
+    await updateProfile(authentication.currentUser, {
+    displayName: "Horica", photoURL: url1
+    }).then(() => {
+      
+      Alert.alert("Profile updated!");
+      // Profile updated!
+      // ...
+    }).catch((error) => {
+      Alert.alert(error);
+      // An error occurred
+      // ...
+    });
+    console.log(url1);
+    setUrl1(authentication.currentUser.photoURL);
+    // console.log(authentication.currentUser);
+  }
+
+  const getObject = () => {
+    console.log(authentication.currentUser);
+  }
+
   return (
     <View>
       <Button title="Select from gallery" onPress={selectFromGallery} />
+      <Button title="Select from gallery with crop" onPress={selectFromGalleryWithCrop}/>
       <Button title="Open camera" onPress={openCamera} />
       <Button title="Upload" onPress={funct} />
       <Button title="Select image crop" onPress={selectGalleryImageCrop} />
+      <Button title="Update profile image" onPress={updateImage} />
+      <Button title="User objects" onPress={getObject} />
       <View style = {styles.imageStyle}>
         <Image
-          source={{ uri: url1 }}
+          // source={{ uri: url1 }}
+          source={{ uri: authentication.currentUser.photoURL }}
           style={{ width: 200, height: 200 }}
         />
       </View>

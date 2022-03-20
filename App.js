@@ -3,6 +3,7 @@ import {View, Text, Image, StyleSheet} from 'react-native';
 import {createAppContainer} from 'react-navigation';
 import {createStackNavigator} from 'react-navigation-stack';
 import LoginScreen from './src/screens/LoginScreen';
+import RegisterScreen from './src/screens/RegisterScreen';
 import CameraScreen from './src/screens/CameraScreen';
 import {LogBox} from 'react-native';
 import {YellowBox} from 'react-native';
@@ -17,10 +18,22 @@ LogBox.ignoreLogs([
   'Warning: Async Storage has been extracted from react-native core',
 ]);
 
+const navigator = createStackNavigator(
+  {
+    Login: LoginScreen,
+    Register: RegisterScreen,
+    Camera: CameraScreen,
+  },
+  {
+    initialRouteName: 'Login',
+  
+  }
+)
+
 const App: () => Node = () => {
   Icon.loadFont();
   return (
-    <View style={{marginTop: 60, marginLeft: 10}}>
+    <View style={{marginTop: 60, marginLeft: 10}}> 
       <Image
         style={styles.logo}
         source={require('./assets/images/SplitLogo.svg')}
@@ -43,4 +56,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default App;
+export default createAppContainer(navigator);

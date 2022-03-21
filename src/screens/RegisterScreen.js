@@ -166,23 +166,7 @@ const RegisterScreen = ({ navigation }) => {
   //   });
   // };
 
-  const signOutUser = () => {
-    const user = authentication.currentUser;
-
-    if (user) {
-      const email = authentication.currentUser.email;
-      console.log(user);
-      signOut(authentication)
-        .then(() => {
-          Alert.alert('User with email ' + email + ' has been signout');
-        })
-        .catch(re => {
-          Alert.alert(re);
-        });
-    } else {
-      Alert.alert('You are not signed in');
-    }
-  };
+  
 
  
 
@@ -240,7 +224,16 @@ const RegisterScreen = ({ navigation }) => {
       {/* <TouchableOpacity onPress={resetPassword}>
         <Text>Forgot password</Text>
       </TouchableOpacity> */}
+      <View styles={styles.buttonStyle}>
+      <TouchableOpacity style={styles.buttonStyle}>
+        <Text style={{color : 0x000034}}>Sign up</Text>
+      </TouchableOpacity>
       <Button title="Sign up" onPress={createAccount} />
+      </View>
+      <Text>I have an account</Text>
+      <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+        <Text style={{color : 0xffffff}}>Sign in</Text>
+      </TouchableOpacity>
       {/* <Button title="Send an email confirmation" onPress={consoleAuthentication} /> */}
       {/* <Button title="Sign in" onPress={signInUser} /> */}
       {/* <Button title="Sign out" onPress={signOutUser} /> */}
@@ -255,6 +248,11 @@ const styles = StyleSheet.create({
     margin: 12,
     borderWidth: 1,
     padding: 10,
+  },
+  buttonStyle:{
+    weight: 180,
+    height: 53,
+    backgroundColor: 0x0feeee
   },
   forgotpass: {
     color: 0xa6a6a6,

@@ -24,12 +24,15 @@ import {
   RecaptchaVerifier,
 } from 'firebase/auth';
 
+// import SplitnestIcon from '../../assets/images/SplitLogo.svg';
+
 const LoginScreen = ({ navigation }) => {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [forgotPassMail, setForgotPassMail] = useState('');
 
+  
    const signInUser = () => {
     signInWithEmailAndPassword(authentication, email, password)
       .then(re => {
@@ -173,13 +176,15 @@ const LoginScreen = ({ navigation }) => {
       </TouchableOpacity>
 
       <Button title="Sign in" onPress={signInUser} />
-      <Text>Don't have an account?</Text>
+      <Text style={{fontWeight: '100'}}>Don't have an account?</Text>
+
       <TouchableOpacity
-        style={styles.touchableOpac}
-        onPress={() => navigation.navigate('Register')}>
-        <Text style={styles.touchableOpac}>Sign up</Text>
-      
+          style={styles.touchableOpac}
+          onPress={() => navigation.navigate('Register')}>
+          <Text style={styles.touchableOpac}>Sign up</Text>
       </TouchableOpacity>
+    
+      {/* <SplitnestIcon width={300} height={300}></SplitnestIcon> */}
       </View>
   );
 };

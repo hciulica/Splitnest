@@ -9,6 +9,8 @@ import {
   Alert,
   TouchableOpacity,
 } from 'react-native';
+import FlatButton from '../components/FlatButton';
+import ImputField from '../components/InputField';
 import {authentication} from '../api/firebase/firebase-config';
 import {
   createUserWithEmailAndPassword,
@@ -153,29 +155,28 @@ const LoginScreen = ({ navigation }) => {
   };
 
   return (
-      <View>
-          <TextInput
-        style={styles.textField}
-        placeholder="Email"
-        value={email}
-        autoCapitalize="none"
-        autoCorrect={false}
+
+      <View style={styles.container}>
+      <InputField 
+        name='email' 
+        value={email} 
         onChangeText={text => setEmail(text)}
-      />
-      <TextInput
-        style={styles.textField}
-        placeholder="Password"
+      />     
+      <InputField 
+        name='password' 
         value={password}
-        secureTextEntry
         onChangeText={text => setPassword(text)}
-      />
+      /> 
       <TouchableOpacity
       style={styles.forgotpass}
        onPress={resetPassInputMail}>
         <Text>Forgot password</Text>
       </TouchableOpacity>
 
-      <Button title="Sign in" onPress={signInUser} />
+      <FlatButton 
+        title="Sign in" onPress={() => signInUser()} 
+
+      />
       <Text style={{fontWeight: '100'}}>Don't have an account?</Text>
 
       <TouchableOpacity
@@ -190,6 +191,20 @@ const LoginScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'white'
+  },
+
+  emailField: {
+    width: 300,
+    height: 48,
+    borderWidth: 1
+    
+  },
+
   textField: {
     height: 60,
     margin: 12,

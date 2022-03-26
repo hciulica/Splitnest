@@ -6,6 +6,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import LoginScreen from './src/screens/LoginScreen';
 import RegisterScreen from './src/screens/RegisterScreen';
 import CameraScreen from './src/screens/CameraScreen';
+import TestScreen from './src/screens/TestScreen';
 import {LogBox} from 'react-native';
 import {YellowBox} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -35,10 +36,11 @@ const App = () => {
         <Stack.Screen component={Home} name = "Home" options={{headerShown:false}}/>
         <Stack.Screen component={RegisterScreen} name = "Register" options={{headerShown:false}}/>
         <Stack.Screen component={CameraScreen} name = "Camera" options={{headerShown:false}}/>
+        <Stack.Screen component={TestScreen} name = "Test" options={{headerShown:false}}/>
       </Stack.Navigator>
     </NavigationContainer>
   )
-  return <Home/>
+  //return <Main/>
 }
 
 const Main: () => Node = ({navigation}) => {

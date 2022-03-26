@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import ImagePicker from 'react-native-image-crop-picker';
 import {getStorage, uploadBytes, ref, getDownloadURL} from 'firebase/storage';
@@ -23,8 +23,22 @@ import {authentication, db} from '../api/firebase/firebase-config';
 const CameraScreen = ({ navigation }) => {
 
   const [imageUri, setImageUri] = useState('');
+  const [imageUriAux, setImageUriAux] = useState('');
   const [url1, setUrl1] = useState('');
+  let counter = 0;
+
+  useEffect (() => {
   
+    const refAux = ref(storage, `/horiaciulica23@gmail.com/Profile/Profile_Image.jpg`);
+    getDownloadURL(refAux)
+    .then((urlAu) => {
+      
+      setImageUriAux(urlAu);
+    })
+
+  })
+
+
   const signOutUser = () => {
       const user = authentication.currentUser;
 
@@ -153,7 +167,7 @@ const CameraScreen = ({ navigation }) => {
     console.log(imagePath);
     //const storage = getStorage();
     const folderName = authentication.currentUser.email;
-    const storageRef = ref(storage, `${folderName}/Profile/Profile_Image.jpg`);
+    const storageRef = ref(storage, `${folderName}/Profile/Profile_image.png`);
     const img = await fetch(imagePath);
     const bytes = await img.blob();
     await uploadBytes(storageRef, bytes);
@@ -179,6 +193,7 @@ const CameraScreen = ({ navigation }) => {
           }
       });
   }
+
 
   const updateImage = async(imageUrl) => {
     await updateProfile(authentication.currentUser, {
@@ -216,29 +231,14 @@ const CameraScreen = ({ navigation }) => {
         },  
         {
           text: "Cancel",
-          style: "destructive"
-        }  
+          style: "cancel"
+        },
       ],
     );
   }
 
   return (
     <View style={{flex:1, alignItems:'center', marginTop: 80}}>
-    {/* <BottomSheet
-        ref={sheetRef}
-        snapPoints={[300, 0,0]}
-        renderContent={renderInner}
-        renderHeader={renderHeader}
-        initialSnap={1}
-        callbackNode={this.fall}
-        enableGestureInteraction={true}
-      {/* /> */}
-      {/* <Button title="Select from gallery" onPress={selectFromGallery} />
-      <Button title="Select from gallery with crop" onPress={selectFromGalleryWithCrop}/>
-      <Button title="Open camera" onPress={openCameraWithCrop} /> */}
-      {/* <Button title="Upload" onPress={funct} /> */}
-      {/* <Button title="Select image crop" onPress={selectGalleryImageCrop} /> */}
-      {/* <Button title="Update profile image" onPress={updateImage} /> */}
       <Text style={{ fontSize: 30 }}>{authentication.currentUser.displayName}</Text>
 
       <TouchableOpacity onPress={changeImageOrGallery} >

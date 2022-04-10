@@ -214,6 +214,7 @@ const LoginScreen = ({ navigation }) => {
       <FlatButton 
         title="Sign in" onPress={() => signInUser()} 
       />
+      
       <View style={styles.groupLabel}>
         <Text style={{fontWeight: '100', fontSize: 16, marginRight: 10}}>Don't have an account?</Text>
         <TouchableOpacity

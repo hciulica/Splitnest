@@ -8,6 +8,9 @@ import {
   TextInput,
   Alert,
   TouchableOpacity,
+  TouchableOpacityHighlight,
+  Switch,
+  Image,
 } from 'react-native';
 import FlatButton from '../components/FlatButton';
 import ImputField from '../components/InputField';
@@ -25,7 +28,9 @@ import {
   signInWithPhoneNumber,
   RecaptchaVerifier,
 } from 'firebase/auth';
-
+import AnimatedInput from "react-native-animated-input";
+import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
+import { Sae } from 'react-native-textinput-effects';
 // import SplitnestIcon from '../../assets/images/SplitLogo.svg';
 
 const LoginScreen = ({ navigation }) => {
@@ -34,6 +39,9 @@ const LoginScreen = ({ navigation }) => {
   const [password, setPassword] = useState('');
   const [forgotPassMail, setForgotPassMail] = useState('');
 
+  const [isEnabled, setIsEnabled] = useState(false);
+  
+  const toggleSwitch = () => setIsEnabled(previousState => !previousState);
   
    const signInUser = () => {
     signInWithEmailAndPassword(authentication, email, password)
@@ -80,7 +88,6 @@ const LoginScreen = ({ navigation }) => {
       [
         {
           text: "Send email",
-          // onPress: mail => setForgotPassMail(mail)
           onPress: mail => resetPassword(mail),
           style: "default"
         },
@@ -156,53 +163,113 @@ const LoginScreen = ({ navigation }) => {
 
   return (
 
-      <View style={styles.container}>
-      <InputField 
-        name='email' 
-        value={email} 
-        onChangeText={text => setEmail(text)}
-      />     
-      <InputField 
-        name='password' 
-        value={password}
-        onChangeText={text => setPassword(text)}
-      /> 
-      <TouchableOpacity
-      style={styles.forgotpass}
-       onPress={resetPassInputMail}>
-        <Text>Forgot password</Text>
-      </TouchableOpacity>
+    <View style={styles.container}>
+      <Image style={styles.logoStyle}
+        source={require('../../assets/images/SplitLogo.png')}
+      />
+      <View style={styles.welcomeContainer}>
+        <Text style = {{fontSize: 26, fontWeight: '900'}}>Welcome back!</Text>
+        <Text style = {{fontSize: 21, marginTop: 20}}>Login to your account</Text>
+      </View>
+      
+      <View style = {styles.emailInput}>
+        <InputField 
+          name='email' 
+          value={email} 
+          onChangeText={text => setEmail(text)}
+        />    
+      </View> 
+      
+      <View>
+        <InputField 
+          name='password' 
+          value={password}
+          onChangeText={text => setPassword(text)}
+        /> 
+      </View>
+
+      <View style={styles.group}>
+        <View style={styles.switchStyle}>
+          <Switch
+            trackColor={{ false: "#E3E3E3", true: "#3165FF" }}
+            thumbColor={ isEnabled ? "#FFFFFF" : "#FFFFFF" }
+            ios_backgroundColor="#3e3e3e"
+            onValueChange={toggleSwitch}
+            value={isEnabled}
+          />
+        </View>
+
+        <View style={styles.label}>
+          <Text>Remember me</Text>
+        </View>
+        
+        <TouchableOpacity
+        style={styles.forgotpass}
+        onPress={resetPassInputMail}>
+          <Text style={{fontSize: 14, textDecorationLine: 'underline'}}>Forgot password</Text>
+        </TouchableOpacity>
+
+      </View>
 
       <FlatButton 
         title="Sign in" onPress={() => signInUser()} 
-
       />
-      <Text style={{fontWeight: '100'}}>Don't have an account?</Text>
-
-      <TouchableOpacity
-          style={styles.touchableOpac}
-          onPress={() => navigation.navigate('Register')}>
-          <Text style={styles.touchableOpac}>Sign up</Text>
-      </TouchableOpacity>
-    
-      {/* <SplitnestIcon width={300} height={300}></SplitnestIcon> */}
+      <View style={styles.groupLabel}>
+        <Text style={{fontWeight: '100', fontSize: 16, marginRight: 10}}>Don't have an account?</Text>
+        <TouchableOpacity
+            style={styles.touchableOpac}
+            onPress={() => navigation.navigate('Register')}>
+            <Text style={styles.touchableOpac}>Sign up</Text>
+        </TouchableOpacity>
       </View>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  logoStyle: {
+    width: 144,
+    height: 180,
+    resizeMode: 'stretch',
+  },
+  welcomeContainer:{
+    marginBottom: 20,
+    marginTop: 10
+  },
+  groupLabel: {
+    flexDirection: 'row',
+    margin: 24,
+  },
+  switchStyle: {
+    marginRight: 8,
+  },
+  label:{
+    marginRight: 27,
+    fontSize: 14,
+  },
+  group:{
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 30,
+    marginBottom: 30,
+  },
+  emailInput: {
+    marginBottom: 15
+  },
+
   container: {
-    flex: 1,
+    // flexDirection: 'row',
+    marginTop: 52,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'white'
+    // backgroundColor: 'white',
+   
   },
 
   emailField: {
     width: 300,
     height: 48,
     borderWidth: 1
-    
   },
 
   textField: {
@@ -215,7 +282,10 @@ const styles = StyleSheet.create({
     fontSize: 50,
   },
   touchableOpac: {
-    color: 0x12EFEF
+    //color: 0x12EFEF
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#3165FF'
   },
   forgotpass: {
     color: 0xa6a6a6,

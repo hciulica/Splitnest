@@ -108,4 +108,6 @@ dist
 
 # Ignore Gradle build output directory
 build
+
+# Ignore firebase config directory
 src/api/firebase/firebase-config.js

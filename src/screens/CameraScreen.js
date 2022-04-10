@@ -1,8 +1,11 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import ImagePicker from 'react-native-image-crop-picker';
 import {getStorage, uploadBytes, ref, getDownloadURL} from 'firebase/storage';
-import {updateProfile} from 'firebase/auth';
+import {updateProfile, signOut} from 'firebase/auth';
+import {storage} from '../api/firebase/firebase-config';
+import BottomSheet from 'reanimated-bottom-sheet';
+import Animated from 'react-native-reanimated';
 
 import {
   View,
@@ -20,16 +23,66 @@ import {authentication, db} from '../api/firebase/firebase-config';
 const CameraScreen = ({ navigation }) => {
 
   const [imageUri, setImageUri] = useState('');
+  const [imageUriAux, setImageUriAux] = useState('');
   const [url1, setUrl1] = useState('');
+  let counter = 0;
+
+  useEffect (() => {
+  
+    const refAux = ref(storage, `/horiaciulica23@gmail.com/Profile/Profile_Image.jpg`);
+    getDownloadURL(refAux)
+    .then((urlAu) => {
+      
+      setImageUriAux(urlAu);
+    })
+
+  })
+
+
+  const signOutUser = () => {
+      const user = authentication.currentUser;
+
+      if (user) {
+        const email = authentication.currentUser.email;
+        console.log(user);
+        signOut(authentication)
+          .then(() => {
+            Alert.alert('User with email ' + email + ' has been signout');
+            navigation.navigate('Login');
+          })
+          .catch(re => {
+            Alert.alert(re);
+          });
+      } else {
+        Alert.alert('You are not signed in');
+      }
+    };
+
+  bs = React.createRef();
+  fall = new Animated.Value(1);
+
+   const renderInner = () => (
+      <Text>Swipe down to close</Text>
+  );
+
+  const renderHeader = () => {
+    <View style={styles.header}>
+      <View style={styles.panelHeader}>
+        <View style = {styles.panelHandle} />
+      </View>
+    </View>
+  }
+ 
+  const sheetRef = React.useRef(null);
 
   const selectGalleryImageCrop = async () =>{
-    ImagePicker.openPicker({
-  width: 300,
-  height: 400,
-  cropping: true
-}).then(image => {
-  console.log(image);
-});
+      ImagePicker.openPicker({
+      width: 300,
+      height: 400,
+      cropping: true
+    }).then(image => {
+      console.log(image);
+    });
   }
 
   const openCamera = async () => {
@@ -70,7 +123,7 @@ const CameraScreen = ({ navigation }) => {
       } else {
         //const source = {uri: 'data:image/jpeg;base64,' + response.base64};
        // console.log(imageUri);
-      setImageUri(response.assets[0].uri);
+      uploadImageCloud((response.assets[0].uri));
       }
     });
   };
@@ -78,33 +131,49 @@ const CameraScreen = ({ navigation }) => {
   const selectFromGalleryWithCrop = async () => {
     
     await ImagePicker.openPicker({
+      width: 500,
+      height: 500,
+      cropping: true,
+      mediaType: 'photo',
+      path: 'images',
+      cropperCircleOverlay: 'true',
+      includeBase64: true
+    }).then(image => {
+      uploadImageCloud(image.path);
+    })
+    .catch((err) => {
+      console.log('User canceled selection');
+    })
+  }
+
+  const openCameraWithCrop = async () => {
+    
+    await ImagePicker.openCamera({
       width: 300,
       height: 400,
       cropping: true,
       mediaType: 'photo',
+      cropperCircleOverlay: 'true',
       path: 'images',
       includeBase64: true
     }).then(image => {
-      // console.log(image.path);
-      setImageUri(image.path);
+      uploadImageCloud(image.path);
     });
   }
 
 
+  const uploadImageCloud = async(imagePath) => {
 
-  const funct = async() => {
-
-    console.log(imageUri);
-    const storage = getStorage();
+    console.log(imagePath);
+    //const storage = getStorage();
     const folderName = authentication.currentUser.email;
-
-    const storageRef = ref(storage, `${folderName}/profileImage.jpg`);
-    const img = await fetch(imageUri);
+    const storageRef = ref(storage, `${folderName}/Profile/Profile_image.png`);
+    const img = await fetch(imagePath);
     const bytes = await img.blob();
     await uploadBytes(storageRef, bytes);
     getDownloadURL(storageRef)
     .then((url) => {
-        setUrl1(url);
+        updateImage(url);
     })
     .catch((error) => {
           switch (error.code) {
@@ -118,8 +187,6 @@ const CameraScreen = ({ navigation }) => {
               // User canceled the upload
               break;
 
-            // ...
-
             case 'storage/unknown':
               // Unknown error occurred, inspect the server response
               break;
@@ -127,9 +194,10 @@ const CameraScreen = ({ navigation }) => {
       });
   }
 
-  const updateImage = async() => {
+
+  const updateImage = async(imageUrl) => {
     await updateProfile(authentication.currentUser, {
-    displayName: "Horica", photoURL: url1
+      photoURL: imageUrl
     }).then(() => {
       
       Alert.alert("Profile updated!");
@@ -140,39 +208,86 @@ const CameraScreen = ({ navigation }) => {
       // An error occurred
       // ...
     });
-    console.log(url1);
+    console.log(imageUrl);
     setUrl1(authentication.currentUser.photoURL);
+    console.log(JSON.stringify(authentication.currentUser, null, 3));
     // console.log(authentication.currentUser);
   }
 
-  const getObject = () => {
-    console.log(authentication.currentUser);
+  const changeImageOrGallery = () => {
+    Alert.alert(
+      "Choose modality",
+      "Choose your modality for choosing to pick image",
+      [
+        {
+          text: "Pick image",
+          onPress: () => selectFromGalleryWithCrop(),
+          style: "default"
+        },
+        {
+          text: "Take a photo",
+          onPress: () => openCameraWithCrop(),
+          style: "default"
+        },  
+        {
+          text: "Cancel",
+          style: "cancel"
+        },
+      ],
+    );
   }
 
   return (
-    <View>
-      <Button title="Select from gallery" onPress={selectFromGallery} />
-      <Button title="Select from gallery with crop" onPress={selectFromGalleryWithCrop}/>
-      <Button title="Open camera" onPress={openCamera} />
-      <Button title="Upload" onPress={funct} />
-      <Button title="Select image crop" onPress={selectGalleryImageCrop} />
-      <Button title="Update profile image" onPress={updateImage} />
-      <Button title="User objects" onPress={getObject} />
-      <View style = {styles.imageStyle}>
+    <View style={{flex:1, alignItems:'center', marginTop: 80}}>
+      <Text style={{ fontSize: 30 }}>{authentication.currentUser.displayName}</Text>
+
+      <TouchableOpacity onPress={changeImageOrGallery} >
+      
         <Image
           // source={{ uri: url1 }}
           source={{ uri: authentication.currentUser.photoURL }}
-          style={{ width: 200, height: 200 }}
+          style = {styles.imageStyle}
         />
-      </View>
+      </TouchableOpacity>
+      <Button title="Signout" onPress={signOutUser}></Button>
+      
+      
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   imageStyle : {
-    marginLeft: 80
+    width: 150,
+    height: 150,
+    borderRadius: 150 / 2,
+    overflow: "hidden",
+    borderWidth: 3,
+    borderColor: "blue",
+    //marginLeft: 80,
+    
   },
+  header: {
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#333333',
+    shadowOffset: {width: -1, height: -3},
+    shadowRadius: 2,
+    shadowOpacity: 0.4,
+    paddingTop: 20,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+  },
+  panelHeader: {
+    alignItems: 'center',
+  },
+
+  panelHandle: {
+    width: 40,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#00000040',
+    marinBottom: 10,
+  }
 });
 
 export default CameraScreen;

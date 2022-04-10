@@ -9,9 +9,13 @@ import {
   Alert,
   AlertType,
   TouchableOpacity,
+  Image
 } from 'react-native';
 import { authentication, db } from '../api/firebase/firebase-config';
 import { doc, setDoc } from "firebase/firestore";
+import FlatButton from '../components/FlatButton';
+import LinearGradient from 'react-native-linear-gradient';
+
 
 import {
   createUserWithEmailAndPassword,
@@ -40,24 +44,6 @@ const RegisterScreen = ({ navigation }) => {
   const [code, setCode] = useState('');
   let provider = '';
 
-  // const signInUser = () => {
-  //   signInWithEmailAndPassword(authentication, email, password)
-  //     .then(re => {
-  //       Alert.alert('Authentication');
-  //     })
-  //     .catch(re => {
-  //       const errorCode = re.code;
-  //       if (errorCode === 'auth/wrong-password') {
-  //         Alert.alert('Wrong password!');
-  //       }
-
-  //       if (errorCode === 'auth/too-many-requests') {
-  //         Alert.alert('Too many requests!');
-  //       }
-
-  //       console.log(re);
-  //     });
-  // };
 
   const numberVerification = () => {
   window.recaptchaVerifier = new RecaptchaVerifier('recaptcha-container', {}, authentication);
@@ -123,6 +109,7 @@ const RegisterScreen = ({ navigation }) => {
             navigation.navigate('Camera');
           })
           .catch(error => {
+            const errorCode = re.code;
             Alert.alert(error);
           });
           
@@ -142,6 +129,12 @@ const RegisterScreen = ({ navigation }) => {
         {
           Alert.alert('Error', 'Please insert a password');
         }
+
+        if(errorCode ==='auth/invalid-email')
+        {
+          Alert.alert('Error', 'Please insert a valid email');
+        }
+
         console.log(re);
       });
     
@@ -159,23 +152,7 @@ const RegisterScreen = ({ navigation }) => {
   //   });
   // };
 
-  const signOutUser = () => {
-    const user = authentication.currentUser;
-
-    if (user) {
-      const email = authentication.currentUser.email;
-      console.log(user);
-      signOut(authentication)
-        .then(() => {
-          Alert.alert('User with email ' + email + ' has been signout');
-        })
-        .catch(re => {
-          Alert.alert(re);
-        });
-    } else {
-      Alert.alert('You are not signed in');
-    }
-  };
+  
 
  
 
@@ -198,56 +175,105 @@ const RegisterScreen = ({ navigation }) => {
   };
 
   return (
-    <View>
-      <TextInput
-        style={styles.textField}
-        placeholder="Username"
-        value={username}
-        autoCapitalize="none"
-        autoCorrect={false}
-        onChangeText={text => setUsername(text)}
+    <View style={styles.container}>
+    <View style={styles.imageContainer}>
+      <Image style={styles.logoStyle}
+        source={require('../../assets/images/SplitLogo.png')}
       />
-      <TextInput
-        style={styles.textField}
-        placeholder="Phone"
-        value={phone}
-        autoCapitalize="none"
-        autoCorrect={false}
-        onChangeText={text => setPhone(text)}
-      />
-      <TextInput
-        style={styles.textField}
-        placeholder="Email"
-        value={email}
-        autoCapitalize="none"
-        autoCorrect={false}
-        onChangeText={text => setEmail(text)}
-      />
-      <TextInput
-        style={styles.textField}
-        placeholder="Password"
-        value={password}
-        secureTextEntry
-        onChangeText={text => setPassword(text)}
-      />
-      {/* <TouchableOpacity onPress={resetPassword}>
-        <Text>Forgot password</Text>
-      </TouchableOpacity> */}
-      <Button title="Sign up" onPress={createAccount} />
-      {/* <Button title="Send an email confirmation" onPress={consoleAuthentication} /> */}
-      {/* <Button title="Sign in" onPress={signInUser} /> */}
-      {/* <Button title="Sign out" onPress={signOutUser} /> */}
-      {/* <Button title="GOTO Camera Screen" onPress={() => navigation.navigate('Camera')} /> */}
+    </View>
+        <Text style = {{fontSize: 26, marginTop: 22, fontWeight: '900'}}>Welcome to Splitnest!</Text>
+        <Text style = {{fontSize: 21, marginTop: 20, marginBottom: 22}}>Create an account</Text>
+      <View style={styles.fieldsBoxStyle}>
+        <InputField
+          name='username'
+          value={username}
+          onChangeText={text => setUsername(text)}
+        />
+      </View>
+
+      <View style={styles.fieldsBoxStyle}>
+        <InputField
+          name='phone'
+          value={phone}
+          onChangeText={text => setPhone(text)}
+        />
+      </View>
+
+      <View style={styles.fieldsBoxStyle}>
+        <InputField 
+          name='email' 
+          value={email} 
+          onChangeText={text => setEmail(text)}
+        />
+      </View>
+
+      <View style={styles.fieldsBoxStyle}>
+        <InputField 
+          name='password' 
+          value={password} 
+          onChangeText={text => setPassword(text)}
+        /> 
+      </View>
+
+      <View style={{marginTop: 30}}>
+        <FlatButton title="Sign up" onPress={createAccount}></FlatButton>
+      </View>
+
+      <View style={styles.groupBottom}>
+        <Text style={{fontWeight: '100', fontSize: 16, marginRight: 10}}>Do you have any account?</Text>
+        <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+          <Text style={styles.touchableOpacityStyle}>Sign in</Text>
+        </TouchableOpacity>
+      </View>
+
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  imageContainer:{
+    borderColor: '#5A429A',
+    borderWidth: 3,
+    paddingTop: 19,
+    paddingLeft: 16, 
+    paddingBottom: 18,
+    paddingRight: 13,
+    borderRadius: 75,
+  },
+  logoStyle: {
+    width: 74,
+    height: 66,
+  
+    // resizeMode: 'stretch',
+  },
+  touchableOpacityStyle:{
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#3165FF',
+    justifyContent: 'center'
+  },
+  groupBottom: {
+    flexDirection: 'row',
+    marginTop: 24,
+  },
+  fieldsBoxStyle:{
+    marginBottom: 16
+  },
+  container:{
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 50,
+  },
   textField: {
     height: 60,
     margin: 12,
     borderWidth: 1,
     padding: 10,
+  },
+  buttonStyle:{
+    weight: 180,
+    height: 53,
+    backgroundColor: 0x0feeee
   },
   forgotpass: {
     color: 0xa6a6a6,

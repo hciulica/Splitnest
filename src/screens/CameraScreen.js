@@ -6,6 +6,8 @@ import {updateProfile, signOut} from 'firebase/auth';
 import {storage} from '../api/firebase/firebase-config';
 import BottomSheet from 'reanimated-bottom-sheet';
 import Animated from 'react-native-reanimated';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import SplitLogo from '../../assets/images/SplitLogo.svg';
 
 import {
   View,
@@ -44,10 +46,11 @@ const CameraScreen = ({ navigation }) => {
 
       if (user) {
         const email = authentication.currentUser.email;
-        console.log(user);
-        signOut(authentication)
+         signOut(authentication)
           .then(() => {
-            Alert.alert('User with email ' + email + ' has been signout');
+  
+            AsyncStorage.removeItem('emailLoggedIn');
+            AsyncStorage.removeItem('passwordLoggedIn');
             navigation.navigate('Login');
           })
           .catch(re => {
@@ -94,8 +97,6 @@ const CameraScreen = ({ navigation }) => {
       } else if (response.customButton) {
         console.log('User tapped custom button', response.customButton);
       } else {
-        //const source = {uri: 'data:image/jpeg;base64,' + response.base64};
-       // console.log(imageUri);
       setImageUri(response.assets[0].uri);
       }
     })
@@ -111,9 +112,7 @@ const CameraScreen = ({ navigation }) => {
     };
 
     launchImageLibrary(options, response => {
-      //console.log('Response = ', response.assets[0].uri);
-      
-      
+     
       if (response.didCancel) {
         console.log('User cancelled image picker');
       } else if (response.error) {
@@ -121,8 +120,6 @@ const CameraScreen = ({ navigation }) => {
       } else if (response.customButton) {
         console.log('User tapped custom button', response.customButton);
       } else {
-        //const source = {uri: 'data:image/jpeg;base64,' + response.base64};
-       // console.log(imageUri);
       uploadImageCloud((response.assets[0].uri));
       }
     });
@@ -211,7 +208,7 @@ const CameraScreen = ({ navigation }) => {
     console.log(imageUrl);
     setUrl1(authentication.currentUser.photoURL);
     console.log(JSON.stringify(authentication.currentUser, null, 3));
-    // console.log(authentication.currentUser);
+
   }
 
   const changeImageOrGallery = () => {
@@ -244,14 +241,11 @@ const CameraScreen = ({ navigation }) => {
       <TouchableOpacity onPress={changeImageOrGallery} >
       
         <Image
-          // source={{ uri: url1 }}
           source={{ uri: authentication.currentUser.photoURL }}
           style = {styles.imageStyle}
         />
       </TouchableOpacity>
-      <Button title="Signout" onPress={signOutUser}></Button>
-      
-      
+      <Button title="Signout" onPress={signOutUser}></Button>  
     </View>
   );
 };
@@ -264,7 +258,6 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     borderWidth: 3,
     borderColor: "blue",
-    //marginLeft: 80,
     
   },
   header: {

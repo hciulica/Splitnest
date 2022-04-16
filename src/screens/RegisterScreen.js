@@ -9,13 +9,14 @@ import {
   Alert,
   AlertType,
   TouchableOpacity,
-  Image
+  Image,
+  KeyboardAvoidingView,
 } from 'react-native';
 import { authentication, db } from '../api/firebase/firebase-config';
 import { doc, setDoc } from "firebase/firestore";
 import FlatButton from '../components/FlatButton';
 import LinearGradient from 'react-native-linear-gradient';
-
+import SplitnestIconSmall from '../../assets/images/SplitLogoSmall.svg';
 
 import {
   createUserWithEmailAndPassword,
@@ -89,6 +90,18 @@ const RegisterScreen = ({ navigation }) => {
         Alert.alert(
               'Error',
               'Please enter a username',);
+    else 
+    if(username.length <= 5)
+        Alert.alert(
+              'Error',
+              'Please enter a username with at least 6 characters'
+        )
+    else
+    if(phone.length != 10)
+        Alert.alert(
+              'Error',
+              'Please enter a valid phone number'
+        )
     else
     if(!phone)
       Alert.alert(
@@ -96,8 +109,10 @@ const RegisterScreen = ({ navigation }) => {
               'Please enter a phone number',
       ); 
     else
+
     createUserWithEmailAndPassword(authentication, email, password)
       .then(() => {
+        
         updateProfile(authentication.currentUser, {
           displayName: username,
         })
@@ -106,7 +121,7 @@ const RegisterScreen = ({ navigation }) => {
             addToFirestoreForAuthentication();
             consoleAuthentication();
             verificationEmail();
-            navigation.navigate('Camera');
+            navigation.replace('Camera');
           })
           .catch(error => {
             const errorCode = re.code;
@@ -116,25 +131,35 @@ const RegisterScreen = ({ navigation }) => {
       })
       .catch(re => {
         const errorCode = re.code;
-        if (errorCode === 'auth/email-already-in-use') {
+        switch(errorCode){
+        case 'auth/email-already-in-use' :
           Alert.alert('Error', 'Email is already in use');
-        }
+        break;
 
-        if (errorCode === 'auth/weak-password')
-        {
+        case 'auth/weak-password':
+        
           Alert.alert('Error', 'Password should be at least 6 characters');
-        }
+        break;
 
-        if(errorCode ==='auth/internal-error')
-        {
-          Alert.alert('Error', 'Please insert a password');
-        }
+        case 'auth/internal-error':
+        
+          Alert.alert('Error', 'Please enter a password');
+        break;
 
-        if(errorCode ==='auth/invalid-email')
-        {
-          Alert.alert('Error', 'Please insert a valid email');
-        }
+        case 'auth/invalid-email':
+        
+          Alert.alert('Error', 'Please enter a valid email');
+        break;
 
+        case 'auth/network-request-failed':
+        
+          Alert.alert('Network error', 'Please check your internet connection');
+        break;
+        
+        default:
+          Alert.alert(errorCode);
+        break;
+      }
         console.log(re);
       });
     
@@ -175,11 +200,14 @@ const RegisterScreen = ({ navigation }) => {
   };
 
   return (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={{flex: 1}}
+    >
     <View style={styles.container}>
     <View style={styles.imageContainer}>
-      <Image style={styles.logoStyle}
-        source={require('../../assets/images/SplitLogo.png')}
-      />
+      
+    <SplitnestIconSmall width = {74} height = {66}/>
     </View>
         <Text style = {{fontSize: 26, marginTop: 22, fontWeight: '900'}}>Welcome to Splitnest!</Text>
         <Text style = {{fontSize: 21, marginTop: 20, marginBottom: 22}}>Create an account</Text>
@@ -221,12 +249,13 @@ const RegisterScreen = ({ navigation }) => {
 
       <View style={styles.groupBottom}>
         <Text style={{fontWeight: '100', fontSize: 16, marginRight: 10}}>Do you have any account?</Text>
-        <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+        <TouchableOpacity onPress={() => navigation.replace('Login')}>
           <Text style={styles.touchableOpacityStyle}>Sign in</Text>
         </TouchableOpacity>
       </View>
 
     </View>
+    </KeyboardAvoidingView>
   );
 };
 

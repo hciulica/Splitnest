@@ -1,5 +1,5 @@
 import React from 'react';
-import {View,StyleSheet} from 'react-native';
+import {View,StyleSheet,Text, Button, TouchableOpacity} from 'react-native';
 import FlatButton from '../components/FlatButton';
 import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
 import { Sae } from 'react-native-textinput-effects';
@@ -7,42 +7,59 @@ import { Fumi } from 'react-native-textinput-effects';
 import { Kohana } from 'react-native-textinput-effects';
 import MaterialsIcon from 'react-native-vector-icons/MaterialIcons';
 import AnimatedInput from "react-native-animated-input";
+import { AnimatedBackgroundColorView } from 'react-native-animated-background-color-view';
 
-const TestScreen = () => {
+const TestScreen = ({navigation}) => {
+    const [colored, setColored] = React.useState('#99affd')
+    const [initialColored, setInitialColored] = React.useState(null)
+
+    const changeColor = () => {
+      if(initialColored === '#f21234'){
+
+        setColored('#dfe123')
+      }
+      else if(initialColored === '#dfe123')
+      {
+        setColored('#f21234')
+      }
+    }
+
+    const changeTheColor = (color) => {
+      // if(color === '#f21234'){
+      //   //setInitialColored('#dfe123')
+      //   setColored(color);
+      // }
+      // if(color === '#dfe123'){
+      //   //setInitialColored('#f21234')
+      //   setColored(color);
+      // }
+      setColored(color);
+    }
+
     return (
-        <View>
-        <Fumi
-            label={'Email'}
-            iconClass={FontAwesomeIcon}
-            iconName={'envelope'}
-            iconColor={'#3165FF'}
-            iconSize={20}
-            iconWidth={40}
-            inputPadding={16}
-        />
+      <AnimatedBackgroundColorView
+        color={colored}
+        initialColor={initialColored}
+        style={{ flex: 1 }}
+      >
+      <View style={{marginTop: 90}}>
+        <Text>Hello, world!</Text>
+        <TouchableOpacity onPress={() => changeTheColor('#f21234')}>
+          <Text>Press Red</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => changeTheColor('#dfe123')}>
+          <Text>Press Yellow</Text>
+        </TouchableOpacity>
 
-  <Fumi
-    label={'Passsword'}
-    iconClass={FontAwesomeIcon}
-    iconName={'lock'}
-    iconColor={'#3165FF'}
-    iconSize={20}
-    iconWidth={40}
-    inputPadding={16}
-  />
+        <TouchableOpacity onPress={() => changeColor()}>
+          <Text>Press</Text>
+        </TouchableOpacity>
 
-    <View style={{ flex: 1, justifyContent: "center", paddingHorizontal: 20 }}>
-      <AnimatedInput
-        placeholder="Email"
-        //valid={}
-        errorText="Error"
-        //onChangeText={handleChange}
-        //value={email}
-        styleLabel={{ fontWeight: "600" }}
-        styleBodyContent={{ borderBottomWidth: 1.5 }}
-      />
-    </View>
-        </View>
+        
+        
+      </View>
+      </AnimatedBackgroundColorView>
+      
     )
     
     const styles = StyleSheet.create({

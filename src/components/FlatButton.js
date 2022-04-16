@@ -4,7 +4,7 @@ import {StyleSheet, TouchableOpacity, TouchableHighlight, Text, View} from 'reac
 export default function FlatButton({ title, onPress }) {
     return (
         <View style={{justifyContent: 'center'}}>
-            <TouchableOpacity onPress={onPress}>
+            <TouchableOpacity activeOpacity={.6} onPress={onPress}>
                 <View style={styles.button}>
                     <Text style={styles.buttonText}>{ title }</Text>
                 </View>

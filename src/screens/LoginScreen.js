@@ -11,6 +11,7 @@ import {
   TouchableOpacityHighlight,
   Switch,
   Image,
+  KeyboardAvoidingView,
 } from 'react-native';
 import FlatButton from '../components/FlatButton';
 import ImputField from '../components/InputField';
@@ -31,28 +32,61 @@ import {
 import AnimatedInput from "react-native-animated-input";
 import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
 import { Sae } from 'react-native-textinput-effects';
-// import SplitnestIcon from '../../assets/images/SplitLogo.svg';
+import SplitnestIcon from '../../assets/images/SplitLogo.svg';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const LoginScreen = ({ navigation }) => {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [forgotPassMail, setForgotPassMail] = useState('');
-
   const [isEnabled, setIsEnabled] = useState(false);
   
   const toggleSwitch = () => setIsEnabled(previousState => !previousState);
   
+  const loginLastUserRemember = async() => {
+    const emailRemembered = await AsyncStorage.getItem("emailLoggedIn");
+    const passwordRemembered = await AsyncStorage.getItem("passwordLoggedIn");
+    
+    setEmail(emailRemembered);
+    setPassword(passwordRemembered);
+    
+
+    if(emailRemembered !== null && passwordRemembered !== null){
+      setIsEnabled(true);
+      signInWithEmailAndPassword(authentication, emailRemembered, passwordRemembered)
+        .then(re => {
+          console.log("User logged in with ", emailRemembered, passwordRemembered);
+
+          navigation.navigate('Camera');
+          
+        })
+    }
+  }
+
+  React.useEffect(() => {
+    loginLastUserRemember();
+  }, []);
+
    const signInUser = () => {
     signInWithEmailAndPassword(authentication, email, password)
       .then(re => {
-        Alert.alert('Authentication');
+        console.log(isEnabled);
+
+        if(isEnabled === true){
+          AsyncStorage.setItem('emailLoggedIn', email);
+          AsyncStorage.setItem('passwordLoggedIn', password);
+        }
         navigation.navigate('Camera');
       })
       .catch(re => {
         const errorCode = re.code;
         switch(errorCode)
         {
+          case 'auth/missing-email':
+            Alert.alert('Error', 'Please enter an email');
+          break;
+
           case 'auth/wrong-password':
              Alert.alert('Error','Wrong password');
           break;
@@ -66,7 +100,7 @@ const LoginScreen = ({ navigation }) => {
           break;
 
           case 'auth/invalid-email':
-            Alert.alert('Error','Please insert a valid email');
+            Alert.alert('Error','Please enter a valid email');
           break;
 
           case 'auth/user-not-found':
@@ -74,7 +108,15 @@ const LoginScreen = ({ navigation }) => {
           break;
 
           case 'auth/internal-error':
-            Alert.alert('Error', 'Please insert password of your email');
+            Alert.alert('Error', 'Please enter password of your email');
+          break;
+        
+          case 'auth/network-request-failed':
+            Alert.alert('Network error', 'Please check your internet connection');
+          break;
+          
+          default:
+            Alert.alert(errorCode);
           break;
         }
         console.log(re);
@@ -137,7 +179,7 @@ const LoginScreen = ({ navigation }) => {
         case 'auth/network-request-failed':
           Alert.alert(
               'Error',
-              'Network error',
+              'Please check your network connection',
               [{ text: "Try again", onPress: () => resetPassInputMail() },
                { text: "Cancel", onPress: () => console.log("Cancel Pressed"),
                 style: "cancel" }]
@@ -162,11 +204,12 @@ const LoginScreen = ({ navigation }) => {
   };
 
   return (
-
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={{flex: 1}}
+    >
     <View style={styles.container}>
-      <Image style={styles.logoStyle}
-        source={require('../../assets/images/SplitLogo.png')}
-      />
+    <SplitnestIcon width = {144} height = {180}/>
       <View style={styles.welcomeContainer}>
         <Text style = {{fontSize: 26, fontWeight: '900'}}>Welcome back!</Text>
         <Text style = {{fontSize: 21, marginTop: 20}}>Login to your account</Text>
@@ -214,7 +257,7 @@ const LoginScreen = ({ navigation }) => {
       <FlatButton 
         title="Sign in" onPress={() => signInUser()} 
       />
-      
+
       <View style={styles.groupLabel}>
         <Text style={{fontWeight: '100', fontSize: 16, marginRight: 10}}>Don't have an account?</Text>
         <TouchableOpacity
@@ -224,6 +267,7 @@ const LoginScreen = ({ navigation }) => {
         </TouchableOpacity>
       </View>
     </View>
+    </KeyboardAvoidingView>
   );
 };
 

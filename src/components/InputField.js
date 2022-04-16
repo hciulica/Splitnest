@@ -78,7 +78,9 @@ export default InputField = ({name, value, onChangeText}) => {
                             onFocus={() => setHandleFocusState(true)}
                             onBlur={() => setHandleFocusState(false)}
                             autoCapitalize='none' 
+                            keyboardType='email-address' 
                             autoCorrect={false}
+                            maxLength={20}
                             onChangeText={(text) => onChangeText(text)}>
                         </TextInput>
                 </View>
@@ -100,6 +102,7 @@ export default InputField = ({name, value, onChangeText}) => {
                             autoCapitalize='none' 
                             autoCorrect={false}
                             keyboardType='number-pad'
+                            maxLength={10}
                             onChangeText={(text) => onChangeText(text)}>
                         </TextInput>
                 </View>

@@ -8,6 +8,7 @@ import BottomSheet from 'reanimated-bottom-sheet';
 import Animated from 'react-native-reanimated';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import SplitLogo from '../../assets/images/SplitLogo.svg';
+import FlatButton from '../components/FlatButton';
 
 import {
   View,
@@ -27,6 +28,10 @@ const CameraScreen = ({ navigation }) => {
   const [imageUri, setImageUri] = useState('');
   const [imageUriAux, setImageUriAux] = useState('');
   const [url1, setUrl1] = useState('');
+
+  const [colorBorderPicture, setColorBorderPicture] = useState("'#3165FF'");
+  let colorBorderSelected = '#3165FF';
+
   let counter = 0;
 
   useEffect (() => {
@@ -236,16 +241,17 @@ const CameraScreen = ({ navigation }) => {
 
   return (
     <View style={{flex:1, alignItems:'center', marginTop: 80}}>
-      <Text style={{ fontSize: 30 }}>{authentication.currentUser.displayName}</Text>
+      <Text style={{ fontSize: 30, marginBottom: 30, fontWeight: '600'}}>{authentication.currentUser.displayName}</Text>
 
       <TouchableOpacity onPress={changeImageOrGallery} >
       
         <Image
           source={{ uri: authentication.currentUser.photoURL }}
           style = {styles.imageStyle}
+
         />
-      </TouchableOpacity>
-      <Button title="Signout" onPress={signOutUser}></Button>  
+      </TouchableOpacity>  
+      <FlatButton title="Signout" onPress={signOutUser}></FlatButton>
     </View>
   );
 };
@@ -257,8 +263,8 @@ const styles = StyleSheet.create({
     borderRadius: 150 / 2,
     overflow: "hidden",
     borderWidth: 3,
-    borderColor: "blue",
-    
+    borderColor: '#3165FF',
+    marginBottom: 430,
   },
   header: {
     backgroundColor: '#FFFFFF',

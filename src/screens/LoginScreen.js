@@ -114,7 +114,7 @@ const LoginScreen = ({ navigation }) => {
           case 'auth/network-request-failed':
             Alert.alert('Network error', 'Please check your internet connection');
           break;
-          
+
           default:
             Alert.alert(errorCode);
           break;
@@ -259,7 +259,7 @@ const LoginScreen = ({ navigation }) => {
       />
 
       <View style={styles.groupLabel}>
-        <Text style={{fontWeight: '100', fontSize: 16, marginRight: 10}}>Don't have an account?</Text>
+        <Text style={{fontWeight: '400', fontSize: 16, marginRight: 10, opacity:0.35}}>Don't have an account?</Text>
         <TouchableOpacity
             style={styles.touchableOpac}
             onPress={() => navigation.navigate('Register')}>

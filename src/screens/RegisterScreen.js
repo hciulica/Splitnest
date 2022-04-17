@@ -16,7 +16,7 @@ import { authentication, db } from '../api/firebase/firebase-config';
 import { doc, setDoc } from "firebase/firestore";
 import FlatButton from '../components/FlatButton';
 import LinearGradient from 'react-native-linear-gradient';
-import SplitnestIconSmall from '../../assets/images/SplitLogoSmall.svg';
+import LogoRounded from '../../assets/images/LogoRounded.svg';
 
 import {
   createUserWithEmailAndPassword,
@@ -205,10 +205,7 @@ const RegisterScreen = ({ navigation }) => {
       style={{flex: 1}}
     >
     <View style={styles.container}>
-    <View style={styles.imageContainer}>
-      
-    <SplitnestIconSmall width = {74} height = {66}/>
-    </View>
+        <LogoRounded/>
         <Text style = {{fontSize: 26, marginTop: 22, fontWeight: '900'}}>Welcome to Splitnest!</Text>
         <Text style = {{fontSize: 21, marginTop: 20, marginBottom: 22}}>Create an account</Text>
       <View style={styles.fieldsBoxStyle}>
@@ -248,7 +245,7 @@ const RegisterScreen = ({ navigation }) => {
       </View>
 
       <View style={styles.groupBottom}>
-        <Text style={{fontWeight: '100', fontSize: 16, marginRight: 10}}>Do you have any account?</Text>
+        <Text style={{fontWeight: '400', fontSize: 16, marginRight: 10, opacity:0.35}}>Do you have any account?</Text>
         <TouchableOpacity onPress={() => navigation.replace('Login')}>
           <Text style={styles.touchableOpacityStyle}>Sign in</Text>
         </TouchableOpacity>

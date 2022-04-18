@@ -243,7 +243,7 @@ const CameraScreen = ({ navigation }) => {
     <View style={{flex:1, alignItems:'center', marginTop: 80}}>
       <Text style={{ fontSize: 30, marginBottom: 30, fontWeight: '600'}}>{authentication.currentUser.displayName}</Text>
 
-      <TouchableOpacity onPress={changeImageOrGallery} >
+      <TouchableOpacity activeOpacity={.6} onPress={changeImageOrGallery} >
       
         <Image
           source={{ uri: authentication.currentUser.photoURL }}
@@ -251,7 +251,7 @@ const CameraScreen = ({ navigation }) => {
 
         />
       </TouchableOpacity>  
-      <FlatButton title="Signout" onPress={signOutUser}></FlatButton>
+      <FlatButton title="Log out" onPress={signOutUser}></FlatButton>
     </View>
   );
 };

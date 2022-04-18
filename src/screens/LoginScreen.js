@@ -16,6 +16,8 @@ import {
 import FlatButton from '../components/FlatButton';
 import ImputField from '../components/InputField';
 import {authentication} from '../api/firebase/firebase-config';
+// import useLogin from '../hooks/useLogin';
+
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -34,6 +36,7 @@ import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
 import { Sae } from 'react-native-textinput-effects';
 import SplitnestIcon from '../../assets/images/SplitLogo.svg';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import useLogin from '../hooks/useLogin';
 
 const LoginScreen = ({ navigation }) => {
 
@@ -44,6 +47,11 @@ const LoginScreen = ({ navigation }) => {
   
   const toggleSwitch = () => setIsEnabled(previousState => !previousState);
   
+  const testLogin = () => {
+    useLogin(email, password);
+  }
+
+
   const loginLastUserRemember = async() => {
     const emailRemembered = await AsyncStorage.getItem("emailLoggedIn");
     const passwordRemembered = await AsyncStorage.getItem("passwordLoggedIn");
@@ -59,7 +67,47 @@ const LoginScreen = ({ navigation }) => {
           console.log("User logged in with ", emailRemembered, passwordRemembered);
 
           navigation.navigate('Camera');
-          
+        })
+        .catch(re => {
+        const errorCode = re.code;
+        switch(errorCode)
+        {
+          case 'auth/missing-email':
+            Alert.alert('Error', 'Please enter an email');
+          break;
+
+          case 'auth/wrong-password':
+             Alert.alert('Error','Wrong password');
+          break;
+
+          case 'auth/too-many-requests':
+            Alert.alert('Too many attempts failed');
+          break;
+
+          case 'auth/user-disabled':
+            Alert.alert('Banned account', 'Account with email '+emailRemembered+' has been disabled');
+          break;
+
+          case 'auth/invalid-email':
+            Alert.alert('Error','Please enter a valid email');
+          break;
+
+          case 'auth/user-not-found':
+            Alert.alert('Error', 'There is no account with the credentials entered');
+          break;
+
+          case 'auth/internal-error':
+            Alert.alert('Error', 'Please enter password of your email');
+          break;
+        
+          case 'auth/network-request-failed':
+            Alert.alert('Network error', 'Please check your internet connection');
+          break;
+
+          default:
+            Alert.alert(errorCode);
+          break;
+        }
         })
     }
   }
@@ -96,7 +144,7 @@ const LoginScreen = ({ navigation }) => {
           break;
 
           case 'auth/user-disabled':
-            Alert.alert('This account has been banned');
+            Alert.alert('Banned account', 'Account with email '+email+' has been disabled');
           break;
 
           case 'auth/invalid-email':
@@ -119,7 +167,6 @@ const LoginScreen = ({ navigation }) => {
             Alert.alert(errorCode);
           break;
         }
-        console.log(re);
       });
   };
 
@@ -147,7 +194,7 @@ const LoginScreen = ({ navigation }) => {
      sendPasswordResetEmail(authentication, emailReset)
       .then(() => {
         Alert.alert(
-          'Email for password reset sent',
+          'Reset email has been sent',
           'Please check your email inbox for the reset password');
       })
       .catch(error => {
@@ -157,8 +204,8 @@ const LoginScreen = ({ navigation }) => {
         case 'auth/user-not-found':
         
         Alert.alert(
-              'Error',
-              'There is not an account created with this email',
+              'Account not found',
+              'There is no account created with this email',
               [{ text: "Try again", onPress: () => resetPassInputMail() },
                { text: "Cancel", onPress: () => console.log("Cancel Pressed"),
                 style: "cancel" }]
@@ -168,7 +215,7 @@ const LoginScreen = ({ navigation }) => {
         
           case 'auth/missing-email':
         Alert.alert(
-              'Error',
+              'Invalid email',
               'Please enter an email',
               [{ text: "Try again", onPress: () => resetPassInputMail() },
                { text: "Cancel", onPress: () => console.log("Cancel Pressed"),
@@ -178,7 +225,7 @@ const LoginScreen = ({ navigation }) => {
 
         case 'auth/network-request-failed':
           Alert.alert(
-              'Error',
+              'Network error',
               'Please check your network connection',
               [{ text: "Try again", onPress: () => resetPassInputMail() },
                { text: "Cancel", onPress: () => console.log("Cancel Pressed"),
@@ -189,7 +236,7 @@ const LoginScreen = ({ navigation }) => {
 
         case 'auth/invalid-email':
          Alert.alert(
-              'Error',
+              'Invalid email',
               'Please enter a valid email',
               [{ text: "Try again", onPress: () => resetPassInputMail() },
                { text: "Cancel", onPress: () => console.log("Cancel Pressed"),
@@ -197,8 +244,10 @@ const LoginScreen = ({ navigation }) => {
         );
         break;
         
+        default:
+          Alert.alert(errorCode);
+        break;
       }
-        console.log(error);
         //Alert.alert(errorCode);
       })
   };
@@ -266,6 +315,7 @@ const LoginScreen = ({ navigation }) => {
             <Text style={styles.touchableOpac}>Sign up</Text>
         </TouchableOpacity>
       </View>
+
     </View>
     </KeyboardAvoidingView>
   );

@@ -22,7 +22,7 @@ export default InputField = ({name, value, onChangeText}) => {
     return (
         <>
            {name === 'email' ?
-           <View style={styles.containerBox}>
+           <View>
                 <Text style={styles.textPlaceHolder}>Email</Text>
                 <View style={customStyle}>
                         <Feather style={customIcon} name = 'mail' size = {19} />
@@ -43,7 +43,7 @@ export default InputField = ({name, value, onChangeText}) => {
             : null}
             
             {name === 'password' ?
-            <View style={styles.containerBox}>
+            <View>
                 <Text style={styles.textPlaceHolder}>Password</Text>
                 <View style={customStyle}>
                         <Feather style={styles.iconPass} name = 'lock' size = {19} />
@@ -67,7 +67,7 @@ export default InputField = ({name, value, onChangeText}) => {
             : null}
            
            {name === 'username' ?
-            <View style={styles.containerBox}>
+            <View>
                 <Text style={styles.textPlaceHolder}>Username</Text>
                 <View style={customStyle}>
                         <Feather style={styles.iconPass} name = 'user' size = {19} />
@@ -89,7 +89,7 @@ export default InputField = ({name, value, onChangeText}) => {
 
 
             {name === 'phone' ?
-            <View style={styles.containerBox}>
+            <View>
                 <Text style={styles.textPlaceHolder}>Phone</Text>
                 <View style={customStyle}>
                         <Feather style={styles.iconPass} name = 'phone' size = {19} />
@@ -116,8 +116,7 @@ export default InputField = ({name, value, onChangeText}) => {
 
 const styles = StyleSheet.create({
 
-    containerBox: {
-    },
+    
 
     container: {
         flex: 1,
@@ -169,7 +168,7 @@ const styles = StyleSheet.create({
     },
     textPlaceHolder:{
         
-        color: 'grey',
+        // color: 'grey',
         marginBottom: 4,
         marginLeft: 4,
         fontSize: 13,
@@ -181,9 +180,9 @@ const styles = StyleSheet.create({
         // justifyContent: 'center',
          alignItems: 'center',
         borderWidth: 1,
-        backgroundColor: '#E3E3E3',
+        backgroundColor: 'rgba(49,101,255,0.03)',
         //backgroundColor: 'green',
-        borderColor: '#ACACAC',
+        borderColor: 'transparent',
         
         borderRadius: 10,
         width: 300,
@@ -195,7 +194,8 @@ const styles = StyleSheet.create({
          alignItems: 'center',
         borderWidth: 2,
         //backgroundColor: 'green',
-        backgroundColor: '#E3E3E3',
+        backgroundColor: 'rgba(49,101,255,0.00)',
+        backgroundOpacity: 0.2,
         borderColor: '#3165FF',
         borderRadius: 10,
         width: 300,

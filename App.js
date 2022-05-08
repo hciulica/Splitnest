@@ -7,7 +7,8 @@ import { createStackNavigator, CardStyleInterpolators, forFade, forVerticalIOS,f
 import LoginScreen from './src/screens/LoginScreen';
 import RegisterScreen from './src/screens/RegisterScreen';
 import CameraScreen from './src/screens/CameraScreen';
-import TestScreen from './src/screens/TestScreen';
+import HomeScreen from './src/screens/HomeScreen';
+import TabNavigator from './src/navigation/TabNavigator';
 // import IntroductionScreen from './src/screens/IntroductionScreen';
 import OnboardScreen from './src/screens/OnboardScreen';
 import {LogBox} from 'react-native';
@@ -36,72 +37,53 @@ LogBox.ignoreLogs([
 
 
 const Stack = createStackNavigator();
+// const Drawer = createDrawerNavigator();
 
 const App = () => {
-  const [isAppFirstLaunched, setisAppFirstLaunched] = React.useState(null);
-  const [emailRememberedCredentials, setEmailRememberedCredentials] = useState(null);
-  const [passwordRememberedCredentials, setPasswordRememberedCredentials] = useState(null);
+  const [isAppFirstLaunched, setIsAppFirstLaunched] = React.useState(null);
   const [isRemembered, setIsRemembered] = useState(null);
-
+  
   const fetchAsyncStorage = async() => {
     const appData = await AsyncStorage.getItem("isAppFirstLaunched");
     
     console.log(appData);
     if(appData == null){
-      setisAppFirstLaunched(true);
-      //AsyncStorage.setItem('isAppFirstLaunched', 'false');
+      setIsAppFirstLaunched(true);
     } else {
-      setisAppFirstLaunched(false);
+      setIsAppFirstLaunched(false);
     }
   }
-
-  const fetchRememberedCredentials = async() => {
-    const emailRemembered = await AsyncStorage.getItem("email");
-    const passwordRemembered = await AsyncStorage.getItem("password");
-    setEmailRememberedCredentials(emailRemembered);
-    setPasswordRememberedCredentials(passwordRemembered);
-  }
-
-  const animationAfterLogin = async() => {
+  const fetchRemembered = async() => {
     // var test = false;
     const emailRemembered = await AsyncStorage.getItem("email");
     const passwordRemembered = await AsyncStorage.getItem("password");
 
     if(emailRemembered === null && passwordRemembered === null)
-    {
         setIsRemembered(true);
-      
-    }
     else
-      
-      setIsRemembered(false);
-      
+        setIsRemembered(false);
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetchAsyncStorage();
-    animationAfterLogin();
-    //console.log("Animation", animationAfterLogin());
+    fetchRemembered();
   }, []);
-
+  
   return (
     isAppFirstLaunched != null && (
     <NavigationContainer>
       <Stack.Navigator>
         {isAppFirstLaunched && (
+
           <Stack.Screen component={OnboardScreen} name = "Onboard" options={{headerShown:false, cardStyleInterpolator: CardStyleInterpolators.forModalPresentationIOS}}/>
         )}
         <Stack.Screen component={LoginScreen} name = "Login" options={{headerShown:false, gestureEnabled:false, animationTypeForReplace: 'pop'}}/>     
         <Stack.Screen component={RegisterScreen} name = "Register" options={{headerShown:false}}/>       
-        <Stack.Screen component={CameraScreen} name = "Camera" options={{headerShown:false, animationEnabled: false}}/>    
-       </Stack.Navigator>
+        <Stack.Screen component={TabNavigator} name = "Tab" options={{headerShown:false}}/>
+       </Stack.Navigator>  
     </NavigationContainer>
     )
   )
-   // <Text>CEVA</Text>
-    
-  
-  //return <Main/>
 }
 
 

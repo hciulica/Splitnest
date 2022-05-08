@@ -1,16 +1,48 @@
-import React from 'react';
-import {StyleSheet, TouchableOpacity, TouchableHighlight, Text, View} from 'react-native';
+import React, {useState, useRef} from 'react';
+import {StyleSheet, TouchableOpacity, TouchableWithoutFeedback, TouchableHighlight, Text, View, Animated} from 'react-native';
+import TouchableWithAnimation from '../components/TouchableWithAnimation';
 
 export default function OnboardButton({onPress, title, color}) {
-    const styleButton = color === 'white' ? styles.buttonWhite : styles.buttonSimple; 
+
+    const animatePress = useRef(new Animated.Value(1)).current;
+
+    const styleButton = color === 'white' ? 
+    {borderRadius: 30,
+     height: 58, 
+     width: 123, 
+     backgroundColor: '#FFFFFF',
+     justifyContent: 'center',
+    }
+        : 
+     
+     {
+         borderRadius: 30,
+        height: 58,
+        width: 123,
+        justifyContent: 'center',
+        
+    }; 
+    const animateIn = () => {
+        Animated.timing(animatePress,{
+            toValue:0.90,
+            duration: 60,
+            useNativeDriver: true
+        }).start()
+    }
+
+    const animateOut = () => {
+        Animated.timing(animatePress,{
+            toValue:1,
+            duration: 60,
+            useNativeDriver: true
+        }).start()
+    }
+
     return (
-        <View style={{justifyContent: 'center'}}>
-            <TouchableOpacity onPress={onPress} activeOpacity={.6}>
-                <View style={styleButton}>
-                    <Text style={styles.buttonText}>{title}</Text>
-                </View>
-            </TouchableOpacity>
-        </View>
+            <TouchableWithAnimation style={styleButton} duration = {50} pressAnimation = {0.90} onPress={onPress}>
+                <Text style={styles.buttonText}>{title}</Text>
+            </TouchableWithAnimation>
+        
     )
 }
 

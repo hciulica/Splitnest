@@ -11,12 +11,12 @@ import {
   TouchableOpacityHighlight,
   Switch,
   Image,
+  Dimensions,
   KeyboardAvoidingView,
 } from 'react-native';
 import FlatButton from '../components/FlatButton';
 import ImputField from '../components/InputField';
 import {authentication} from '../api/firebase/firebase-config';
-// import useLogin from '../hooks/useLogin';
 
 import {
   createUserWithEmailAndPassword,
@@ -31,6 +31,7 @@ import {
   signInWithPhoneNumber,
   RecaptchaVerifier,
 } from 'firebase/auth';
+
 import AnimatedInput from "react-native-animated-input";
 import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
 import { Sae } from 'react-native-textinput-effects';
@@ -40,11 +41,13 @@ import useLogin from '../hooks/useLogin';
 
 const LoginScreen = ({ navigation }) => {
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState(null);
+  const [password, setPassword] = useState(null);
   const [forgotPassMail, setForgotPassMail] = useState('');
   const [isEnabled, setIsEnabled] = useState(false);
-  
+  const disableButton = ((email === null || email === '') || (password === null || password === '')) ? true : false;
+  const {width, height} = Dimensions.get('window');
+
   const toggleSwitch = () => setIsEnabled(previousState => !previousState);
   
   const testLogin = () => {
@@ -66,7 +69,7 @@ const LoginScreen = ({ navigation }) => {
         .then(re => {
           console.log("User logged in with ", emailRemembered, passwordRemembered);
 
-          navigation.navigate('Camera');
+          navigation.navigate('Tab');
         })
         .catch(re => {
         const errorCode = re.code;
@@ -116,7 +119,7 @@ const LoginScreen = ({ navigation }) => {
     loginLastUserRemember();
   }, []);
 
-   const signInUser = () => {
+   const handleSignIn = () => {
     signInWithEmailAndPassword(authentication, email, password)
       .then(re => {
         console.log(isEnabled);
@@ -125,7 +128,7 @@ const LoginScreen = ({ navigation }) => {
           AsyncStorage.setItem('emailLoggedIn', email);
           AsyncStorage.setItem('passwordLoggedIn', password);
         }
-        navigation.navigate('Camera');
+        navigation.navigate('Tab');
       })
       .catch(re => {
         const errorCode = re.code;
@@ -255,7 +258,7 @@ const LoginScreen = ({ navigation }) => {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={{flex: 1}}
+      style={{flex: 1, backgroundColor: 'white', width:width, height:height}}
     >
     <View style={styles.container}>
     <SplitnestIcon width = {144} height = {180}/>
@@ -304,24 +307,23 @@ const LoginScreen = ({ navigation }) => {
       </View>
 
       <FlatButton 
-        title="Sign in" onPress={() => signInUser()} 
+        title="Sign in" disabled = {disableButton} onPress={() => handleSignIn()}  
       />
 
       <View style={styles.groupLabel}>
         <Text style={{fontWeight: '400', fontSize: 16, marginRight: 10, opacity:0.35}}>Don't have an account?</Text>
         <TouchableOpacity
-            style={styles.touchableOpac}
             onPress={() => navigation.navigate('Register')}>
-            <Text style={styles.touchableOpac}>Sign up</Text>
+            <Text style={styles.labelSwitch}>Sign up</Text>
         </TouchableOpacity>
       </View>
-
     </View>
     </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
+  
   logoStyle: {
     width: 144,
     height: 180,
@@ -376,7 +378,7 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 50,
   },
-  touchableOpac: {
+  labelSwitch: {
     //color: 0x12EFEF
     fontSize: 16,
     fontWeight: 'bold',

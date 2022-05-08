@@ -1,8 +1,9 @@
 import React, {useState, useEffect} from 'react';
+import {Linking} from 'react-native';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import ImagePicker from 'react-native-image-crop-picker';
 import {getStorage, uploadBytes, ref, getDownloadURL} from 'firebase/storage';
-import {updateProfile, signOut} from 'firebase/auth';
+import {updateProfile, signOut, deleteUser} from 'firebase/auth';
 import {storage} from '../api/firebase/firebase-config';
 import BottomSheet from 'reanimated-bottom-sheet';
 import Animated from 'react-native-reanimated';
@@ -66,6 +67,16 @@ const CameraScreen = ({ navigation }) => {
       }
     };
 
+  const deleteAccount = () => {
+    const user = authentication.currentUser;
+    deleteUser(user).then(() => {
+      Alert.alert("User has been removed");
+      navigation.navigate('Login');
+    }).catch((error) => {
+      Alert.alert(error);
+    });
+  }
+
   bs = React.createRef();
   fall = new Animated.Value(1);
 
@@ -81,8 +92,6 @@ const CameraScreen = ({ navigation }) => {
     </View>
   }
  
-  const sheetRef = React.useRef(null);
-
   const selectGalleryImageCrop = async () =>{
       ImagePicker.openPicker({
       width: 300,
@@ -239,6 +248,10 @@ const CameraScreen = ({ navigation }) => {
     );
   }
 
+  const numberCall = () => {
+    Linking.openURL(`tel:0771583241`)
+  }
+
   return (
     <View style={{flex:1, alignItems:'center', marginTop: 80}}>
       <Text style={{ fontSize: 30, marginBottom: 30, fontWeight: '600'}}>{authentication.currentUser.displayName}</Text>
@@ -251,6 +264,10 @@ const CameraScreen = ({ navigation }) => {
 
         />
       </TouchableOpacity>  
+      <View style={{marginBottom: 230, marginTop: 100}}>
+        <FlatButton title="Remove user" onPress={deleteAccount}></FlatButton>
+      </View>
+      <FlatButton title="Call" onPress={numberCall}></FlatButton>
       <FlatButton title="Log out" onPress={signOutUser}></FlatButton>
     </View>
   );
@@ -264,7 +281,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     borderWidth: 3,
     borderColor: '#3165FF',
-    marginBottom: 430,
+    // marginBottom: 430,
   },
   header: {
     backgroundColor: '#FFFFFF',

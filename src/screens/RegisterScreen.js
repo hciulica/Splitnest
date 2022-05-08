@@ -36,14 +36,16 @@ import {
 
 const RegisterScreen = ({ navigation }) => {
   const [isSignedIn, setIsSignedIn] = useState(false);
-  const [username, setUsername] = useState('');
-  const [phone, setPhone] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState(null);
+  const [phone, setPhone] = useState(null);
+  const [email, setEmail] = useState(null);
+  const [password, setPassword] = useState(null);
   const [emailLoggedIn, setEmailLoggedIn] = useState(false);
   const [confirmationResult1, setConfirmationResult1] = useState('');
   const [code, setCode] = useState('');
   let provider = '';
+
+  const disableButton = ((email === null || email === '') || (password === null || password === '') || (username === null || username === '') || (phone === null || phone === '')) ? true : false;
 
 
   const numberVerification = () => {
@@ -85,7 +87,7 @@ const RegisterScreen = ({ navigation }) => {
     }
   } 
 
-  const createAccount = async() => {
+  const handleSignUp = async() => {
     if(!username)
         Alert.alert(
               'Error',
@@ -121,7 +123,7 @@ const RegisterScreen = ({ navigation }) => {
             addToFirestoreForAuthentication();
             consoleAuthentication();
             verificationEmail();
-            navigation.replace('Camera');
+            navigation.replace('Tab');
           })
           .catch(error => {
             const errorCode = re.code;
@@ -202,7 +204,7 @@ const RegisterScreen = ({ navigation }) => {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={{flex: 1}}
+      style={{flex: 1, backgroundColor: 'white'}}
     >
     <View style={styles.container}>
         <LogoRounded/>
@@ -241,7 +243,7 @@ const RegisterScreen = ({ navigation }) => {
       </View>
 
       <View style={{marginTop: 30}}>
-        <FlatButton title="Sign up" onPress={createAccount}></FlatButton>
+        <FlatButton title="Sign up" disabled = {disableButton} onPress={handleSignUp}></FlatButton>
       </View>
 
       <View style={styles.groupBottom}>

@@ -11,12 +11,20 @@ import {
   TouchableOpacity,
   Image,
   KeyboardAvoidingView,
+  KeyboardAwareScrollView,
+  ActivityIndicator,
+  Dimensions
 } from 'react-native';
+
 import { authentication, db } from '../api/firebase/firebase-config';
 import { doc, setDoc } from "firebase/firestore";
+import { getStorage, uploadBytes, ref, getDownloadURL } from 'firebase/storage';
+import { storage } from '../api/firebase/firebase-config';
 import FlatButton from '../components/FlatButton';
 import LinearGradient from 'react-native-linear-gradient';
 import LogoRounded from '../../assets/images/LogoRounded.svg';
+import SplitLogo from '../../assets/images/SplitLogo.png';
+import BasicImage from '../../assets/images/Image_profile.png';
 
 import {
   createUserWithEmailAndPassword,
@@ -33,7 +41,6 @@ import {
   sendEmailVerification
 } from 'firebase/auth';
 
-
 const RegisterScreen = ({ navigation }) => {
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [username, setUsername] = useState(null);
@@ -41,31 +48,38 @@ const RegisterScreen = ({ navigation }) => {
   const [email, setEmail] = useState(null);
   const [password, setPassword] = useState(null);
   const [emailLoggedIn, setEmailLoggedIn] = useState(false);
-  const [confirmationResult1, setConfirmationResult1] = useState('');
-  const [code, setCode] = useState('');
-  let provider = '';
-
+  const [loading, setLoading] = useState(false);
+  
   const disableButton = ((email === null || email === '') || (password === null || password === '') || (username === null || username === '') || (phone === null || phone === '')) ? true : false;
+  const {width, height} = Dimensions.get('window');
 
+   const updateImage = async() => {
+        const imagePath = "https://i.imgur.com/pVbj3Y0.png";
+        await updateProfile(authentication.currentUser, {
+            photoURL: imagePath
+        }).then(() => {
 
-  const numberVerification = () => {
-  window.recaptchaVerifier = new RecaptchaVerifier('recaptcha-container', {}, authentication);
+        }).catch((error) => {
+        Alert.alert(error);
+        
+        });
+    }
 
+  const uploadImageCloud = async() => {
+
+    const imagePath = "https://i.imgur.com/pVbj3Y0.png";
+    const folderName = `Users/${authentication.currentUser.email}`;
+    const storageRef = ref(storage, `${folderName}/Profile/Profile_image.png`);
+    const img = await fetch(imagePath);
+    const bytes = await img.blob();
+
+    await uploadBytes(storageRef, bytes);
+    await updateImage();
   }
 
   const consoleAuthentication = () => {
     console.log(JSON.stringify(authentication.currentUser, null, 3));
   }
-
-  const getNameConnected = () => {
-    const user = authentication.currentUser;
-    if (user) {
-      Alert.alert(user.displayName);
-      consoleAuthentication();
-    } else {
-      Alert.alert('No one is connected');
-    }
-  };
 
   const verificationEmail = () => {
     sendEmailVerification(authentication.currentUser)
@@ -76,10 +90,9 @@ const RegisterScreen = ({ navigation }) => {
 
   const addToFirestoreForAuthentication = async() => {
     try{
-        await setDoc(doc(db, "User profiles", authentication.currentUser.uid), {
-          phone: phone,
-          email: authentication.currentUser.email,
+        await setDoc(doc(db, "Users", authentication.currentUser.email), {
           username: username,
+          phone: parseInt(phone, 10),
         });
     } catch(err)
     {
@@ -114,22 +127,21 @@ const RegisterScreen = ({ navigation }) => {
 
     createUserWithEmailAndPassword(authentication, email, password)
       .then(() => {
-        
+        setLoading(true);
         updateProfile(authentication.currentUser, {
           displayName: username,
         })
-          .then(() => {
-            console.log('Created user with email: ' + email + ' with name' + username);        
+          .then(async () => {
             addToFirestoreForAuthentication();
             consoleAuthentication();
-            verificationEmail();
+            await uploadImageCloud();
             navigation.replace('Tab');
+            setLoading(false);
           })
           .catch(error => {
             const errorCode = re.code;
             Alert.alert(error);
           });
-          
       })
       .catch(re => {
         const errorCode = re.code;
@@ -168,27 +180,11 @@ const RegisterScreen = ({ navigation }) => {
     
   };
 
-  // const stateChange = () => {
-  //   //Functie ciclica care se apeleaza automat cand se schimba un state
-  //   onAuthStateChanged(authentication, user => {
-  //     if (user) {
-  //       setEmailLoggedIn(true);
-  //     } else {
-  //       setEmailLoggedIn(false);
-  //     }
-  //   });
-  // };
-
-  
-
- 
-
   const resetPassword = () => {
     resetButt();
     sendPasswordResetEmail(authentication, email)
       .then(() => {
-        // Password reset email sent!
-        // ..
+        
         Alert.alert('Password reset email success');
       })
       .catch(error => {
@@ -201,7 +197,26 @@ const RegisterScreen = ({ navigation }) => {
       });
   };
 
+  const BottomRegister = () => (
+    !loading ?
+    <>
+          <View style={{marginTop: 30}}>
+          <FlatButton title="Sign up" disabled = {disableButton} onPress={handleSignUp}></FlatButton>
+        </View>
+
+        <View style={styles.groupBottom}>
+          <Text style={{fontWeight: '400', fontSize: 16, marginRight: 10, opacity:0.35}}>Do you have any account?</Text>
+          <TouchableOpacity onPress={() => navigation.replace('Login')}>
+            <Text style={styles.touchableOpacityStyle}>Sign in</Text>
+          </TouchableOpacity>
+        </View>
+    </> 
+    : <ActivityIndicator style={{width: width, height: 270}} size="large" color="#3165FF" />
+
+  )
+
   return (
+    
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={{flex: 1, backgroundColor: 'white'}}
@@ -210,6 +225,9 @@ const RegisterScreen = ({ navigation }) => {
         <LogoRounded/>
         <Text style = {{fontSize: 26, marginTop: 22, fontWeight: '900'}}>Welcome to Splitnest!</Text>
         <Text style = {{fontSize: 21, marginTop: 20, marginBottom: 22}}>Create an account</Text>
+      
+      { !loading ? 
+      <> 
       <View style={styles.fieldsBoxStyle}>
         <InputField
           name='username'
@@ -241,17 +259,24 @@ const RegisterScreen = ({ navigation }) => {
           onChangeText={text => setPassword(text)}
         /> 
       </View>
-
       <View style={{marginTop: 30}}>
-        <FlatButton title="Sign up" disabled = {disableButton} onPress={handleSignUp}></FlatButton>
-      </View>
+          <FlatButton title="Sign up" disabled = {disableButton} onPress={handleSignUp}></FlatButton>
+        </View>
 
-      <View style={styles.groupBottom}>
-        <Text style={{fontWeight: '400', fontSize: 16, marginRight: 10, opacity:0.35}}>Do you have any account?</Text>
-        <TouchableOpacity onPress={() => navigation.replace('Login')}>
-          <Text style={styles.touchableOpacityStyle}>Sign in</Text>
-        </TouchableOpacity>
-      </View>
+        <View style={styles.groupBottom}>
+          <Text style={{fontWeight: '400', fontSize: 16, marginRight: 10, opacity:0.35}}>Do you have any account?</Text>
+          <TouchableOpacity onPress={() => navigation.replace('Login')}>
+            <Text style={styles.touchableOpacityStyle}>Sign in</Text>
+          </TouchableOpacity>
+        </View>
+      </> : 
+      <>
+        <ActivityIndicator style={{width: width, height: 270}} size="large" color="#3165FF" />
+        {/* <Text style={{marginTop: -100}}>Please wait for your account to be created</Text> */}
+      </>
+      }
+
+      {/* <BottomRegister/> */}
 
     </View>
     </KeyboardAvoidingView>

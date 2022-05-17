@@ -14,29 +14,14 @@ export default function OnboardButton({onPress, title, color}) {
      justifyContent: 'center',
     }
         : 
-     
-     {
+    {
          borderRadius: 30,
         height: 58,
         width: 123,
         justifyContent: 'center',
         
     }; 
-    const animateIn = () => {
-        Animated.timing(animatePress,{
-            toValue:0.90,
-            duration: 60,
-            useNativeDriver: true
-        }).start()
-    }
-
-    const animateOut = () => {
-        Animated.timing(animatePress,{
-            toValue:1,
-            duration: 60,
-            useNativeDriver: true
-        }).start()
-    }
+    
 
     return (
             <TouchableWithAnimation style={styleButton} duration = {50} pressAnimation = {0.90} onPress={onPress}>

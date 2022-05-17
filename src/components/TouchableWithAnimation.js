@@ -7,8 +7,8 @@ const TouchableWithAnimation = ({children, duration, pressAnimation, onPress, di
 
         const animateIn = () => {
             Animated.timing(animatePress,{
-                toValue: pressAnimation,
-                duration: duration,
+                toValue: (pressAnimation===undefined) ? 0.95 : pressAnimation,
+                duration: (duration === undefined) ? 50 : duration,
                 useNativeDriver: true
             }).start()
         }
@@ -16,7 +16,7 @@ const TouchableWithAnimation = ({children, duration, pressAnimation, onPress, di
         const animateOut = () => {
             Animated.timing(animatePress,{
                 toValue:1,
-                duration: duration,
+                duration: (duration === undefined) ? 50 : duration,
                 useNativeDriver: true
             }).start()
         }

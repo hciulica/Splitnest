@@ -1,5 +1,5 @@
 import React, {useState, useEffect, useRef} from 'react';
-import {Linking} from 'react-native';
+import {Linking, ActivityIndicator} from 'react-native';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import ImagePicker from 'react-native-image-crop-picker';
 import {getStorage, uploadBytes, ref, getDownloadURL} from 'firebase/storage';
@@ -7,8 +7,21 @@ import {updateProfile, signOut, deleteUser} from 'firebase/auth';
 import {storage} from '../api/firebase/firebase-config';
 import BottomSheet from 'reanimated-bottom-sheet';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import SplitLogo from '../../assets/images/SplitLogo.svg';
 import FlatButton from '../components/FlatButton';
+import CameraLogo from '../../assets/icons/accscreen/camera.svg';
+import * as Progress from 'react-native-progress';
+
+import {
+  BallIndicator,
+  BarIndicator,
+  DotIndicator,
+  MaterialIndicator,
+  PacmanIndicator,
+  PulseIndicator,
+  SkypeIndicator,
+  UIActivityIndicator,
+  WaveIndicator,
+} from 'react-native-indicators';
 
 import {
   View,
@@ -20,35 +33,82 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   Image,
-  Animated
+  Animated,
+  Dimensions,
+  KeyboardAvoidingView
 } from 'react-native';
 
+import TouchableWithAnimation from '../components/TouchableWithAnimation';
+
 import {authentication, db} from '../api/firebase/firebase-config';
+import { doc, onSnapshot , setDoc, getDoc, updateDoc } from 'firebase/firestore';
+import {onAuthStateChanged} from 'firebase/auth';
 
 const AccountScreen = ({ navigation }) => {
     
   const animatePress = useRef(new Animated.Value(1)).current;
     
   const [imageUri, setImageUri] = useState('');
-  const [imageUriAux, setImageUriAux] = useState('');
-  const [url1, setUrl1] = useState('');
+  const [phone, setPhone] = useState('');
+  const [username, setUsername] = useState(authentication.currentUser.displayName);
+  const [imageURL, setImageURL] = useState(null);
+  const [isEditable, setIsEditable] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [colorBorderPicture, setColorBorderPicture] = useState('#3165FF');
 
-  const [colorBorderPicture, setColorBorderPicture] = useState("'#3165FF'");
+
   let colorBorderSelected = '#3165FF';
-
-  let counter = 0;
+  const {width, height} = Dimensions.get('window');
 
   useEffect (() => {
-  
-    const refAux = ref(storage, `/horiaciulica23@gmail.com/Profile/Profile_Image.jpg`);
-    getDownloadURL(refAux)
-    .then((urlAu) => {
+      const fetchDataFirestore = async() => {
+      const docRef = doc(db, "Users", authentication.currentUser.email);
+      getDoc(docRef).then(docSnap => {
+        if (docSnap.exists()) {
+          setPhone(docSnap.data().phone);
+        } 
+        else console.log("No such document!");
+      })
+      setImageURL(authentication.currentUser.photoURL);
       
-      setImageUriAux(urlAu);
-    })
+    }
+    console.log('Account');
+    fetchDataFirestore();
+  }, [])
 
-  })
+    const editUser = async(username) => {
 
+    
+        try{
+          
+          await updateDoc(doc(db, "Users", authentication.currentUser.email), {
+            username: username,
+        });
+        
+        await updateProfile(authentication.currentUser, {
+          displayName: username,
+        })
+
+        } catch(err)
+        {
+          console.log(err);
+        }
+    } 
+
+  const editProfile = () => {
+     if(isEditable && username.length <= 5)
+          Alert.alert(
+                'Error',
+                'Please enter a username with at least 6 characters'
+          )   
+    
+      else{
+      
+      editUser(username); 
+      setIsEditable(!isEditable);
+    
+    }
+  }
 
   const signOutUser = () => {
       const user = authentication.currentUser;
@@ -80,69 +140,17 @@ const AccountScreen = ({ navigation }) => {
     });
   }
 
-  bs = React.createRef();
-  fall = new Animated.Value(1);
-
-   const renderInner = () => (
-      <Text>Swipe down to close</Text>
-  );
-
-  const renderHeader = () => {
-    <View style={styles.header}>
-      <View style={styles.panelHeader}>
-        <View style = {styles.panelHandle} />
-      </View>
-    </View>
-  }
- 
-  const sheetRef = React.useRef(null);
-
   const selectGalleryImageCrop = async () =>{
-      ImagePicker.openPicker({
+      ImagePicker.openPicker({  
       width: 300,
       height: 400,
       cropping: true
     }).then(image => {
-      console.log(image);
+      // console.log(image);
     });
   }
 
-  const openCamera = async () => {
-   launchCamera(options, response => {
-      if (response.didCancel) {
-        console.log('User cancelled image picker');
-      } else if (response.error) {
-        console.log('ImagePicker Error: ', response.error);
-      } else if (response.customButton) {
-        console.log('User tapped custom button', response.customButton);
-      } else {
-      setImageUri(response.assets[0].uri);
-      }
-    })
-  }
 
-  const selectFromGallery = async () => {
-    const options = {
-      storageOptions: {
-        path: 'images',
-        mediaType: 'photo',
-      },
-      includeBase64: true,
-    };
-
-    launchImageLibrary(options, response => {
-     
-      if (response.didCancel) {
-        console.log('User cancelled image picker');
-      } else if (response.error) {
-        console.log('ImagePicker Error: ', response.error);
-      } else if (response.customButton) {
-        console.log('User tapped custom button', response.customButton);
-      } else {
-      uploadImageCloud((response.assets[0].uri));
-      }
-    });
-  };
 
   const selectFromGalleryWithCrop = async () => {
     
@@ -154,8 +162,11 @@ const AccountScreen = ({ navigation }) => {
       path: 'images',
       cropperCircleOverlay: 'true',
       includeBase64: true
-    }).then(image => {
-      uploadImageCloud(image.path);
+    }).then(async(image) => {
+      setLoading(true);
+      setIsEditable(false);
+      await uploadImageCloud(image.path);
+      setLoading(false);
     })
     .catch((err) => {
       console.log('User canceled selection');
@@ -172,61 +183,57 @@ const AccountScreen = ({ navigation }) => {
       cropperCircleOverlay: 'true',
       path: 'images',
       includeBase64: true
-    }).then(image => {
-      uploadImageCloud(image.path);
+    }).then(async(image) => {
+      setLoading(true);
+      setIsEditable(false);
+      await uploadImageCloud(image.path);
+      setLoading(false);
     });
   }
 
 
   const uploadImageCloud = async(imagePath) => {
-
-    console.log(imagePath);
-    //const storage = getStorage();
-    const folderName = authentication.currentUser.email;
+    
+    const folderName = `Users/${authentication.currentUser.email}`;
     const storageRef = ref(storage, `${folderName}/Profile/Profile_image.png`);
     const img = await fetch(imagePath);
     const bytes = await img.blob();
     await uploadBytes(storageRef, bytes);
-    getDownloadURL(storageRef)
-    .then((url) => {
-        updateImage(url);
-    })
-    .catch((error) => {
-          switch (error.code) {
-            case 'storage/object-not-found':
-              // File doesn't exist
-              break;
-            case 'storage/unauthorized':
-              // User doesn't have permission to access the object
-              break;
-            case 'storage/canceled':
-              // User canceled the upload
-              break;
 
-            case 'storage/unknown':
-              // Unknown error occurred, inspect the server response
-              break;
-          }
-      });
-  }
+    await getDownloadURL(storageRef)
+      .then(async(photoURL) => {
+        await updateProfile(authentication.currentUser, {
+          photoURL: photoURL
 
+        }).then(() => {
 
-  const updateImage = async(imageUrl) => {
-    await updateProfile(authentication.currentUser, {
-      photoURL: imageUrl
-    }).then(() => {
+          setImageURL(photoURL);
+        }).catch((error) => {
+          Alert.alert(error);
+        });
+
       
-      Alert.alert("Profile updated!");
-      // Profile updated!
-      // ...
-    }).catch((error) => {
-      Alert.alert(error);
-      // An error occurred
-      // ...
-    });
-    console.log(imageUrl);
-    setUrl1(authentication.currentUser.photoURL);
-    console.log(JSON.stringify(authentication.currentUser, null, 3));
+      }).catch((error) => {
+        
+        switch (error.code) {
+      
+        case 'storage/object-not-found':
+            Alert.alert('Object not found');
+          break;
+        case 'storage/unauthorized':
+            Alert.alert('Unauthorized');
+          break;
+        case 'storage/canceled':
+          
+            Alert.alert('Canceled');
+          break;
+
+      case 'storage/unknown':
+        
+            Alert.alert('Unknown');
+        break;
+      }
+    })
 
   }
 
@@ -257,58 +264,131 @@ const AccountScreen = ({ navigation }) => {
     Linking.openURL(`tel:0771583241`)
   }
 
-  const animateIn = () => {
-        Animated.timing(animatePress,{
-            toValue:0.95,
-            duration: 60,
-            useNativeDriver: true,
-        }).start()
-    }
-
-    const animateOut = () => {
-        Animated.timing(animatePress,{
-            toValue:1,
-            duration: 60,
-            useNativeDriver: true,
-        }).start()
-    }
-
   return (
-    <View style={{flex:1, alignItems:'center', marginTop: 80}}>
-      <Text style={{ fontSize: 30, marginBottom: 30, fontWeight: '600'}}>{authentication.currentUser.displayName}</Text>
-    
-        <TouchableWithoutFeedback
-            onPressIn={() => animateIn()}
-            onPressOut={() => animateOut()}
+    <KeyboardAvoidingView style={styles.container}>
+        <View style={[styles.topContainer,{width: width}]}>
+          <Text style={[styles.title, (phone && imageURL) ? {marginTop: 20} : {marginBottom: 7}]}>Account</Text>
+          
+           {(phone && imageURL) ?
+        <>
+          <View style={{justifyContent: 'center', alignItems: 'center', flexDirection: 'row'}}>
+         
+          <View style={styles.groupText}>
+            <Text style={styles.number}>23</Text>
+            <Text style= {{color: 'rgba(0,0,0,0.5)', fontWeight: 'bold'}}>Friends</Text>
+          </View>
+
+          <TouchableWithAnimation duration={100} pressAnimation={0.96} style={{marginTop: 40}} disabled={!isEditable}
             onPress={() => changeImageOrGallery()}>
-            <Animated.View style={{ 
-                transform: [
-                {
-                    scale:animatePress
-                    }
-                ]}}>        
-                <Image
-                source={{ uri: authentication.currentUser.photoURL }}
-                style = {styles.imageStyle} />
-            </Animated.View>
-        </TouchableWithoutFeedback>  
-    
+            
+              <Image source={{ uri: imageURL}}
+              style = {[styles.imageStyle, {borderTopWidth: 1}]}/>
+
+            {
+            isEditable ?
+            <View style={{position:'absolute', top: 0, left: 0, right: 0, bottom: 0, 
+              justifyContent: 'center', alignItems: 'center', 
+              backgroundColor: loading ? null : 'rgba(69,69,69,0.6)',
+               borderRadius: 75, borderWidth: 3, borderColor: '#3165FF'}}>            
+              <Text style={{color:'white', fontSize: 12, fontWeight:'800'}}>Tap to change</Text>
+            </View> 
+            :   
+                loading ? 
+                
+                <View style={{position:'absolute', top: 0, left: 0, right: 0, bottom: 0, 
+                  justifyContent: 'center', alignItems: 'center', backgroundColor: loading ? null : 'rgba(69,69,69,0.6)', borderRadius: 75}}>
+                    <Progress.CircleSnail size={140} thickness={3} indeterminate={true} />      
+                </View> : null
+            }
+          </TouchableWithAnimation>  
+          
+          <View style={styles.groupText}>
+            <Text style={styles.number}>10</Text>
+            <Text style= {{color: 'rgba(0,0,0,0.5)', fontWeight: 'bold'}}>Groups</Text>
+          </View>
+
+        </View>
+
+        <TextInput 
+             editable = {isEditable}
+             style={[{ fontSize: 30, marginTop: 18}, {fontWeight: isEditable ? '700' : '600'}]}
+             autoCapitalize='none' 
+             keyboardType='email-address' 
+             autoCorrect={false}
+             name='username'
+             value={username}
+             onChangeText={text => setUsername(text)}
+             maxLength={20}
+             color= {isEditable ? '#3165FF' : null}>
+        </TextInput>
+        
+          <Text style={{fontSize: 12, fontWeight: '700', marginTop: 12, color: 'rgba(0,0,0,0.40)'}}>Email: {authentication.currentUser.email}</Text>
+          <Text style={{fontSize: 12, fontWeight: '700', marginTop: 5, color: 'rgba(0,0,0,0.40)'}}>Phone: {phone}</Text>
+          
+            <FlatButton height={38} 
+            width={136} 
+            radius = {10} 
+            fontSize = {13} 
+            title = {isEditable ? 'Save' : 'Edit profile'}
+            style = {{ marginTop: 19 }}  
+            onPress={() => editProfile()}
+            disabled= {!isEditable && loading}
+            >
+            </FlatButton>
+          
+        </>
+      : 
+      <ActivityIndicator style={{width: width, height: 300}} size="large" color="#3165FF" />
+           }
+        </View>
+      
       <View style={{marginBottom: 130, marginTop: 100}}>
         <FlatButton title="Remove user" onPress={deleteAccount}></FlatButton>
       </View>
-      <FlatButton title="Call" onPress={numberCall}></FlatButton>
-      <FlatButton title="Log out" onPress={signOutUser}></FlatButton>
-    </View>
+        <FlatButton title="Call" onPress={numberCall}></FlatButton>
+        <FlatButton title="Log out" onPress={signOutUser}></FlatButton>
+    </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
+  container: {
+    flex:1, 
+    alignItems:'center', 
+    backgroundColor: 'rgba(49,101,255,0.03)',
+  },
+  title:{
+    
+    marginRight: 210,
+    fontSize: 25,
+    fontWeight: 'bold',
+    
+  },
+  groupText: {
+    alignItems: 'center',
+    marginHorizontal: 35,
+    marginTop: 80,
+  },
+  number: {
+    fontSize: 20,
+    fontWeight: '900',
+    color: 'rgba(49,101,255,0.8)'
+  },
+
+  topContainer: {
+    height: 450,
+    borderRadius: 30,
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    
+  },
   imageStyle : {
-    width: 150,
-    height: 150,
-    borderRadius: 150 / 2,
+    width: 130,
+    height: 130,
+    borderRadius: 75,
     overflow: "hidden",
-    borderWidth: 3,
+    borderWidth: 2,
     borderColor: '#3165FF',
     // marginBottom: 430,
   },

@@ -13,6 +13,7 @@ import {
   Image,
   Dimensions,
   KeyboardAvoidingView,
+  ActivityIndicator,
 } from 'react-native';
 import FlatButton from '../components/FlatButton';
 import ImputField from '../components/InputField';
@@ -37,7 +38,6 @@ import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
 import { Sae } from 'react-native-textinput-effects';
 import SplitnestIcon from '../../assets/images/SplitLogo.svg';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import useLogin from '../hooks/useLogin';
 
 const LoginScreen = ({ navigation }) => {
 
@@ -45,15 +45,12 @@ const LoginScreen = ({ navigation }) => {
   const [password, setPassword] = useState(null);
   const [forgotPassMail, setForgotPassMail] = useState('');
   const [isEnabled, setIsEnabled] = useState(false);
+  const [loading, setLoading] = useState(false);
+
   const disableButton = ((email === null || email === '') || (password === null || password === '')) ? true : false;
   const {width, height} = Dimensions.get('window');
 
   const toggleSwitch = () => setIsEnabled(previousState => !previousState);
-  
-  const testLogin = () => {
-    useLogin(email, password);
-  }
-
 
   const loginLastUserRemember = async() => {
     const emailRemembered = await AsyncStorage.getItem("emailLoggedIn");
@@ -64,12 +61,14 @@ const LoginScreen = ({ navigation }) => {
     
 
     if(emailRemembered !== null && passwordRemembered !== null){
+      setLoading(true);
       setIsEnabled(true);
       signInWithEmailAndPassword(authentication, emailRemembered, passwordRemembered)
         .then(re => {
           console.log("User logged in with ", emailRemembered, passwordRemembered);
-
+          
           navigation.navigate('Tab');
+          setLoading(false);
         })
         .catch(re => {
         const errorCode = re.code;
@@ -120,15 +119,21 @@ const LoginScreen = ({ navigation }) => {
   }, []);
 
    const handleSignIn = () => {
+   
+    
     signInWithEmailAndPassword(authentication, email, password)
-      .then(re => {
+      .then((re) => {
+        setLoading(true);
         console.log(isEnabled);
 
         if(isEnabled === true){
           AsyncStorage.setItem('emailLoggedIn', email);
           AsyncStorage.setItem('passwordLoggedIn', password);
         }
-        navigation.navigate('Tab');
+
+          navigation.navigate('Tab');
+          setLoading(false);
+      
       })
       .catch(re => {
         const errorCode = re.code;
@@ -170,7 +175,7 @@ const LoginScreen = ({ navigation }) => {
             Alert.alert(errorCode);
           break;
         }
-      });
+      })
   };
 
    const resetPassInputMail = () => {
@@ -256,69 +261,75 @@ const LoginScreen = ({ navigation }) => {
   };
 
   return (
+    
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={{flex: 1, backgroundColor: 'white', width:width, height:height}}
     >
     <View style={styles.container}>
-    <SplitnestIcon width = {144} height = {180}/>
+      <SplitnestIcon width = {144} height = {180}/>
       <View style={styles.welcomeContainer}>
         <Text style = {{fontSize: 26, fontWeight: '900'}}>Welcome back!</Text>
         <Text style = {{fontSize: 21, marginTop: 20}}>Login to your account</Text>
       </View>
-      
-      <View style = {styles.emailInput}>
-        <InputField 
-          name='email' 
-          value={email} 
-          onChangeText={text => setEmail(text)}
-        />    
-      </View> 
-      
-      <View>
-        <InputField 
-          name='password' 
-          value={password}
-          onChangeText={text => setPassword(text)}
-        /> 
-      </View>
-
-      <View style={styles.group}>
-        <View style={styles.switchStyle}>
-          <Switch
-            trackColor={{ false: "#E3E3E3", true: "#3165FF" }}
-            thumbColor={ isEnabled ? "#FFFFFF" : "#FFFFFF" }
-            ios_backgroundColor="#3e3e3e"
-            onValueChange={toggleSwitch}
-            value={isEnabled}
-          />
-        </View>
-
-        <View style={styles.label}>
-          <Text>Remember me</Text>
-        </View>
+      {!loading ? 
+      <>
+          <View style = {styles.emailInput}>
+          <InputField 
+            name='email' 
+            value={email} 
+            onChangeText={text => setEmail(text)}
+          />    
+        </View> 
         
-        <TouchableOpacity
-        style={styles.forgotpass}
-        onPress={resetPassInputMail}>
-          <Text style={{fontSize: 14, textDecorationLine: 'underline'}}>Forgot password</Text>
-        </TouchableOpacity>
+        <View>
+          <InputField 
+            name='password' 
+            value={password}
+            onChangeText={text => setPassword(text)}
+          /> 
+        </View>
 
-      </View>
+        <View style={styles.group}>
+          <View style={styles.switchStyle}>
+            <Switch
+              trackColor={{ false: "#E3E3E3", true: "#3165FF" }}
+              thumbColor={ isEnabled ? "#FFFFFF" : "#FFFFFF" }
+              ios_backgroundColor="#3e3e3e"
+              onValueChange={toggleSwitch}
+              value={isEnabled}
+            />
+          </View>
 
-      <FlatButton 
-        title="Sign in" disabled = {disableButton} onPress={() => handleSignIn()}  
-      />
+          <View style={styles.label}>
+            <Text>Remember me</Text>
+          </View>
+          
+          <TouchableOpacity
+          style={styles.forgotpass}
+          onPress={resetPassInputMail}>
+            <Text style={{fontSize: 14, textDecorationLine: 'underline'}}>Forgot password</Text>
+          </TouchableOpacity>
 
-      <View style={styles.groupLabel}>
-        <Text style={{fontWeight: '400', fontSize: 16, marginRight: 10, opacity:0.35}}>Don't have an account?</Text>
-        <TouchableOpacity
-            onPress={() => navigation.navigate('Register')}>
-            <Text style={styles.labelSwitch}>Sign up</Text>
-        </TouchableOpacity>
-      </View>
+        </View>
+
+        <FlatButton 
+          title="Sign in" disabled = {disableButton} onPress={() => {handleSignIn()}}  
+        />
+
+        <View style={styles.groupLabel}>
+          <Text style={{fontWeight: '400', fontSize: 16, marginRight: 10, opacity:0.35}}>Don't have an account?</Text>
+          <TouchableOpacity
+              onPress={() => navigation.navigate('Register')}>
+              <Text style={styles.labelSwitch}>Sign up</Text>
+          </TouchableOpacity>
+        </View>
+      </>
+      : <ActivityIndicator style={{width: width, height: 270}} size="large" color="#3165FF"/>}
+
     </View>
     </KeyboardAvoidingView>
+    
   );
 };
 

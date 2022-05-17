@@ -2,13 +2,18 @@ import React, {useState, useRef} from 'react';
 import {StyleSheet, TouchableOpacity,TouchableWithoutFeedback, TouchableHighlight, Text, View, Animated} from 'react-native';
 import TouchableWithAnimation from '../components/TouchableWithAnimation';
 
-export default function FlatButton({ title, onPress, disabled }) {
+export default function FlatButton({ title, onPress, disabled, style, height, width, radius, fontSize }) {
     
     const colorDisabled = ( disabled === true ) ? 'rgba(49,101,255,0.5)' : 'rgb(49,101,255)';
+    const heightButton = height ? height : 53;
+    const widthButton = width ? width : 300;
+    const radiusButton = radius ? radius : 15;
+    const fontSizeText = fontSize ? fontSize : 17;
 
     return (
-        <TouchableWithAnimation style={[styles.buttonLayout,{backgroundColor:colorDisabled}]} duration = {50} pressAnimation = {0.95} onPress={onPress} disabled={disabled}>
-                <Text style={styles.buttonText}>{ title }</Text>
+        <TouchableWithAnimation style={[style, styles.buttonLayout, {backgroundColor:colorDisabled, height: heightButton, width: widthButton, borderRadius: radiusButton }]} 
+            onPress={onPress} disabled={disabled}>
+                <Text style={[styles.buttonText, {fontSize:fontSizeText}]}>{ title }</Text>
          </TouchableWithAnimation>
     )
 }
@@ -16,15 +21,12 @@ export default function FlatButton({ title, onPress, disabled }) {
 const styles = StyleSheet.create({
     buttonLayout:{
         borderRadius: 15,
-        height: 53, 
-        width: 300, 
         justifyContent: 'center'
     },
 
     buttonText: {
         color: 'white',
         fontWeight: 'bold',
-        fontSize: 17,
         justifyContent: 'center',
         textAlign: 'center'
     }

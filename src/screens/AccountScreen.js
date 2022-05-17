@@ -10,6 +10,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import FlatButton from '../components/FlatButton';
 import CameraLogo from '../../assets/icons/accscreen/camera.svg';
 import * as Progress from 'react-native-progress';
+import ExploreCard from '../components/ExploreCard';
 
 import {
   BallIndicator,
@@ -70,7 +71,6 @@ const AccountScreen = ({ navigation }) => {
         else console.log("No such document!");
       })
       setImageURL(authentication.currentUser.photoURL);
-      
     }
     console.log('Account');
     fetchDataFirestore();
@@ -106,8 +106,28 @@ const AccountScreen = ({ navigation }) => {
       
       editUser(username); 
       setIsEditable(!isEditable);
-    
+      
     }
+  }
+
+  const handleLogout = () => {
+    Alert.alert(
+      "Logout confirmation",
+      "Are you sure you want to logout?",
+      [
+
+        { text: "Cancel",
+          style: 'cancel'
+        }
+        ,
+        {
+          text: "Logout",
+          onPress: () => signOutUser(),
+          style: "destructive"
+        },
+      ]
+    );
+    
   }
 
   const signOutUser = () => {
@@ -290,14 +310,14 @@ const AccountScreen = ({ navigation }) => {
               justifyContent: 'center', alignItems: 'center', 
               backgroundColor: loading ? null : 'rgba(69,69,69,0.6)',
                borderRadius: 75, borderWidth: 3, borderColor: '#3165FF'}}>            
-              <Text style={{color:'white', fontSize: 12, fontWeight:'800'}}>Tap to change</Text>
+              <Text style={{color:'white', fontSize: 12, fontWeight:'900'}}>Tap to change</Text>
             </View> 
             :   
                 loading ? 
                 
                 <View style={{position:'absolute', top: 0, left: 0, right: 0, bottom: 0, 
                   justifyContent: 'center', alignItems: 'center', backgroundColor: loading ? null : 'rgba(69,69,69,0.6)', borderRadius: 75}}>
-                    <Progress.CircleSnail size={140} thickness={3} indeterminate={true} />      
+                    <Progress.CircleSnail size={145} thickness={4} indeterminate={true} />      
                 </View> : null
             }
           </TouchableWithAnimation>  
@@ -325,14 +345,16 @@ const AccountScreen = ({ navigation }) => {
           <Text style={{fontSize: 12, fontWeight: '700', marginTop: 12, color: 'rgba(0,0,0,0.40)'}}>Email: {authentication.currentUser.email}</Text>
           <Text style={{fontSize: 12, fontWeight: '700', marginTop: 5, color: 'rgba(0,0,0,0.40)'}}>Phone: {phone}</Text>
           
-            <FlatButton height={38} 
-            width={136} 
-            radius = {10} 
-            fontSize = {13} 
-            title = {isEditable ? 'Save' : 'Edit profile'}
-            style = {{ marginTop: 19 }}  
-            onPress={() => editProfile()}
-            disabled= {!isEditable && loading}
+            <FlatButton 
+            height={38} 
+              width={136} 
+              radius = {10} 
+              fontSize = {13} 
+              title = {isEditable ? 'Save' : 'Edit profile'}
+              style = {{ marginTop: 19 }}  
+              onPress={() => editProfile()}
+              disabled= {!isEditable && loading}
+              
             >
             </FlatButton>
           
@@ -341,12 +363,24 @@ const AccountScreen = ({ navigation }) => {
       <ActivityIndicator style={{width: width, height: 300}} size="large" color="#3165FF" />
            }
         </View>
-      
-      <View style={{marginBottom: 130, marginTop: 100}}>
+
+        <View style={{ alignSelf: 'flex-start', marginTop: 17, marginLeft: 30}}>
+          <Text style={{fontWeight: '600'}}>Explore</Text>
+        </View>
+
+        <View style={styles.exploreContainer}>
+          <ExploreCard name='about'/>
+          <ExploreCard name='settings'/>
+          <ExploreCard name='payments'/>
+        </View>
+          
+        <View style={{alignSelf: 'flex-start', marginLeft: 30, marginTop: -10}}>
+          <ExploreCard name='logout' onPress={() => handleLogout()}/>
+        </View>
+{/*         
         <FlatButton title="Remove user" onPress={deleteAccount}></FlatButton>
-      </View>
         <FlatButton title="Call" onPress={numberCall}></FlatButton>
-        <FlatButton title="Log out" onPress={signOutUser}></FlatButton>
+        <FlatButton title="Log out" onPress={signOutUser}></FlatButton> */}
     </KeyboardAvoidingView>
   );
 };
@@ -357,6 +391,12 @@ const styles = StyleSheet.create({
     alignItems:'center', 
     backgroundColor: 'rgba(49,101,255,0.03)',
   },
+
+  exploreContainer:{
+    flexDirection: 'row',
+    justifyContent: 'space-around'
+  },
+
   title:{
     
     marginRight: 210,

@@ -15,9 +15,6 @@ import ButtonIcon from '../../assets/icons/navbar/button.svg';
 
 const {width, height} = Dimensions.get('window');
 
-// width: 348, 
-// height: 74, 
-
 const GroupsScreen = ({navigation}) => 
 {
     return(

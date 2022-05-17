@@ -323,11 +323,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: 10,
   },
-  buttonStyle:{
-    weight: 180,
-    height: 53,
-    backgroundColor: 0x0feeee
-  },
   forgotpass: {
     color: 0xa6a6a6,
   },

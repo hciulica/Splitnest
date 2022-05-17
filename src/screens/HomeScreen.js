@@ -16,7 +16,6 @@ import {
 } from 'firebase/auth';
 import { authentication, db } from '../api/firebase/firebase-config';
 
-
 const HomeScreen = () => {
     
     return (

@@ -4,7 +4,7 @@ import TouchableWithAnimation from '../components/TouchableWithAnimation';
 
 export default function FlatButton({ title, onPress, disabled, style, height, width, radius, fontSize }) {
     
-    const colorDisabled = ( disabled === true ) ? 'rgba(49,101,255,0.5)' : 'rgb(49,101,255)';
+    const colorDisabled = ( disabled === true ) ? 'rgba(49,101,255,0.5)' : 'rgba(49,101,255,0.9)';
     const heightButton = height ? height : 53;
     const widthButton = width ? width : 300;
     const radiusButton = radius ? radius : 15;

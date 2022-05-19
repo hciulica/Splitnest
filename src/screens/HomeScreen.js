@@ -16,12 +16,16 @@ import {
 } from 'firebase/auth';
 import { authentication, db } from '../api/firebase/firebase-config';
 
+  const consoleAuthentication = () => {
+    console.log(JSON.stringify(authentication.currentUser, null, 3));
+  }
+
 const HomeScreen = () => {
     
     return (
         <SafeAreaView style={{justifyContent:'center', alignItems: 'center', flex: 1,}}>
             <Text>HomeScreen</Text>
-
+            <Button title = "Press" onPress={() => consoleAuthentication()}> </Button>
         </SafeAreaView>
     );
 }

@@ -66,9 +66,9 @@ const LoginScreen = ({ navigation }) => {
       signInWithEmailAndPassword(authentication, emailRemembered, passwordRemembered)
         .then(re => {
           console.log("User logged in with ", emailRemembered, passwordRemembered);
-          
-          navigation.navigate('Tab');
           setLoading(false);
+          navigation.navigate('Tab');
+          
         })
         .catch(re => {
         const errorCode = re.code;

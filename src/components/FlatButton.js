@@ -2,7 +2,7 @@ import React, {useState, useRef} from 'react';
 import {StyleSheet, TouchableOpacity,TouchableWithoutFeedback, TouchableHighlight, Text, View, Animated} from 'react-native';
 import TouchableWithAnimation from '../components/TouchableWithAnimation';
 
-export default function FlatButton({ title, onPress, disabled, style, height, width, radius, fontSize }) {
+export default function FlatButton({ title, onPress, disabled, style, height, width, radius, fontSize, duration, pressAnimation }) {
     
     const colorDisabled = ( disabled === true ) ? 'rgba(49,101,255,0.5)' : 'rgba(49,101,255,0.9)';
     const heightButton = height ? height : 53;
@@ -12,9 +12,10 @@ export default function FlatButton({ title, onPress, disabled, style, height, wi
 
     return (
         <TouchableWithAnimation style={[style, styles.buttonLayout, {backgroundColor:colorDisabled, height: heightButton, width: widthButton, borderRadius: radiusButton }]} 
-            onPress={onPress} disabled={disabled}>
+            onPress={onPress} disabled={disabled} duration = {duration} pressAnimation = {pressAnimation} 
+            >
                 <Text style={[styles.buttonText, {fontSize:fontSizeText}]}>{ title }</Text>
-         </TouchableWithAnimation>
+        </TouchableWithAnimation>
     )
 }
 

@@ -2,10 +2,13 @@ import React, {useState} from 'react';
 import {View, Text, TextInput, TouchableOpacity, StyleSheet, Button} from 'react-native';
 import Feather from 'react-native-vector-icons/Feather';
 
-export default InputField = ({name, value, onChangeText}) => {
+export default InputField = ({name, value, onChangeText, width, height}) => {
     const [handleFocusState, setHandleFocusState] = useState(false);
     const customStyle = handleFocusState ? styles.fieldBoxFocus :styles.fieldBox;
     const customIcon = handleFocusState ? styles.iconFocus: styles.icon;
+    const heightInput = height ? height : 48;
+    const widthInput = width ? width : 300;
+    
     const [showPassword, setShowPassword] = useState(true);
     const [rightIcon, setRightIcon] = useState('eye-off');
 
@@ -49,6 +52,54 @@ export default InputField = ({name, value, onChangeText}) => {
                         <Feather style={styles.iconPass} name = 'lock' size = {19} />
                         <TextInput 
                             placeholder="Enter your password" 
+                            value={value}
+                            style={styles.inputField}
+                            onFocus={() => setHandleFocusState(true)}
+                            onBlur={() => setHandleFocusState(false)}
+                            autoCapitalize='none' 
+                            autoCorrect={false}
+                            onChangeText={(text) => onChangeText(text)}
+                            secureTextEntry={showPassword}>
+                        </TextInput>
+                        
+                        <TouchableOpacity onPress={handlePasswordVisibility} style={styles.iconFocusShow}>
+                             <Feather name = {rightIcon} size = {20} />
+                        </TouchableOpacity>
+                </View>
+            </View>
+            : null}
+
+            {name === 'currentPassword' ?
+            <View>
+                <Text style={styles.textPlaceHolder}>Current Password</Text>
+                <View style={customStyle}>
+                        <Feather style={styles.iconPass} name = 'lock' size = {19} />
+                        <TextInput 
+                            placeholder="Enter your current password" 
+                            value={value}
+                            style={styles.inputField}
+                            onFocus={() => setHandleFocusState(true)}
+                            onBlur={() => setHandleFocusState(false)}
+                            autoCapitalize='none' 
+                            autoCorrect={false}
+                            onChangeText={(text) => onChangeText(text)}
+                            secureTextEntry={showPassword}>
+                        </TextInput>
+                        
+                        <TouchableOpacity onPress={handlePasswordVisibility} style={styles.iconFocusShow}>
+                             <Feather name = {rightIcon} size = {20} />
+                        </TouchableOpacity>
+                </View>
+            </View>
+            : null}
+
+            {name === 'newPassword' ?
+            <View>
+                <Text style={styles.textPlaceHolder}>New Password</Text>
+                <View style={customStyle}>
+                        <Feather style={styles.iconPass} name = 'lock' size = {19} />
+                        <TextInput 
+                            placeholder="Enter a new password" 
                             value={value}
                             style={styles.inputField}
                             onFocus={() => setHandleFocusState(true)}
@@ -121,79 +172,55 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         justifyContent: 'center',
-        //alignItems: 'center',
-        // margin: 10,
+
     },
     
     icon: {
-        // flex:3,
+
         padding: 8,
         margin: 5,
-        //backgroundColor: 'blue',
-       
-        // resizeMode: 'stretch',
-        // alignItems: 'flex-end',
+
     },
     iconFocus: {
-        // flex:1,
         padding: 8,
         margin: 5,
-        //backgroundColor: 'blue',
-     
-        // resizeMode: 'stretch',
-        // alignItems: 'flex-end',
         
     },
 
     iconFocusShow: {
-        // justifyContent: 'center',
-        // alignItems: 'center',
-        // marginRight: 40,
-        // width: 50,
-        // height: 40,
-        // borderRadius: 10,
-
-        //backgroundColor: 'yellow',
         padding: 5,
          
     },
     iconPass: {
-        //  flex:1,
-         padding: 8,
-         margin: 5,
-        //backgroundColor: 'blue',
+        
+        padding: 8,
+        margin: 5,
         borderRadius: 10,
         justifyContent: 'center',
         alignItems: 'center',
     },
     textPlaceHolder:{
         
-        // color: 'grey',
         marginBottom: 4,
         marginLeft: 4,
         fontSize: 13,
-
-        // justifyContent: 'flex-start',
     },
     fieldBox:{
-         flexDirection: 'row',
-        // justifyContent: 'center',
-         alignItems: 'center',
+        
+        flexDirection: 'row',
+        alignItems: 'center',
         borderWidth: 1,
         backgroundColor: 'rgba(49,101,255,0.03)',
-        //backgroundColor: 'green',
         borderColor: 'transparent',
-        
         borderRadius: 10,
         width: 300,
         height: 48,
     },
     fieldBoxFocus:{
+        
         flexDirection: 'row',
-        // justifyContent: 'center',
-         alignItems: 'center',
+        alignItems: 'center',
         borderWidth: 2,
-        //backgroundColor: 'green',
         backgroundColor: 'rgba(49,101,255,0.00)',
         backgroundOpacity: 0.2,
         borderColor: '#3165FF',

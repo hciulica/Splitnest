@@ -112,7 +112,7 @@ const AccountScreen = ({ navigation }) => {
 
   const handleLogout = () => {
     Alert.alert(
-      "Logout confirmation",
+      "Sign out",
       "Are you sure you want to logout?",
       [
 
@@ -137,10 +137,10 @@ const AccountScreen = ({ navigation }) => {
         const email = authentication.currentUser.email;
          signOut(authentication)
           .then(() => {
-  
+            AsyncStorage.setItem('disabledChangePassword', 'false');
             AsyncStorage.removeItem('emailLoggedIn');
             AsyncStorage.removeItem('passwordLoggedIn');
-            navigation.navigate('Login');
+            navigation.replace('Login');
           })
           .catch(re => {
             Alert.alert(re);
@@ -148,17 +148,7 @@ const AccountScreen = ({ navigation }) => {
       } else {
         Alert.alert('You are not signed in');
       }
-    };
-
-  const deleteAccount = () => {
-    const user = authentication.currentUser;
-    deleteUser(user).then(() => {
-      Alert.alert("User has been removed");
-      navigation.navigate('Login');
-    }).catch((error) => {
-      Alert.alert(error);
-    });
-  }
+  };
 
   const selectGalleryImageCrop = async () =>{
       ImagePicker.openPicker({  
@@ -317,7 +307,7 @@ const AccountScreen = ({ navigation }) => {
                 
                 <View style={{position:'absolute', top: 0, left: 0, right: 0, bottom: 0, 
                   justifyContent: 'center', alignItems: 'center', backgroundColor: loading ? null : 'rgba(69,69,69,0.6)', borderRadius: 75}}>
-                    <Progress.CircleSnail size={145} thickness={4} indeterminate={true} />      
+                    <Progress.CircleSnail size={150} thickness={3} indeterminate={true} direction='clockwise'/>      
                 </View> : null
             }
           </TouchableWithAnimation>  
@@ -331,7 +321,7 @@ const AccountScreen = ({ navigation }) => {
 
         <TextInput 
              editable = {isEditable}
-             style={[{ fontSize: 30, marginTop: 18}, {fontWeight: isEditable ? '700' : '600'}]}
+             style={[{ fontSize: 30, marginTop: 18}, {fontWeight: '600'}]}
              autoCapitalize='none' 
              keyboardType='email-address' 
              autoCorrect={false}
@@ -346,10 +336,12 @@ const AccountScreen = ({ navigation }) => {
           <Text style={{fontSize: 12, fontWeight: '700', marginTop: 5, color: 'rgba(0,0,0,0.40)'}}>Phone: {phone}</Text>
           
             <FlatButton 
-            height={38} 
+              height={38} 
               width={136} 
               radius = {10} 
               fontSize = {13} 
+              duration = {75}
+              pressAnimation = {0.97} 
               title = {isEditable ? 'Save' : 'Edit profile'}
               style = {{ marginTop: 19 }}  
               onPress={() => editProfile()}
@@ -370,7 +362,7 @@ const AccountScreen = ({ navigation }) => {
 
         <View style={styles.exploreContainer}>
           <ExploreCard name='about'/>
-          <ExploreCard name='settings'/>
+          <ExploreCard name='settings' onPress={() => navigation.navigate('Settings')}/>
           <ExploreCard name='payments'/>
         </View>
           
@@ -432,27 +424,8 @@ const styles = StyleSheet.create({
     borderColor: '#3165FF',
     // marginBottom: 430,
   },
-  header: {
-    backgroundColor: '#FFFFFF',
-    shadowColor: '#333333',
-    shadowOffset: {width: -1, height: -3},
-    shadowRadius: 2,
-    shadowOpacity: 0.4,
-    paddingTop: 20,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-  },
-  panelHeader: {
-    alignItems: 'center',
-  },
+ 
 
-  panelHandle: {
-    width: 40,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#00000040',
-    marinBottom: 10,
-  }
 });
 
 export default AccountScreen;

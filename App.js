@@ -1,24 +1,24 @@
 import 'react-native-gesture-handler';
 import React, {Component, useState, useEffect, createContext} from 'react';
 import {View, Text, Image, StyleSheet, SafeAreaView, TouchableOpacity} from 'react-native';
-// import {createAppContainer} from 'react-navigation';
+
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator, CardStyleInterpolators, forFade, forVerticalIOS,forModalPresentationIOS , TransitionPresets} from '@react-navigation/stack';
+
 import LoginScreen from './src/screens/LoginScreen';
 import RegisterScreen from './src/screens/RegisterScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import TabNavigator from './src/navigation/TabNavigator';
-// import IntroductionScreen from './src/screens/IntroductionScreen';
+import SettingsScreen from './src/screens/SettingsScreen';
 import OnboardScreen from './src/screens/OnboardScreen';
+import AddExpenseScreen from './src/screens/AddExpenseScreen';
+
 import {LogBox} from 'react-native';
 import {YellowBox} from 'react-native';
+
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import AddExpenseScreen from './src/screens/AddExpenseScreen';
-// import { NavigationContainer } from '@react-navigation/native';
-// import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import AppContext from './src/AppContext';
-
 
 import authentication from './src/api/firebase/firebase-config';
 
@@ -60,6 +60,7 @@ const App = () => {
       setIsAppFirstLaunched(false);
     }
   }
+
   const fetchRemembered = async() => {
     // var test = false;
     const emailRemembered = await AsyncStorage.getItem("email");
@@ -71,36 +72,38 @@ const App = () => {
         setIsRemembered(false);
   }
 
+  const disabledPassword = async() => {
+    AsyncStorage.setItem('disabledChangePassword', 'false');
+  }
+
   useEffect(() => {
     fetchAsyncStorage();
     fetchRemembered();
+    disabledPassword();
   }, []);
   
   return (
-    //  <AppContext.Provider value={userSettings}>
-
+    
       isAppFirstLaunched != null && (
       <NavigationContainer>
         <Stack.Navigator>
-          {isAppFirstLaunched && (
-
-            <Stack.Screen component={OnboardScreen} name = "Onboard" options={{headerShown:false, cardStyleInterpolator: CardStyleInterpolators.forModalPresentationIOS}}/>
-          )}
-         
+          {
+            isAppFirstLaunched && 
+            (
+              <Stack.Screen component={OnboardScreen} name = "Onboard" options={{headerShown:false, cardStyleInterpolator: CardStyleInterpolators.forModalPresentationIOS}}/>
+            )
+          }
             <Stack.Screen component={LoginScreen} name = "Login" options={{headerShown:false, gestureEnabled:false, animationTypeForReplace: 'pop'}}/>     
             <Stack.Screen component={RegisterScreen} name = "Register" options={{headerShown:false}}/>       
-            <Stack.Screen component={TabNavigator} name = "Tab" options={{headerShown:false, gestureEnabled:false}}/>
+            <Stack.Screen component={TabNavigator} name = "Tab" options={{headerShown:false, gestureEnabled:false, animationEnabled: false,}}/>
+            <Stack.Screen component={SettingsScreen} name = "Settings" options={{headerShown:false, gestureEnabled:false}}/>
             <Stack.Screen component={AddExpenseScreen} name = "Add" />
          
         </Stack.Navigator>  
       </NavigationContainer> 
-    )
-    // </AppContext.Provider>
-    
+    )    
   )
 }
-
-
 
 const styles = StyleSheet.create({
   titleBig: {

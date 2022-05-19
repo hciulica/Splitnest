@@ -81,13 +81,6 @@ const RegisterScreen = ({ navigation }) => {
     console.log(JSON.stringify(authentication.currentUser, null, 3));
   }
 
-  const verificationEmail = () => {
-    sendEmailVerification(authentication.currentUser)
-    .then(() => {
-      Alert.alert("An email verification has been sent");
-  });
-  }
-
   const addToFirestoreForAuthentication = async() => {
     try{
         await setDoc(doc(db, "Users", authentication.currentUser.email), {
@@ -135,7 +128,7 @@ const RegisterScreen = ({ navigation }) => {
             addToFirestoreForAuthentication();
             consoleAuthentication();
             await uploadImageCloud();
-            navigation.replace('Tab');
+            navigation.navigate('Tab');
             setLoading(false);
           })
           .catch(error => {
@@ -197,23 +190,7 @@ const RegisterScreen = ({ navigation }) => {
       });
   };
 
-  const BottomRegister = () => (
-    !loading ?
-    <>
-          <View style={{marginTop: 30}}>
-          <FlatButton title="Sign up" disabled = {disableButton} onPress={handleSignUp}></FlatButton>
-        </View>
 
-        <View style={styles.groupBottom}>
-          <Text style={{fontWeight: '400', fontSize: 16, marginRight: 10, opacity:0.35}}>Do you have any account?</Text>
-          <TouchableOpacity onPress={() => navigation.replace('Login')}>
-            <Text style={styles.touchableOpacityStyle}>Sign in</Text>
-          </TouchableOpacity>
-        </View>
-    </> 
-    : <ActivityIndicator style={{width: width, height: 270}} size="large" color="#3165FF" />
-
-  )
 
   return (
     
@@ -269,15 +246,12 @@ const RegisterScreen = ({ navigation }) => {
             <Text style={styles.touchableOpacityStyle}>Sign in</Text>
           </TouchableOpacity>
         </View>
-      </> : 
+      </> 
+      : 
       <>
         <ActivityIndicator style={{width: width, height: 270}} size="large" color="#3165FF" />
-        {/* <Text style={{marginTop: -100}}>Please wait for your account to be created</Text> */}
       </>
       }
-
-      {/* <BottomRegister/> */}
-
     </View>
     </KeyboardAvoidingView>
   );

@@ -172,10 +172,7 @@ const TabNavigator =  () => {
             
             <Tab.Screen name="Home" component={HomeScreen} />
             <Tab.Screen name="Groups" component={GroupsScreen} />
-            <Tab.Screen name="Button" component={AddExpenseScreen}
-            options={{
-                tabBarStyle: { display: "none" },
-            }} />
+            <Tab.Screen name="Button" component={AddExpenseScreen} options={{ tabBarStyle: { display: "none" },}} />
             <Tab.Screen name="Friends" component={FriendsScreen}/>
             <Tab.Screen name="Account" component={AccountScreen}/>
         </Tab.Navigator>

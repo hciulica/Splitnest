@@ -17,7 +17,7 @@ import {
 } from 'react-native';
 
 import { authentication, db } from '../api/firebase/firebase-config';
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, updateDoc } from "firebase/firestore";
 import { getStorage, uploadBytes, ref, getDownloadURL } from 'firebase/storage';
 import { storage } from '../api/firebase/firebase-config';
 import FlatButton from '../components/FlatButton';
@@ -72,6 +72,8 @@ const RegisterScreen = ({ navigation }) => {
     const storageRef = ref(storage, `${folderName}/Profile/Profile_image.png`);
     const img = await fetch(imagePath);
     const bytes = await img.blob();
+    
+    addImageToFirestore(imagePath);
 
     await uploadBytes(storageRef, bytes);
     await updateImage();
@@ -81,18 +83,27 @@ const RegisterScreen = ({ navigation }) => {
     console.log(JSON.stringify(authentication.currentUser, null, 3));
   }
 
-  const verificationEmail = () => {
-    sendEmailVerification(authentication.currentUser)
-    .then(() => {
-      Alert.alert("An email verification has been sent");
-  });
+  const addImageToFirestore = async(imageURL) => {
+    try{
+      const refImage = doc(db, "Users", authentication.currentUser.email);
+
+      await updateDoc(refImage ,{
+          "Account.image": imageURL
+        });
+    } catch(err)
+    {
+      console.log(err);
+    }
   }
 
   const addToFirestoreForAuthentication = async() => {
     try{
         await setDoc(doc(db, "Users", authentication.currentUser.email), {
-          username: username,
-          phone: parseInt(phone, 10),
+          'Account':{
+            username: username,
+            phone: parseInt(phone, 10),
+            numberFriends: 0,
+          }
         });
     } catch(err)
     {
@@ -135,7 +146,7 @@ const RegisterScreen = ({ navigation }) => {
             addToFirestoreForAuthentication();
             consoleAuthentication();
             await uploadImageCloud();
-            navigation.replace('Tab');
+            navigation.navigate('Tab');
             setLoading(false);
           })
           .catch(error => {
@@ -197,23 +208,7 @@ const RegisterScreen = ({ navigation }) => {
       });
   };
 
-  const BottomRegister = () => (
-    !loading ?
-    <>
-          <View style={{marginTop: 30}}>
-          <FlatButton title="Sign up" disabled = {disableButton} onPress={handleSignUp}></FlatButton>
-        </View>
 
-        <View style={styles.groupBottom}>
-          <Text style={{fontWeight: '400', fontSize: 16, marginRight: 10, opacity:0.35}}>Do you have any account?</Text>
-          <TouchableOpacity onPress={() => navigation.replace('Login')}>
-            <Text style={styles.touchableOpacityStyle}>Sign in</Text>
-          </TouchableOpacity>
-        </View>
-    </> 
-    : <ActivityIndicator style={{width: width, height: 270}} size="large" color="#3165FF" />
-
-  )
 
   return (
     
@@ -260,7 +255,7 @@ const RegisterScreen = ({ navigation }) => {
         /> 
       </View>
       <View style={{marginTop: 30}}>
-          <FlatButton title="Sign up" disabled = {disableButton} onPress={handleSignUp}></FlatButton>
+          <FlatButton title="Sign up" disabled = {disableButton} duration={150} pressAnimation={0.97} onPress={handleSignUp}></FlatButton>
         </View>
 
         <View style={styles.groupBottom}>
@@ -269,15 +264,12 @@ const RegisterScreen = ({ navigation }) => {
             <Text style={styles.touchableOpacityStyle}>Sign in</Text>
           </TouchableOpacity>
         </View>
-      </> : 
+      </> 
+      : 
       <>
         <ActivityIndicator style={{width: width, height: 270}} size="large" color="#3165FF" />
-        {/* <Text style={{marginTop: -100}}>Please wait for your account to be created</Text> */}
       </>
       }
-
-      {/* <BottomRegister/> */}
-
     </View>
     </KeyboardAvoidingView>
   );

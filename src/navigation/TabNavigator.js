@@ -26,6 +26,7 @@ import {updateProfile, signOut, deleteUser, onAuthStateChanged} from 'firebase/a
 import {storage} from '../api/firebase/firebase-config';
 import {authentication, db} from '../api/firebase/firebase-config';
 
+import { doc, onSnapshot } from "firebase/firestore";
 
 const homeName = 'Home';
 const groupsName = 'Groups';
@@ -38,7 +39,22 @@ const Stack = createStackNavigator();
 
 const {width, height} = Dimensions.get('window');
 
+
+
 const TabNavigator =  () => {
+
+    const [imageAccount, setImageAccount] = useState(authentication.currentUser.photoURL)
+    useEffect (() => {
+        const updateImage = () => {
+          const refAccount = doc(db, "Users", authentication.currentUser.email);
+          
+          const unsub = onSnapshot(refAccount, (doc) => {
+            setImageAccount(doc.data().Account.image)
+          })
+        }
+        updateImage();
+    }, [])
+    
 
     return(
         
@@ -144,7 +160,7 @@ const TabNavigator =  () => {
 
                                 <View style={{width: 40, height: 60 ,alignItems: 'center', justifyContent: 'center',paddingTop: 7,}}>
                                         <Image
-                                        source={{ uri: authentication.currentUser.photoURL}}
+                                        source={{ uri: imageAccount}}
                                         style = {{ width:30, height:30, borderRadius:100 }}
                                           />
                                     <Text style={{ fontSize: 8, marginBottom: 12, marginTop: 5,}}>Account</Text>
@@ -156,8 +172,7 @@ const TabNavigator =  () => {
                                 <View style={{width: 40, height: 60 ,alignItems: 'center', justifyContent: 'center',paddingTop: 7}}>
                                     <View borderWidth={2} borderColor='#3165FF' borderRadius={20}>
                                         <Image
-                                        source={{ uri: authentication.currentUser.photoURL}}
-                                        // source={{uri : imageAccount}}
+                                        source={{ uri: imageAccount}}
                                         style = {{ width:30, height:30, borderRadius:100 }}
 
                                         />
@@ -172,10 +187,7 @@ const TabNavigator =  () => {
             
             <Tab.Screen name="Home" component={HomeScreen} />
             <Tab.Screen name="Groups" component={GroupsScreen} />
-            <Tab.Screen name="Button" component={AddExpenseScreen}
-            options={{
-                tabBarStyle: { display: "none" },
-            }} />
+            <Tab.Screen name="Button" component={AddExpenseScreen} options={{ tabBarStyle: { display: "none" },}} />
             <Tab.Screen name="Friends" component={FriendsScreen}/>
             <Tab.Screen name="Account" component={AccountScreen}/>
         </Tab.Navigator>

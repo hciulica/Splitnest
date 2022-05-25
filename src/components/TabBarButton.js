@@ -14,7 +14,7 @@ import {
 const TabBarButton = ({focused, fill, style, onPress, children}) => {
         return (
             <TouchableWithAnimation onPress={onPress}
-             style={{marginHorizontal:32, marginTop: 30}}>                  
+             style={{marginHorizontal:32.5, marginTop: 30}}>                  
                 {children}
             </TouchableWithAnimation>
         );

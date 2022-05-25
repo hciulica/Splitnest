@@ -67,7 +67,7 @@ const LoginScreen = ({ navigation }) => {
         .then(re => {
           console.log("User logged in with ", emailRemembered, passwordRemembered);
           setLoading(false);
-          navigation.navigate('Tab');
+          navigation.replace('Tab');
           
         })
         .catch(re => {
@@ -130,10 +130,8 @@ const LoginScreen = ({ navigation }) => {
           AsyncStorage.setItem('emailLoggedIn', email);
           AsyncStorage.setItem('passwordLoggedIn', password);
         }
-
-          navigation.navigate('Tab');
           setLoading(false);
-      
+          navigation.navigate('Tab');
       })
       .catch(re => {
         const errorCode = re.code;
@@ -314,7 +312,7 @@ const LoginScreen = ({ navigation }) => {
         </View>
 
         <FlatButton 
-          title="Sign in" disabled = {disableButton} onPress={() => {handleSignIn()}}  
+          title="Sign in" disabled = {disableButton} duration={150} pressAnimation={0.97} onPress={() => {handleSignIn()}}  
         />
 
         <View style={styles.groupLabel}>

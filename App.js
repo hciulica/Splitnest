@@ -12,6 +12,7 @@ import TabNavigator from './src/navigation/TabNavigator';
 import SettingsScreen from './src/screens/SettingsScreen';
 import OnboardScreen from './src/screens/OnboardScreen';
 import AddExpenseScreen from './src/screens/AddExpenseScreen';
+import AddFriendScreen from './src/screens/AddFriendScreen';
 
 import {LogBox} from 'react-native';
 import {YellowBox} from 'react-native';
@@ -97,6 +98,7 @@ const App = () => {
             <Stack.Screen component={RegisterScreen} name = "Register" options={{headerShown:false}}/>       
             <Stack.Screen component={TabNavigator} name = "Tab" options={{headerShown:false, gestureEnabled:false, animationEnabled: false,}}/>
             <Stack.Screen component={SettingsScreen} name = "Settings" options={{headerShown:false, gestureEnabled:false}}/>
+            <Stack.Screen component={AddFriendScreen} name = "AddFriend" options={{headerShown:false, gestureEnabled:false}}/>
             <Stack.Screen component={AddExpenseScreen} name = "Add" />
          
         </Stack.Navigator>  

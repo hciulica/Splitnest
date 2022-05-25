@@ -96,10 +96,11 @@ const SettingsScreen = ({navigation,}) => {
             .then(() => {
                 AsyncStorage.removeItem('emailLoggedIn');
                 AsyncStorage.removeItem('passwordLoggedIn');
+                
                 navigation.navigate('Login');
             })
             .catch(re => {
-                Alert.alert(re);
+                Alert.alert('Error',re.message);
             });
         } else {
             Alert.alert('You are not signed in');
@@ -131,15 +132,50 @@ const SettingsScreen = ({navigation,}) => {
                     );
                     setAccountCardState(0);  
                 }).catch((error) => {
-                    Alert.alert(error.message);
+                    
+                        switch(error.code){
+                            case 'auth/weak-password':
+                            Alert.alert('Error', 'Password should be at least 6 characters');
+                            break;
+
+                            case 'auth/requires-recent-login':
+
+                            Alert.alert(
+                            "Reauthentication required",
+                            "You need to reauthenticate if you want change password",
+                            [
+
+                                            {
+                                            text: "Later",
+                                            onPress: () => setAccountCardState(0),
+                                            style: "cancel"
+                                            },  
+                                        
+                                            {
+                                            text: "Logout",
+                                            onPress: () => signOutUser(),
+                                            style: "destructive"
+                                            },  
+                                            
+                                        ],
+                            );
+                            break;
+
+                            default:
+                                Alert.alert(error.message);
+                            break;
+                        }
+                    
                 })
         
     }
 
+
     const reauthenticateUser = async(currentPassword) => {
         const user = authentication.currentUser;
         const credentials = await authentication.EmailAuthProvider.credential(user.email, currentPassword);    
-        return reauthenticateWithCredential(user, credentials);
+        // return 
+        reauthenticateWithCredential(user, credentials);
     }
 
     const resetPassword = () => 
@@ -158,6 +194,8 @@ const SettingsScreen = ({navigation,}) => {
                             Alert.alert('Password updated', 'You need to authenticate again');
                           
                         }).catch((error) => {
+                            Alert.alert('Error',error.message);
+                            
                             const errorCode = error.code;
                             Alert.alert(errorCode);
                         })
@@ -180,7 +218,7 @@ const SettingsScreen = ({navigation,}) => {
     const verificationEmail = () => {
         sendEmailVerification(authentication.currentUser)
         .then(() => {
-        Alert.alert("An email verification has been sent");
+            Alert.alert("An email verification has been sent", 'If you confirmed already please log in again');
         }).catch((re)=>{
             const errorCode = re.code;
             if(errorCode === 'auth/too-many-requests')
@@ -301,19 +339,7 @@ const SettingsScreen = ({navigation,}) => {
                 {/* Back Side */}
                 
                     <View style={styles.resetPassContainer}>
-                        {/* <View style={{backgroundColor: 'rgba(49,101,255,0.1)', borderRadius: 10, width: 211, height: 30, justifyContent:'center'}}>
-                            <TextInput 
-                                name='currentPassword' 
-                                style={{marginLeft: 15}}
-                                value={currentPassword} 
-                                autoCapitalize='none'
-                                autoCorrect={false}
-                                placeholder='Current password'
-                                onChangeText={text => setCurrentPassword(text)}
-
-                            />
-                        </View> */}
-                        {/* <XIcon> */}
+                       
                         <TouchableWithAnimation duration={50} pressAnimation={0.90} style={{alignSelf: 'flex-end', marginRight: 30, marginTop: 10, marginBottom: 20, width: 20, height: 20}} onPress={() => setAccountCardState(0)}>
                             <XIcon ></XIcon>
                         </TouchableWithAnimation>
@@ -341,7 +367,7 @@ const SettingsScreen = ({navigation,}) => {
                         <View style={{flexDirection: 'row',marginTop: 30, marginBottom: 20}}>
                             
                             {/* <FlatButton title="Back" onPress = { () => setAccountCardState(0) } height={30} width={70} fontSize = {10} ></FlatButton> */}
-                            <FlatButton disabled = {passwordDisabled} onPress = {() => onChangePasswordPress()} title="Reset" radius={20} height={40} width={211} fontSize = {12} ></FlatButton>
+                            <FlatButton disabled = {passwordDisabled} onPress = {() => onChangePasswordPress()} title="Reset" radius={15} height={40} width={211} fontSize = {12} ></FlatButton>
                         </View>
                     </View>
                     

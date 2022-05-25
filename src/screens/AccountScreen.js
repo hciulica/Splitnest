@@ -49,10 +49,10 @@ const AccountScreen = ({ navigation }) => {
     
   const animatePress = useRef(new Animated.Value(1)).current;
     
-  const [imageUri, setImageUri] = useState('');
   const [phone, setPhone] = useState('');
   const [username, setUsername] = useState(authentication.currentUser.displayName);
   const [imageURL, setImageURL] = useState(null);
+  const [friendsNumber, setFriendsNumber] = useState(null);
   const [isEditable, setIsEditable] = useState(false);
   const [loading, setLoading] = useState(false);
   const [colorBorderPicture, setColorBorderPicture] = useState('#3165FF');
@@ -63,26 +63,40 @@ const AccountScreen = ({ navigation }) => {
 
   useEffect (() => {
       const fetchDataFirestore = async() => {
-      const docRef = doc(db, "Users", authentication.currentUser.email);
-      getDoc(docRef).then(docSnap => {
-        if (docSnap.exists()) {
-          setPhone(docSnap.data().phone);
-        } 
-        else console.log("No such document!");
-      })
-      setImageURL(authentication.currentUser.photoURL);
+        const docRef = doc(db, "Users", authentication.currentUser.email);
+        getDoc(docRef).then(docSnap => {
+          if (docSnap.exists()) 
+          {
+            setPhone(docSnap.data().Account.phone); 
+            console.log(docSnap.data().Account);
+          } 
+          else console.log("No such document!");
+        })
+        setImageURL(authentication.currentUser.photoURL);
     }
+
+    
+    
     console.log('Account');
     fetchDataFirestore();
+    getFriendsNumber();
   }, [])
+
+    const getFriendsNumber = async() => {
+          const refAccount = doc(db, "Users", authentication.currentUser.email);
+          
+          const unsub = onSnapshot(refAccount, (doc) => {
+            setFriendsNumber(doc.data().Account.numberFriends)
+          })
+    }
 
     const editUser = async(username) => {
 
     
         try{
-          
-          await updateDoc(doc(db, "Users", authentication.currentUser.email), {
-            username: username,
+          const refAccount = doc(db, "Users", authentication.currentUser.email);
+          await updateDoc(refAccount, {
+            "Account.username": username,
         });
         
         await updateProfile(authentication.currentUser, {
@@ -215,9 +229,18 @@ const AccountScreen = ({ navigation }) => {
         await updateProfile(authentication.currentUser, {
           photoURL: photoURL
 
-        }).then(() => {
-
+        }).then(async() => { 
+          try{
           setImageURL(photoURL);
+          const refImage = doc(db, "Users", authentication.currentUser.email);
+            await updateDoc(refImage ,{
+                "Account.image": photoURL
+              });
+          } catch(err)
+          {
+            console.log(err);
+          }
+          
         }).catch((error) => {
           Alert.alert(error);
         });
@@ -274,6 +297,8 @@ const AccountScreen = ({ navigation }) => {
     Linking.openURL(`tel:0771583241`)
   }
 
+  
+
   return (
     <KeyboardAvoidingView style={styles.container}>
         <View style={[styles.topContainer,{width: width}]}>
@@ -284,7 +309,7 @@ const AccountScreen = ({ navigation }) => {
           <View style={{justifyContent: 'center', alignItems: 'center', flexDirection: 'row'}}>
          
           <View style={styles.groupText}>
-            <Text style={styles.number}>23</Text>
+            <Text style={styles.number}>{friendsNumber}</Text>
             <Text style= {{color: 'rgba(0,0,0,0.5)', fontWeight: 'bold'}}>Friends</Text>
           </View>
 
@@ -369,10 +394,6 @@ const AccountScreen = ({ navigation }) => {
         <View style={{alignSelf: 'flex-start', marginLeft: 30, marginTop: -10}}>
           <ExploreCard name='logout' onPress={() => handleLogout()}/>
         </View>
-{/*         
-        <FlatButton title="Remove user" onPress={deleteAccount}></FlatButton>
-        <FlatButton title="Call" onPress={numberCall}></FlatButton>
-        <FlatButton title="Log out" onPress={signOutUser}></FlatButton> */}
     </KeyboardAvoidingView>
   );
 };

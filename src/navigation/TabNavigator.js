@@ -69,7 +69,7 @@ const TabNavigator = () => {
             tabBarShowLabel: false,
             headerShown: false,
             tabBarActiveTintColor: "#4674FF",
-            tabBarInactiveTintColor: "#000000",
+            tabBarInactiveTintColor: "rgba(0,0,0,0.75)",
             gestureEnabled: false,
             tabBarStyle: {
                alignItems: "center",
@@ -132,7 +132,13 @@ const TabNavigator = () => {
                            }}
                         >
                            <HomeIconUnfocused fill={color} />
-                           <Text style={{ fontSize: 8, marginTop: 8 }}>
+                           <Text
+                              style={{
+                                 fontSize: 8,
+                                 marginTop: 8,
+                                 color: "rgba(0, 0, 0, 0.75)",
+                              }}
+                           >
                               Home
                            </Text>
                         </View>
@@ -175,7 +181,13 @@ const TabNavigator = () => {
                            }}
                         >
                            <GroupsIconUnfocused fill={color} />
-                           <Text style={{ fontSize: 8, marginTop: 8 }}>
+                           <Text
+                              style={{
+                                 fontSize: 8,
+                                 marginTop: 8,
+                                 color: "rgba(0, 0, 0, 0.75)",
+                              }}
+                           >
                               Groups
                            </Text>
                         </View>
@@ -219,7 +231,13 @@ const TabNavigator = () => {
                            }}
                         >
                            <FriendsIconUnfocused fill={color} />
-                           <Text style={{ fontSize: 8, marginTop: 9 }}>
+                           <Text
+                              style={{
+                                 fontSize: 8,
+                                 marginTop: 9,
+                                 color: "rgba(0, 0, 0, 0.75)",
+                              }}
+                           >
                               Friends
                            </Text>
                         </View>
@@ -251,6 +269,7 @@ const TabNavigator = () => {
                                  fontSize: 8,
                                  marginBottom: 12,
                                  marginTop: 5,
+                                 color: "rgba(0, 0, 0, 0.75)",
                               }}
                            >
                               Account

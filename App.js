@@ -27,9 +27,13 @@ import SettingsScreen from "./src/screens/SettingsScreen";
 import OnboardScreen from "./src/screens/OnboardScreen";
 import AddExpenseScreen from "./src/screens/AddExpenseScreen";
 import AddFriendScreen from "./src/screens/AddFriendScreen";
+import CreateGroupScreen from "./src/screens/CreateGroupScreen";
+import InviteFriendsScreen from "./src/screens/InviteFriendsScreen";
 
 import { LogBox } from "react-native";
 import { YellowBox } from "react-native";
+
+import { MenuProvider } from "react-native-popup-menu";
 
 import Icon from "react-native-vector-icons/MaterialIcons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -99,7 +103,7 @@ const App = () => {
 
    return (
       isAppFirstLaunched != null && (
-         <PaperProvider>
+         <MenuProvider>
             <NavigationContainer>
                <Stack.Navigator>
                   {isAppFirstLaunched && (
@@ -136,20 +140,39 @@ const App = () => {
                         animationEnabled: false,
                      }}
                   />
+
                   <Stack.Screen
                      component={SettingsScreen}
                      name="Settings"
                      options={{ headerShown: false, gestureEnabled: false }}
                   />
                   <Stack.Screen
+                     component={InviteFriendsScreen}
+                     name="InviteFriends"
+                     options={{ headerShown: false, gestureEnabled: false }}
+                  />
+
+                  <Stack.Screen
                      component={AddFriendScreen}
                      name="AddFriend"
                      options={{ headerShown: false, gestureEnabled: false }}
                   />
+                  <Stack.Screen
+                     component={CreateGroupScreen}
+                     name="CreateGroup"
+                     options={{
+                        headerShown: false,
+                        // gestureEnabled: false,
+                        gestureDirection: "vertical",
+                        cardStyleInterpolator:
+                           CardStyleInterpolators.forVerticalIOS,
+                        animationTypeForReplace: "pop",
+                     }}
+                  />
                   <Stack.Screen component={AddExpenseScreen} name="Add" />
                </Stack.Navigator>
             </NavigationContainer>
-         </PaperProvider>
+         </MenuProvider>
       )
    );
 };

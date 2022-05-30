@@ -29,13 +29,15 @@ import {
 } from "firebase/firestore";
 
 import CancelIcon from "../../assets/icons/friendsscreen/cancelIcon.svg";
-
 import FlatButton from "../components/FlatButton";
 import SearchIcon from "../../assets/icons/friendsscreen/searchIcon.svg";
 import TouchableWithAnimation from "../components/TouchableWithAnimation";
 import FriendCard from "../components/FriendCard";
+import FlatInput from "../components/FlatInput";
 
 import ThreeDotsMenu from "../components/ThreeDotsMenu";
+
+import useFriendsList from "../hooks/useFriendsList";
 
 import { MenuProvider } from "react-native-popup-menu";
 
@@ -52,6 +54,8 @@ const FriendsScreen = ({ navigation, route }) => {
    const [friendsNumber, setFriendsNumber] = useState(null);
    const [search, setSearch] = useState();
    const [searchBarActive, setSearchBarActive] = useState(false);
+
+   const friendsList = useFriendsList();
 
    const getFriendsInfo = async () => {
       let friends = [];
@@ -76,6 +80,7 @@ const FriendsScreen = ({ navigation, route }) => {
                friends.push(friend);
             }
       }
+
       setResults(friends);
       setFilteredResults(friends);
    };
@@ -94,6 +99,7 @@ const FriendsScreen = ({ navigation, route }) => {
    const onRefresh = useCallback((firstRender) => {
       if (!firstRender) setRefreshing(true);
       getFriendsInfo();
+
       getNumberFriends();
       if (!firstRender) wait(1000).then(() => setRefreshing(false));
    }, []);
@@ -102,7 +108,6 @@ const FriendsScreen = ({ navigation, route }) => {
       const unsubscribe = navigation.addListener("focus", () => {
          onRefresh(true);
       });
-
       return unsubscribe;
    }, [navigation]);
 
@@ -150,65 +155,68 @@ const FriendsScreen = ({ navigation, route }) => {
    };
 
    return (
-      <MenuProvider>
-         <View style={styles.container}>
-            <SafeAreaView style={styles.topContainer}>
-               <View style={styles.topElements}>
+      <View style={styles.container}>
+         <SafeAreaView style={styles.topContainer}>
+            <View style={styles.topElements}>
+               {!searchBarActive ? (
+                  <Text style={styles.title}>Friends list</Text>
+               ) : (
+                  <FlatInput
+                     style={{ marginLeft: 40 }}
+                     placeholder="Search by email or username"
+                     value={search}
+                     onChangeText={(text) => searchFilter(text)}
+                  />
+               )}
+
+               <View style={{ flexDirection: "row", alignItems: "center" }}>
                   {!searchBarActive ? (
-                     <Text style={styles.title}>Friends list</Text>
-                  ) : (
-                     <View style={styles.containerTextInput}>
-                        <TextInput
-                           style={{ fontSize: 14, marginLeft: 15 }}
-                           value={search}
-                           placeholder="Search by email or username"
-                           onChangeText={(text) => searchFilter(text)}
-                           autoCapitalize="none"
-                           keyboardType="email-address"
-                           autoCorrect={false}
-                        />
-                     </View>
-                  )}
-
-                  <View style={{ flexDirection: "row", alignItems: "center" }}>
-                     {!searchBarActive ? (
-                        <TouchableWithAnimation
-                           style={{ marginRight: 20 }}
-                           onPress={() => setSearchBarActive(true)}
-                        >
-                           <SearchIcon></SearchIcon>
-                        </TouchableWithAnimation>
-                     ) : null}
-                     <FlatButton
-                        style={{ marginRight: 30 }}
-                        onPress={() =>
-                           !searchBarActive
-                              ? navigation.navigate("AddFriend")
-                              : setSearchBarActive(false)
-                        }
-                        duration={150}
-                        pressAnimation={0.95}
-                        title={searchBarActive ? "Done" : "Add"}
-                        height={38}
-                        width={60}
-                        fontSize={14}
-                     ></FlatButton>
-                  </View>
+                     <TouchableWithAnimation
+                        style={{ marginRight: 20 }}
+                        onPress={() => setSearchBarActive(true)}
+                     >
+                        <SearchIcon></SearchIcon>
+                     </TouchableWithAnimation>
+                  ) : null}
+                  <FlatButton
+                     style={{ marginRight: 30 }}
+                     onPress={() =>
+                        !searchBarActive
+                           ? navigation.navigate("AddFriend")
+                           : setSearchBarActive(false)
+                     }
+                     duration={150}
+                     pressAnimation={0.95}
+                     title={searchBarActive ? "Done" : "Add"}
+                     height={38}
+                     width={60}
+                     fontSize={14}
+                  ></FlatButton>
                </View>
-            </SafeAreaView>
-
-            <View style={styles.textContainer}>
-               <Text style={styles.numberFriends}>{friendsNumber}</Text>
-               <Text style={styles.labelFriends}>Friends</Text>
             </View>
+         </SafeAreaView>
 
-            <SafeAreaView>
-               {filteredResults.length ? (
+         <View style={styles.textContainer}>
+            <Text style={styles.numberFriends}>{friendsNumber}</Text>
+            <Text style={styles.labelFriends}>Friends</Text>
+         </View>
+
+         <SafeAreaView>
+            {filteredResults.length ? (
+               <View style={{ height: height - 290 }}>
                   <FlatList
-                     contentContainerStyle={{ marginTop: 10 }}
+                     contentContainerStyle={{
+                        height:
+                           filteredResults.length !== 0
+                              ? 80 * filteredResults.length
+                              : null,
+                     }}
                      data={filteredResults}
                      renderItem={renderItem}
                      keyExtractor={(item) => item.email}
+                     scrollEnabled
+                     alwaysBounceVertical={false}
+                     showsVerticalScrollIndicator={false}
                      refreshControl={
                         <RefreshControl
                            refreshing={refreshing}
@@ -217,25 +225,25 @@ const FriendsScreen = ({ navigation, route }) => {
                         />
                      }
                   />
-               ) : (
-                  <ScrollView
-                     contentContainerStyle={{ marginTop: 60 }}
-                     refreshControl={
-                        <RefreshControl
-                           refreshing={refreshing}
-                           onRefresh={onRefresh}
-                           tintColor={"rgba(49,101,255,0.80)"}
-                        />
-                     }
-                  >
-                     <Text style={{ fontSize: 11, color: "rgba(0,0,0,0.60)" }}>
-                        No friends to be displayed
-                     </Text>
-                  </ScrollView>
-               )}
-            </SafeAreaView>
-         </View>
-      </MenuProvider>
+               </View>
+            ) : (
+               <ScrollView
+                  contentContainerStyle={{ marginTop: 60 }}
+                  refreshControl={
+                     <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                        tintColor={"rgba(49,101,255,0.80)"}
+                     />
+                  }
+               >
+                  <Text style={{ fontSize: 11, color: "rgba(0,0,0,0.60)" }}>
+                     No friends to be displayed
+                  </Text>
+               </ScrollView>
+            )}
+         </SafeAreaView>
+      </View>
    );
 };
 
@@ -253,12 +261,23 @@ const styles = StyleSheet.create({
       backgroundColor: "white",
       borderTopRightRadius: 30,
       borderTopLeftRadius: 30,
+      shadowColor: "#000",
+      shadowOffset: {
+         width: 0,
+         height: 0,
+      },
+      shadowOpacity: 0.25,
+      shadowRadius: 6.68,
+
+      elevation: 11,
    },
    textContainer: {
       marginTop: 25,
+      marginBottom: 10,
       flexDirection: "row",
-      // marginLeft: 10
+
       alignSelf: "flex-start",
+
       marginLeft: 40,
    },
 

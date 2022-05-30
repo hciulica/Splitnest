@@ -30,6 +30,7 @@ import {
    getDocs,
    collection,
    query,
+   TimeStamp,
 } from "firebase/firestore";
 import { authentication, db } from "../api/firebase/firebase-config";
 import { getStorage, uploadBytes, ref, getDownloadURL } from "firebase/storage";
@@ -151,6 +152,14 @@ const AddFriendScreen = ({ navigation }) => {
       } else setCredentials(text);
    };
 
+   renderListHeader = () => {
+      return (
+         <View>
+            <Text>Foo</Text>
+         </View>
+      );
+   };
+
    return (
       <View style={styles.container}>
          <SafeAreaView style={styles.topContainer}>
@@ -200,7 +209,16 @@ const AddFriendScreen = ({ navigation }) => {
                   data={filteredResults}
                   renderItem={renderItem}
                   keyExtractor={(item) => item.email}
-                  contentContainerStyle={{ marginTop: 25 }}
+                  contentContainerStyle={{
+                     marginTop: 25,
+                     height:
+                        filteredResults.length !== 0
+                           ? 100 * filteredResults.length
+                           : null,
+                  }}
+                  scrollEnabled={true}
+                  alwaysBounceVertical={false}
+                  showsVerticalScrollIndicator={false}
                />
             ) : (
                <Text

@@ -27,6 +27,7 @@ import {
    serverTimestamp,
    increment,
    autoRefresh,
+   Timestamp,
 } from "firebase/firestore";
 
 import {
@@ -81,7 +82,11 @@ export default function FriendCard({
             authentication.currentUser.email
          );
          const refFriendFriends = doc(db, "Users", mail);
-
+         // Account: {
+         //    username: username,
+         //    phone: parseInt(phone, 10),
+         //    numberFriends: 0,
+         // },
          if (pressed) {
             await updateDoc(refUserFriends, {
                "Account.numberFriends": increment(1),
@@ -166,7 +171,6 @@ const styles = StyleSheet.create({
    mailStyle: {
       marginTop: 5,
       fontSize: 9,
-      // color: '#979797',
       color: "rgba(0,0,0,0.60)",
    },
 });

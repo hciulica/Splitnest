@@ -76,6 +76,7 @@ const RegisterScreen = ({ navigation }) => {
 
    const uploadImageCloud = async () => {
       const imagePath = "https://i.imgur.com/pVbj3Y0.png";
+
       const folderName = `Users/${authentication.currentUser.email}`;
       const storageRef = ref(
          storage,

@@ -35,9 +35,6 @@ const HomeScreen = () => {
          style={{ justifyContent: "center", alignItems: "center", flex: 1 }}
       >
          <Text>HomeScreen</Text>
-         <Button title="Press" onPress={() => consoleAuthentication()}>
-            {" "}
-         </Button>
       </SafeAreaView>
    );
 };

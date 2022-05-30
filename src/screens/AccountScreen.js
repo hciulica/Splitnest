@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Linking, ActivityIndicator } from "react-native";
-import { launchCamera, launchImageLibrary } from "react-native-image-picker";
 import ImagePicker from "react-native-image-crop-picker";
 import { getStorage, uploadBytes, ref, getDownloadURL } from "firebase/storage";
 import { updateProfile, signOut, deleteUser } from "firebase/auth";
@@ -38,6 +37,8 @@ import {
    Dimensions,
    KeyboardAvoidingView,
 } from "react-native";
+
+import { TouchableRipple } from "react-native-paper";
 
 import TouchableWithAnimation from "../components/TouchableWithAnimation";
 
@@ -138,16 +139,6 @@ const AccountScreen = ({ navigation }) => {
       } else {
          Alert.alert("You are not signed in");
       }
-   };
-
-   const selectGalleryImageCrop = async () => {
-      ImagePicker.openPicker({
-         width: 300,
-         height: 400,
-         cropping: true,
-      }).then((image) => {
-         // console.log(image);
-      });
    };
 
    const selectFromGalleryWithCrop = async () => {
@@ -301,9 +292,10 @@ const AccountScreen = ({ navigation }) => {
                         </Text>
                      </View>
 
-                     <TouchableWithAnimation
+                     <TouchableOpacity
                         duration={100}
                         pressAnimation={0.96}
+                        activeOpacity={0.75}
                         style={{ marginTop: 40 }}
                         disabled={!isEditable}
                         onPress={() => changeImageOrGallery()}
@@ -328,6 +320,7 @@ const AccountScreen = ({ navigation }) => {
                                     : "rgba(69,69,69,0.6)",
                                  borderRadius: 75,
                                  borderWidth: 3,
+
                                  borderColor: "#3165FF",
                               }}
                            >
@@ -365,7 +358,7 @@ const AccountScreen = ({ navigation }) => {
                               />
                            </View>
                         ) : null}
-                     </TouchableWithAnimation>
+                     </TouchableOpacity>
 
                      <View style={styles.groupText}>
                         <Text style={styles.number}>10</Text>
@@ -497,6 +490,15 @@ const styles = StyleSheet.create({
       backgroundColor: "#FFFFFF",
       alignItems: "center",
       justifyContent: "center",
+      shadowColor: "#000",
+      shadowOffset: {
+         width: 0,
+         height: 0,
+      },
+      shadowOpacity: 0.25,
+      shadowRadius: 6.68,
+
+      elevation: 11,
    },
    imageStyle: {
       width: 130,

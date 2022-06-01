@@ -8,6 +8,7 @@ import {
    TouchableOpacity,
    Animated,
    Dimensions,
+   SafeAreaView,
 } from "react-native";
 import TouchableWithAnimation from "../components/TouchableWithAnimation";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
@@ -320,6 +321,9 @@ const TabNavigator = () => {
       >
          <Tab.Screen name="Home" component={HomeScreen} />
          <Tab.Screen name="Groups" component={GroupsScreen} />
+         {/* 
+         <Tab.Screen name="Groups" component={TopBarNavigator} /> */}
+
          <Tab.Screen
             name="Button"
             component={AddExpenseScreen}

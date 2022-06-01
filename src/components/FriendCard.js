@@ -111,7 +111,7 @@ export default function FriendCard({
    };
 
    return (
-      <View style={styles.containerCard}>
+      <TouchableWithAnimation style={styles.containerCard}>
          <Image style={styles.imageProfile} source={{ uri: image }} />
 
          <View style={{ width: cardType === "AddFriends" ? 200 : 210 }}>
@@ -134,7 +134,7 @@ export default function FriendCard({
                autoRefresh={autoRefresh}
             />
          ) : null}
-      </View>
+      </TouchableWithAnimation>
    );
 }
 

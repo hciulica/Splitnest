@@ -14,6 +14,7 @@ import {
    RefreshControl,
    ScrollView,
    TextInput,
+   ActivityIndicator,
 } from "react-native";
 
 import { authentication, db } from "../api/firebase/firebase-config";
@@ -27,6 +28,18 @@ import {
    collection,
    query,
 } from "firebase/firestore";
+
+import {
+   BallIndicator,
+   BarIndicator,
+   DotIndicator,
+   MaterialIndicator,
+   PacmanIndicator,
+   PulseIndicator,
+   SkypeIndicator,
+   UIActivityIndicator,
+   WaveIndicator,
+} from "react-native-indicators";
 
 import CancelIcon from "../../assets/icons/friendsscreen/cancelIcon.svg";
 import FlatButton from "../components/FlatButton";
@@ -54,10 +67,12 @@ const FriendsScreen = ({ navigation, route }) => {
    const [friendsNumber, setFriendsNumber] = useState(null);
    const [search, setSearch] = useState();
    const [searchBarActive, setSearchBarActive] = useState(false);
+   const [loading, setLoading] = useState(false);
 
    const friendsList = useFriendsList();
 
    const getFriendsInfo = async () => {
+      setLoading(true);
       let friends = [];
       let friend = {};
 
@@ -83,6 +98,7 @@ const FriendsScreen = ({ navigation, route }) => {
 
       setResults(friends);
       setFilteredResults(friends);
+      setLoading(false);
    };
 
    const getNumberFriends = async () => {
@@ -98,8 +114,9 @@ const FriendsScreen = ({ navigation, route }) => {
 
    const onRefresh = useCallback((firstRender) => {
       if (!firstRender) setRefreshing(true);
-      getFriendsInfo();
 
+      setSearchBarActive(false);
+      getFriendsInfo();
       getNumberFriends();
       if (!firstRender) wait(1000).then(() => setRefreshing(false));
    }, []);
@@ -195,54 +212,65 @@ const FriendsScreen = ({ navigation, route }) => {
                </View>
             </View>
          </SafeAreaView>
-
-         <View style={styles.textContainer}>
-            <Text style={styles.numberFriends}>{friendsNumber}</Text>
-            <Text style={styles.labelFriends}>Friends</Text>
-         </View>
-
-         <SafeAreaView>
-            {filteredResults.length ? (
-               <View style={{ height: height - 290 }}>
-                  <FlatList
-                     contentContainerStyle={{
-                        height:
-                           filteredResults.length !== 0
-                              ? 80 * filteredResults.length
-                              : null,
-                     }}
-                     data={filteredResults}
-                     renderItem={renderItem}
-                     keyExtractor={(item) => item.email}
-                     scrollEnabled
-                     alwaysBounceVertical={false}
-                     showsVerticalScrollIndicator={false}
-                     refreshControl={
-                        <RefreshControl
-                           refreshing={refreshing}
-                           onRefresh={onRefresh}
-                           tintColor={"rgba(49,101,255,0.50)"}
-                        />
-                     }
-                  />
+         {!loading ? (
+            <>
+               <View style={styles.textContainer}>
+                  <Text style={styles.numberFriends}>{friendsNumber}</Text>
+                  <Text style={styles.labelFriends}>Friends</Text>
                </View>
-            ) : (
-               <ScrollView
-                  contentContainerStyle={{ marginTop: 60 }}
-                  refreshControl={
-                     <RefreshControl
-                        refreshing={refreshing}
-                        onRefresh={onRefresh}
-                        tintColor={"rgba(49,101,255,0.80)"}
-                     />
-                  }
-               >
-                  <Text style={{ fontSize: 11, color: "rgba(0,0,0,0.60)" }}>
-                     No friends to be displayed
-                  </Text>
-               </ScrollView>
-            )}
-         </SafeAreaView>
+
+               <SafeAreaView>
+                  {filteredResults.length ? (
+                     <View style={{ height: height - 290 }}>
+                        <FlatList
+                           contentContainerStyle={{
+                              height:
+                                 filteredResults.length !== 0
+                                    ? 80 * filteredResults.length
+                                    : null,
+                           }}
+                           data={filteredResults}
+                           renderItem={renderItem}
+                           keyExtractor={(item) => item.email}
+                           scrollEnabled
+                           alwaysBounceVertical={false}
+                           showsVerticalScrollIndicator={false}
+                           refreshControl={
+                              <RefreshControl
+                                 refreshing={refreshing}
+                                 onRefresh={onRefresh}
+                                 tintColor={"rgba(49,101,255,0.50)"}
+                              />
+                           }
+                        />
+                     </View>
+                  ) : (
+                     <ScrollView
+                        contentContainerStyle={{ marginTop: 60 }}
+                        refreshControl={
+                           <RefreshControl
+                              refreshing={refreshing}
+                              onRefresh={onRefresh}
+                              tintColor={"rgba(49,101,255,0.80)"}
+                           />
+                        }
+                     >
+                        <Text
+                           style={{ fontSize: 11, color: "rgba(0,0,0,0.60)" }}
+                        >
+                           No friends to be displayed
+                        </Text>
+                     </ScrollView>
+                  )}
+               </SafeAreaView>
+            </>
+         ) : (
+            <MaterialIndicator
+               size={40}
+               color="rgba(49,101,255,0.80)"
+               style={{ marginBottom: 230 }}
+            ></MaterialIndicator>
+         )}
       </View>
    );
 };
@@ -261,15 +289,6 @@ const styles = StyleSheet.create({
       backgroundColor: "white",
       borderTopRightRadius: 30,
       borderTopLeftRadius: 30,
-      shadowColor: "#000",
-      shadowOffset: {
-         width: 0,
-         height: 0,
-      },
-      shadowOpacity: 0.25,
-      shadowRadius: 6.68,
-
-      elevation: 11,
    },
    textContainer: {
       marginTop: 25,

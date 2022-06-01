@@ -114,6 +114,7 @@ const RegisterScreen = ({ navigation }) => {
                username: username,
                phone: parseInt(phone, 10),
                numberFriends: 0,
+               numberGroups: 0,
             },
          });
       } catch (err) {

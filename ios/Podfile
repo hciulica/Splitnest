@@ -17,7 +17,6 @@ target 'SplitnestProj' do
   
 
 
-  pod 'RNSVG', :path => '../node_modules/react-native-svg'
 
   target 'SplitnestProjTests' do
     inherit! :complete

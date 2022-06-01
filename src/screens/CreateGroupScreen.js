@@ -52,6 +52,7 @@ import {
    arrayUnion,
    serverTimestamp,
    Timestamp,
+   increment,
 } from "firebase/firestore";
 
 import { getStorage, uploadBytes, ref, getDownloadURL } from "firebase/storage";
@@ -105,6 +106,7 @@ const CreateGroupScreen = ({ navigation, route }) => {
 
                await updateDoc(refMember, {
                   Groups: arrayUnion(groupRef),
+                  "Account.numberGroups": increment(1),
                });
             });
 
@@ -121,6 +123,7 @@ const CreateGroupScreen = ({ navigation, route }) => {
 
             await updateDoc(refCurrentUser, {
                Groups: arrayUnion(groupRef),
+               "Account.numberGroups": increment(1),
             });
             if (groupImage !== null) uploadGroupImage(groupRef.id, groupImage);
             setLoading(false);

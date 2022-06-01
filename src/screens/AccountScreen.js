@@ -55,6 +55,8 @@ const AccountScreen = ({ navigation }) => {
    );
    const [imageURL, setImageURL] = useState(null);
    const [friendsNumber, setFriendsNumber] = useState(null);
+   const [groupsNumber, setGroupsNumber] = useState(null);
+
    const [isEditable, setIsEditable] = useState(false);
    const [loading, setLoading] = useState(false);
    const [colorBorderPicture, setColorBorderPicture] = useState("#3165FF");
@@ -74,13 +76,19 @@ const AccountScreen = ({ navigation }) => {
          setImageURL(authentication.currentUser.photoURL);
       };
 
-      console.log("Account");
+      const unsubscribe = navigation.addListener("focus", () => {
+         setIsEditable(false);
+         setUsername(authentication.currentUser.displayName);
+      });
       fetchDataFirestore();
-   }, []);
+
+      return unsubscribe;
+   }, [navigation]);
 
    const refAccount = doc(db, "Users", authentication.currentUser.email);
    const unsub = onSnapshot(refAccount, (doc) => {
       setFriendsNumber(doc.data().Account.numberFriends);
+      setGroupsNumber(doc.data().Account.numberGroups);
    });
 
    const editUser = async (username) => {
@@ -361,7 +369,7 @@ const AccountScreen = ({ navigation }) => {
                      </TouchableOpacity>
 
                      <View style={styles.groupText}>
-                        <Text style={styles.number}>10</Text>
+                        <Text style={styles.number}>{groupsNumber}</Text>
                         <Text
                            style={{
                               color: "rgba(0,0,0,0.5)",

@@ -1,23 +1,52 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
-   SafeAreaView,
+   View,
    Image,
    StyleSheet,
-   FlatList,
-   View,
    Text,
-   StatusBar,
+   Alert,
    TouchableOpacity,
+   Animated,
    Dimensions,
-   TextInput,
+   SafeAreaView,
+   FlatList,
+   ScrollView,
+   RefreshControl,
+   ActivityIndicator,
 } from "react-native";
+
+import {
+   BallIndicator,
+   BarIndicator,
+   DotIndicator,
+   MaterialIndicator,
+   PacmanIndicator,
+   PulseIndicator,
+   SkypeIndicator,
+   UIActivityIndicator,
+   WaveIndicator,
+} from "react-native-indicators";
+
+import GroupsAllScreen from "../screens/GroupsAllScreen";
+import GroupsSettledUpScreen from "../screens/GroupsSettledUpScreen";
 
 import ButtonIcon from "../../assets/icons/navbar/button.svg";
 import SearchIcon from "../../assets/icons/friendsscreen/searchIcon.svg";
 
 import TouchableWithAnimation from "../components/TouchableWithAnimation";
+import CircularProgress from "react-native-circular-progress-indicator";
+
 import FlatButton from "../components/FlatButton";
 import FlatInput from "../components/FlatInput";
+import GroupCard from "../components/GroupCard";
+
+import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
+
+import ContentLoader, {
+   Rect,
+   Circle,
+   Facebook,
+} from "react-content-loader/native";
 
 import { authentication, db } from "../api/firebase/firebase-config";
 import {
@@ -31,17 +60,21 @@ import {
    query,
 } from "firebase/firestore";
 
+const Tab = createMaterialTopTabNavigator();
+
 const { width, height } = Dimensions.get("window");
 
-const GroupsScreen = ({ navigation }) => {
+const TopBarNavigator = ({ navigation }) => {
    const [results, setResults] = useState([]);
    const [filteredResults, setFilteredResults] = useState([]);
    const [refreshing, setRefreshing] = useState(false);
    const [friendsNumber, setFriendsNumber] = useState(null);
    const [search, setSearch] = useState();
-   const [searchBarActive, setSearchBarActive] = useState(false);
 
-   function timeConverter(UNIX_timestamp) {
+   const [searchBarActive, setSearchBarActive] = useState(false);
+   const [loading, setLoading] = useState(false);
+
+   function extractTime(UNIX_timestamp) {
       var a = new Date(UNIX_timestamp * 1000);
       var months = [
          "Jan",
@@ -65,69 +98,263 @@ const GroupsScreen = ({ navigation }) => {
       var sec = a.getSeconds();
       var time =
          date + " " + month + " " + year + " " + hour + ":" + min + ":" + sec;
-      return time;
+      return [date, month, year];
    }
 
-   const modifyData = async () => {
-      const refAccount = doc(db, "Groups", "01CpU5uraarqBHGmtjoL");
-      const docSnap = await getDoc(refAccount);
+   const wait = (timeout) => {
+      return new Promise((resolve) => setTimeout(resolve, timeout));
+   };
 
-      const nanoSeconds =
-         docSnap.data().Details.createdAt.nanoseconds / 1000000000;
-      console.log(nanoSeconds);
-      const createdTimeSeconds =
-         docSnap.data().Details.createdAt.seconds + nanoSeconds;
+   const getFriends = () => {
+      // console.log(JSON.stringify(filteredResults, null, 3));
+      console.log(JSON.stringify(filteredResults[0], null, 3));
+   };
 
-      console.log(timeConverter(createdTimeSeconds));
-      //   console.log(docSnap.data().Details.createdAt.seconds);
+   const getGroupsInfo = async () => {
+      setLoading(true);
+      let groups = [];
+      let group = {};
+
+      const refFriends = doc(db, "Users", authentication.currentUser.email);
+      const docFriends = await getDoc(refFriends);
+
+      if (docFriends.exists()) {
+         const refGroup = docFriends.data().Groups;
+         if (refGroup)
+            for (let i = 0; i < refGroup.length; i++) {
+               const docGroupDetails = await getDoc(refGroup[i]);
+
+               if (docGroupDetails.exists()) {
+                  const nanoSeconds =
+                     docGroupDetails.data().Details.createdAt.nanoseconds /
+                     1000000000;
+
+                  const createdTimeSeconds =
+                     docGroupDetails.data().Details.createdAt.seconds +
+                     nanoSeconds;
+
+                  const [day, month, year] = extractTime(createdTimeSeconds);
+                  const createdAt = {
+                     day: day,
+                     month: month,
+                     year: year,
+                  };
+                  const refMembers = docGroupDetails.data().Members;
+                  console.log(
+                     "Pentru numele grupului ",
+                     docGroupDetails.data().Details.name,
+                     ":"
+                  );
+
+                  let members = [];
+                  let member = {};
+
+                  if (refMembers)
+                     for (let i = 0; i < refMembers.length; i++) {
+                        const docGroupMembers = await getDoc(refMembers[i]);
+                        if (docGroupMembers.exists()) {
+                           console.log(docGroupMembers.id);
+                           console.log(docGroupMembers.data().Account);
+
+                           member = docGroupMembers.data().Account;
+                           member.uid = docGroupMembers.id;
+                           members.push(member);
+                        }
+                     }
+
+                  group = {
+                     uid: docGroupDetails.id,
+                     name: docGroupDetails.data().Details.name,
+                     createdAt: createdAt,
+                     image: docGroupDetails.data().Details.image,
+                     type: docGroupDetails.data().Details.type,
+                     members: members,
+                  };
+               }
+               groups.push(group);
+            }
+      }
+      setResults(groups);
+      setFilteredResults(groups);
+      setLoading(false);
+   };
+
+   const onRefresh = useCallback((firstRender) => {
+      if (!firstRender) setRefreshing(true);
+      getGroupsInfo();
+
+      if (!firstRender) wait(1000).then(() => setRefreshing(false));
+   }, []);
+
+   useEffect(() => {
+      const unsubscribe = navigation.addListener("focus", () => {
+         onRefresh(true);
+      });
+      return unsubscribe;
+   }, [navigation]);
+
+   const searchFilter = (text) => {
+      if (text) {
+         const newData = results.filter((item) => {
+            const itemData = item.name
+               ? item.name.toUpperCase()
+               : "".toUpperCase();
+            const textData = text.toUpperCase();
+
+            return itemData.indexOf(textData) > -1;
+         });
+         setFilteredResults(newData);
+         setSearch(text);
+      } else {
+         setFilteredResults(results);
+         setSearch(text);
+      }
+   };
+
+   const renderItem = ({ item }) => {
+      return (
+         <GroupCard
+            style={{ alignSelf: "center", marginTop: 20 }}
+            name={item.name}
+            createdAt={item.createdAt}
+            type={item.type}
+            image={item.image ? item.image : "none"}
+            members={item.members}
+         ></GroupCard>
+      );
    };
 
    return (
-      <View style={styles.container}>
-         <SafeAreaView style={styles.topContainer}>
-            <View style={styles.topElements}>
-               {!searchBarActive ? (
-                  <Text style={styles.title}>Groups</Text>
-               ) : (
-                  <FlatInput
-                     style={{ marginLeft: 25 }}
-                     placeholder="Search by group name"
-                     //  value={search}
-                     //  onChangeText={(text) => searchFilter(text)}
-                  />
-               )}
+      <SafeAreaView style={styles.topContainer}>
+         <View style={styles.topElements}>
+            {!searchBarActive ? (
+               <Text style={styles.title}>Groups</Text>
+            ) : (
+               <FlatInput
+                  style={{ marginLeft: 25 }}
+                  placeholder="Search by group name"
+                  value={search}
+                  onChangeText={(text) => searchFilter(text)}
+               />
+            )}
 
-               <View style={{ flexDirection: "row", alignItems: "center" }}>
-                  {!searchBarActive ? (
-                     <TouchableWithAnimation
-                        style={{ marginRight: 20 }}
-                        // onPress={() => setSearchBarActive(true)}
-                        onPress={() => modifyData()}
-                     >
-                        <SearchIcon></SearchIcon>
-                     </TouchableWithAnimation>
-                  ) : null}
-                  <FlatButton
-                     style={{ marginRight: 30 }}
-                     onPress={() =>
-                        !searchBarActive
-                           ? navigation.navigate("CreateGroup")
-                           : setSearchBarActive(false)
-                     }
-                     duration={150}
-                     pressAnimation={0.95}
-                     title={searchBarActive ? "Done" : "Create"}
-                     height={31}
-                     width={65}
-                     fontSize={12}
-                  ></FlatButton>
-               </View>
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+               {!searchBarActive ? (
+                  <TouchableWithAnimation
+                     style={{ marginRight: 20 }}
+                     onPress={() => setSearchBarActive(true)}
+                  >
+                     <SearchIcon></SearchIcon>
+                  </TouchableWithAnimation>
+               ) : null}
+               <FlatButton
+                  style={{ marginRight: 30 }}
+                  onPress={() =>
+                     !searchBarActive
+                        ? navigation.navigate("CreateGroup")
+                        : setSearchBarActive(false)
+                  }
+                  duration={150}
+                  pressAnimation={0.95}
+                  title={searchBarActive ? "Done" : "Create"}
+                  height={31}
+                  width={65}
+                  fontSize={12}
+                  radius={searchBarActive ? 9 : null}
+               ></FlatButton>
             </View>
-         </SafeAreaView>
-      </View>
+         </View>
+         {
+            !loading ? (
+               <SafeAreaView>
+                  {filteredResults.length ? (
+                     <View style={{ height: height - 190 }}>
+                        <FlatList
+                           contentContainerStyle={{
+                              marginTop: 30,
+                              height:
+                                 filteredResults.length !== 0
+                                    ? 230 * filteredResults.length
+                                    : null,
+                           }}
+                           data={filteredResults}
+                           renderItem={renderItem}
+                           keyExtractor={(item) => item.uid}
+                           scrollEnabled
+                           alwaysBounceVertical={false}
+                           showsVerticalScrollIndicator={false}
+                           refreshControl={
+                              <RefreshControl
+                                 refreshing={refreshing}
+                                 onRefresh={onRefresh}
+                                 tintColor={"rgba(49,101,255,0.50)"}
+                              />
+                           }
+                        />
+                     </View>
+                  ) : (
+                     <ScrollView
+                        contentContainerStyle={{ marginTop: 60 }}
+                        refreshControl={
+                           <RefreshControl
+                              refreshing={refreshing}
+                              onRefresh={onRefresh}
+                              tintColor={"rgba(49,101,255,0.80)"}
+                           />
+                        }
+                     >
+                        <Text
+                           style={{
+                              fontSize: 11,
+                              color: "rgba(0,0,0,0.60)",
+                              alignSelf: "center",
+                           }}
+                        >
+                           No groups to be displayed
+                        </Text>
+                     </ScrollView>
+                  )}
+               </SafeAreaView>
+            ) : (
+               <MaterialIndicator
+                  size={40}
+                  color="rgba(49,101,255,0.80)"
+                  style={{ marginTop: 230 }}
+               ></MaterialIndicator>
+            )
+
+            /*
+             */
+         }
+      </SafeAreaView>
+
+      /* <Tab.Navigator
+            screenOptions={({ route }) => ({
+               headerShown: false,
+               tabBarShowLabel: true,
+               initialRouteName: "All",
+               style: { alignSelf: "center" },
+               tabBarLabelStyle: {
+                  fontSize: 16,
+                  fontWeight: "600",
+                  color: "#3165FF",
+               },
+               tabBarBounces: true,
+               tabBarStyle: {
+                  // backgroundColor: focused ? "#3165FF" : "#FFFFFF",
+                  tabBarActiveTintColor: "#3165FF",
+                  tabBarInactiveTintColor: "#FFFFFF",
+
+                  borderRadius: 15,
+               },
+            })}
+         >
+            <Tab.Screen name="All" component={GroupsAllScreen} />
+            <Tab.Screen name="Settled up" component={GroupsSettledUpScreen} />
+         
+         </Tab.Navigator> */
    );
 };
-
 const styles = StyleSheet.create({
    container: {
       width: width,
@@ -167,6 +394,7 @@ const styles = StyleSheet.create({
       flexDirection: "row",
       alignItems: "center",
       marginTop: 20,
+      marginBottom: 35,
       justifyContent: "space-between",
    },
    title: {
@@ -185,4 +413,4 @@ const styles = StyleSheet.create({
    },
 });
 
-export default GroupsScreen;
+export default TopBarNavigator;

@@ -72,8 +72,11 @@ const SettingsScreen = ({ navigation }) => {
       newPassword === null || newPassword === "" ? true : false;
 
    useEffect(() => {
-      console.log(disabledChangePassword);
-   }, []);
+      const unsubscribe = navigation.addListener("focus", () => {
+         setVerified(authentication.currentUser.emailVerified);
+      });
+      return unsubscribe;
+   }, [navigation]);
 
    onAuthStateChanged(authentication, (user) => {
       if (user) {

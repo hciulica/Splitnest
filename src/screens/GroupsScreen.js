@@ -27,14 +27,10 @@ import {
    WaveIndicator,
 } from "react-native-indicators";
 
-import GroupsAllScreen from "../screens/GroupsAllScreen";
-import GroupsSettledUpScreen from "../screens/GroupsSettledUpScreen";
-
 import ButtonIcon from "../../assets/icons/navbar/button.svg";
 import SearchIcon from "../../assets/icons/friendsscreen/searchIcon.svg";
 
 import TouchableWithAnimation from "../components/TouchableWithAnimation";
-import CircularProgress from "react-native-circular-progress-indicator";
 
 import FlatButton from "../components/FlatButton";
 import FlatInput from "../components/FlatInput";
@@ -106,7 +102,6 @@ const TopBarNavigator = ({ navigation }) => {
    };
 
    const getFriends = () => {
-      // console.log(JSON.stringify(filteredResults, null, 3));
       console.log(JSON.stringify(filteredResults[0], null, 3));
    };
 
@@ -153,11 +148,8 @@ const TopBarNavigator = ({ navigation }) => {
                      for (let i = 0; i < refMembers.length; i++) {
                         const docGroupMembers = await getDoc(refMembers[i]);
                         if (docGroupMembers.exists()) {
-                           console.log(docGroupMembers.id);
-                           console.log(docGroupMembers.data().Account);
-
                            member = docGroupMembers.data().Account;
-                           member.uid = docGroupMembers.id;
+                           member.email = docGroupMembers.id;
                            members.push(member);
                         }
                      }
@@ -193,6 +185,20 @@ const TopBarNavigator = ({ navigation }) => {
       return unsubscribe;
    }, [navigation]);
 
+   const handlePressCard = (item) => {
+      console.log(JSON.stringify(item));
+      navigation.navigate({
+         name: "GroupIndividual",
+         params: { group: item },
+         merge: true,
+      });
+   };
+
+   const onPressDone = () => {
+      setSearchBarActive(false);
+      searchFilter("");
+   };
+
    const searchFilter = (text) => {
       if (text) {
          const newData = results.filter((item) => {
@@ -220,6 +226,7 @@ const TopBarNavigator = ({ navigation }) => {
             type={item.type}
             image={item.image ? item.image : "none"}
             members={item.members}
+            onPress={() => handlePressCard(item)}
          ></GroupCard>
       );
    };
@@ -252,7 +259,7 @@ const TopBarNavigator = ({ navigation }) => {
                   onPress={() =>
                      !searchBarActive
                         ? navigation.navigate("CreateGroup")
-                        : setSearchBarActive(false)
+                        : onPressDone()
                   }
                   duration={150}
                   pressAnimation={0.95}
@@ -283,25 +290,25 @@ const TopBarNavigator = ({ navigation }) => {
                            scrollEnabled
                            alwaysBounceVertical={false}
                            showsVerticalScrollIndicator={false}
-                           refreshControl={
-                              <RefreshControl
-                                 refreshing={refreshing}
-                                 onRefresh={onRefresh}
-                                 tintColor={"rgba(49,101,255,0.50)"}
-                              />
-                           }
+                           // refreshControl={
+                           //    <RefreshControl
+                           //       refreshing={refreshing}
+                           //       onRefresh={onRefresh}
+                           //       tintColor={"rgba(49,101,255,0.50)"}
+                           //    />
+                           // }
                         />
                      </View>
                   ) : (
                      <ScrollView
                         contentContainerStyle={{ marginTop: 60 }}
-                        refreshControl={
-                           <RefreshControl
-                              refreshing={refreshing}
-                              onRefresh={onRefresh}
-                              tintColor={"rgba(49,101,255,0.80)"}
-                           />
-                        }
+                        // refreshControl={
+                        //    <RefreshControl
+                        //       refreshing={refreshing}
+                        //       onRefresh={onRefresh}
+                        //       tintColor={"rgba(49,101,255,0.80)"}
+                        //    />
+                        // }
                      >
                         <Text
                            style={{
@@ -327,32 +334,6 @@ const TopBarNavigator = ({ navigation }) => {
              */
          }
       </SafeAreaView>
-
-      /* <Tab.Navigator
-            screenOptions={({ route }) => ({
-               headerShown: false,
-               tabBarShowLabel: true,
-               initialRouteName: "All",
-               style: { alignSelf: "center" },
-               tabBarLabelStyle: {
-                  fontSize: 16,
-                  fontWeight: "600",
-                  color: "#3165FF",
-               },
-               tabBarBounces: true,
-               tabBarStyle: {
-                  // backgroundColor: focused ? "#3165FF" : "#FFFFFF",
-                  tabBarActiveTintColor: "#3165FF",
-                  tabBarInactiveTintColor: "#FFFFFF",
-
-                  borderRadius: 15,
-               },
-            })}
-         >
-            <Tab.Screen name="All" component={GroupsAllScreen} />
-            <Tab.Screen name="Settled up" component={GroupsSettledUpScreen} />
-         
-         </Tab.Navigator> */
    );
 };
 const styles = StyleSheet.create({

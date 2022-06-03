@@ -54,23 +54,24 @@ export default function FriendCard({
    const [pressed, setPressed] = useState(true);
    const [visible, setVisible] = useState(false);
 
-   useEffect(() => {
-      const checkIfAdded = async () => {
-         const refFriends = doc(db, "Users", authentication.currentUser.email);
-         const docFriends = await getDoc(refFriends);
+   const checkIfAdded = async () => {
+      const refFriends = doc(db, "Users", authentication.currentUser.email);
+      const docFriends = await getDoc(refFriends);
 
-         if (docFriends.exists()) {
-            const refFriend = docFriends.data().Friends;
-            if (refFriend)
-               for (let i = 0; i < refFriend.length; i++) {
-                  const docFriendAccount = await getDoc(refFriend[i]);
-                  if (mail === docFriendAccount.id) {
-                     setPressed(false);
-                     break;
-                  }
+      if (docFriends.exists()) {
+         const refFriend = docFriends.data().Friends;
+         if (refFriend)
+            for (let i = 0; i < refFriend.length; i++) {
+               const docFriendAccount = await getDoc(refFriend[i]);
+               if (mail === docFriendAccount.id) {
+                  setPressed(false);
+                  break;
                }
-         }
-      };
+            }
+      }
+   };
+
+   useEffect(() => {
       checkIfAdded();
    }, []);
 

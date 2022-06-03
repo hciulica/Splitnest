@@ -15,9 +15,12 @@ import {
 
 function useFriendsList() {
    const [results, setResults] = useState([]);
+   const [loading, setLoading] = useState(false);
 
    useEffect(() => {
       const fetchFriends = async () => {
+         setLoading(true);
+
          let friends = [];
          let friend = {};
          const refFriends = doc(db, "Users", authentication.currentUser.email);
@@ -40,12 +43,13 @@ function useFriendsList() {
                }
          }
          setResults(friends);
+         setLoading(false);
       };
 
       fetchFriends();
    }, []);
 
-   return results;
+   return [results, loading];
 }
 
 export default useFriendsList;

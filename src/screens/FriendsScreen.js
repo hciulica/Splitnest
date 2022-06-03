@@ -171,6 +171,11 @@ const FriendsScreen = ({ navigation, route }) => {
       console.log(route.params);
    };
 
+   const onPressDone = () => {
+      setSearchBarActive(false);
+      searchFilter("");
+   };
+
    return (
       <View style={styles.container}>
          <SafeAreaView style={styles.topContainer}>
@@ -200,7 +205,7 @@ const FriendsScreen = ({ navigation, route }) => {
                      onPress={() =>
                         !searchBarActive
                            ? navigation.navigate("AddFriend")
-                           : setSearchBarActive(false)
+                           : onPressDone()
                      }
                      duration={150}
                      pressAnimation={0.95}

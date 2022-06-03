@@ -12,7 +12,10 @@ import {
 } from "react-native";
 import TouchableWithAnimation from "../components/TouchableWithAnimation";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { createStackNavigator } from "@react-navigation/stack";
+import {
+   createStackNavigator,
+   CardStyleInterpolators,
+} from "@react-navigation/stack";
 import HomeScreen from "../screens/HomeScreen";
 import GroupsScreen from "../screens/GroupsScreen";
 import FriendsScreen from "../screens/FriendsScreen";
@@ -54,7 +57,7 @@ const Stack = createStackNavigator();
 
 const { width, height } = Dimensions.get("window");
 
-const TabNavigator = () => {
+const TabNavigator = ({ navigation }) => {
    const [imageAccount, setImageAccount] = useState(
       authentication.currentUser.photoURL
    );
@@ -327,7 +330,14 @@ const TabNavigator = () => {
          <Tab.Screen
             name="Button"
             component={AddExpenseScreen}
-            options={{ tabBarStyle: { display: "none" } }}
+            options={{
+               tabBarStyle: { display: "none" },
+               headerShown: false,
+               gestureDirection: "vertical",
+               cardStyleInterpolator: CardStyleInterpolators.forVerticalIOS,
+               animationTypeForReplace: "pop",
+               unmountOnBlur: true,
+            }}
          />
          <Tab.Screen name="Friends" component={FriendsScreen} />
          <Tab.Screen name="Account" component={AccountScreen} />

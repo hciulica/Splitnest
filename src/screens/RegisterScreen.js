@@ -272,9 +272,7 @@ const RegisterScreen = ({ navigation }) => {
                      >
                         Do you have any account?
                      </Text>
-                     <TouchableOpacity
-                        onPress={() => navigation.replace("Login")}
-                     >
+                     <TouchableOpacity onPress={() => navigation.goBack()}>
                         <Text style={styles.touchableOpacityStyle}>
                            Sign in
                         </Text>

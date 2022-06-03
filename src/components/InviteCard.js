@@ -51,6 +51,8 @@ export default function InviteCard({
    style,
    add,
    remove,
+   radioButtonActive,
+   you,
 }) {
    const [imageURL, setImageURL] = useState(image);
    const [selected, setSelected] = useState(false);
@@ -68,9 +70,24 @@ export default function InviteCard({
             <Text style={styles.nameStyle}>{username}</Text>
             <Text style={styles.mailStyle}>{mail}</Text>
          </View>
-         <TouchableOpacity onPress={() => cardSelected()}>
-            {selected ? <RadioButtonActive /> : <RadioButtonInactive />}
-         </TouchableOpacity>
+         {radioButtonActive ? (
+            <TouchableOpacity onPress={() => cardSelected()}>
+               {selected ? <RadioButtonActive /> : <RadioButtonInactive />}
+            </TouchableOpacity>
+         ) : null}
+         {/* <View>You</View> */}
+         {you ? (
+            <Text
+               style={{
+                  color: "#3165FF",
+                  marginLeft: 260,
+                  fontWeight: "700",
+                  position: "absolute",
+               }}
+            >
+               YOU
+            </Text>
+         ) : null}
       </View>
    );
 }

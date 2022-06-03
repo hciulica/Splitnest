@@ -38,6 +38,7 @@ import {
 
 import { authentication, db } from "../api/firebase/firebase-config";
 import { storage } from "../api/firebase/firebase-config";
+import { getStorage, uploadBytes, ref, getDownloadURL } from "firebase/storage";
 
 import {
    doc,
@@ -54,8 +55,6 @@ import {
    Timestamp,
    increment,
 } from "firebase/firestore";
-
-import { getStorage, uploadBytes, ref, getDownloadURL } from "firebase/storage";
 
 const { width, height } = Dimensions.get("window");
 
@@ -84,6 +83,7 @@ const CreateGroupScreen = ({ navigation, route }) => {
    }, [route.params?.groupParticipants]);
 
    const createGroup = async () => {
+      //Group name should be at least 5 characters
       if (groupName.length >= 5) {
          setLoading(true);
          try {
@@ -96,7 +96,7 @@ const CreateGroupScreen = ({ navigation, route }) => {
             });
             console.log(groupRef.id);
 
-            //Add every group member
+            //Add for every group member
             route.params?.groupParticipants.forEach(async (member) => {
                const refMember = doc(db, "Users", member.email);
 
@@ -110,7 +110,7 @@ const CreateGroupScreen = ({ navigation, route }) => {
                });
             });
 
-            //Add current user connected
+            //Add for current user connected
             const refCurrentUser = doc(
                db,
                "Users",
@@ -125,6 +125,7 @@ const CreateGroupScreen = ({ navigation, route }) => {
                Groups: arrayUnion(groupRef),
                "Account.numberGroups": increment(1),
             });
+
             if (groupImage !== null) uploadGroupImage(groupRef.id, groupImage);
             setLoading(false);
             navigation.navigate("Groups");
@@ -297,7 +298,7 @@ const CreateGroupScreen = ({ navigation, route }) => {
                            placeholder="Enter a group name"
                            autoCapitalize="words"
                            fontWeight="700"
-                           maxLength={21}
+                           maxLength={16}
                            value={groupName}
                            type="normal"
                            onChangeText={(text) => setGroupName(text)}
@@ -455,7 +456,7 @@ const CreateGroupScreen = ({ navigation, route }) => {
                            )}
 
                            <FlatButton
-                              title="Invite"
+                              title="Add"
                               onPress={() =>
                                  navigation.navigate("InviteFriends")
                               }

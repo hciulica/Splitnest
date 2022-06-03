@@ -17,11 +17,10 @@ import XIconAvatar from "../../assets/icons/groupsscreen/removeXAvatarIcon.svg";
 
 import { authentication, db } from "../api/firebase/firebase-config";
 
-export default function AvatarAdded({ image, style, imageStyle, remove, key }) {
+export default function AvatarAdded({ image, style, imageStyle, remove }) {
    const removeAdded = () => {
       remove();
    };
-   console.log(key);
 
    return (
       <View style={style}>

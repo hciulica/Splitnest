@@ -19,12 +19,21 @@ import CameraDefaultGroup from "../../assets/images/CameraDefaultGroup.png";
 
 import CircularProgress from "react-native-circular-progress-indicator";
 
-const GroupCard = ({ name, createdAt, type, members, image, style }) => {
+const GroupCard = ({
+   name,
+   createdAt,
+   type,
+   members,
+   image,
+   style,
+   onPress,
+}) => {
    return (
       <TouchableWithAnimation
          duration={150}
-         pressAnimation={0.95}
+         pressAnimation={0.96}
          style={[styles.card, style]}
+         onPress={onPress}
       >
          <View>
             <View
@@ -125,20 +134,20 @@ const GroupCard = ({ name, createdAt, type, members, image, style }) => {
             <View
                style={{
                   position: "absolute",
-                  marginTop: 26,
+                  marginTop: 40,
                   marginLeft: 230,
                }}
             >
                <CircularProgress
                   style={{ marginLeft: 10 }}
-                  value={87}
+                  value={76}
                   inActiveStrokeColor={"#2ecc71"}
                   inActiveStrokeOpacity={0.15}
                   progressValueColor={"rgba(0,0,0,0.6)"}
                   valueSuffix={"%"}
                   size={100}
                   titleFontSize={9}
-                  radius={45}
+                  radius={40}
                   progressValueFontSize={16}
                   activeStrokeWidth={10}
                   inActiveStrokeWidth={10}

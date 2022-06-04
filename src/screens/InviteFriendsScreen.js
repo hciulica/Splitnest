@@ -355,7 +355,7 @@ const InviteFriendsScreen = ({ navigation, route }) => {
                      renderItem={renderItem}
                      keyExtractor={(item) => item.email}
                      showsVerticalScrollIndicator={false}
-                     //  alwaysBounceVertical={false}
+                     alwaysBounceVertical={false}
                   />
                ) : (
                   <View

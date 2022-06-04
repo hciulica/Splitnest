@@ -19,19 +19,37 @@ export default function FlatInput({
    fontWeight,
    maxLength,
    type,
+   width,
+   children,
+   fontSize,
+   fontColor,
 }) {
+   const sizeFont = fontSize ? fontSize : 14;
    return (
       <View style={[styles.containerTextInput, style]}>
          <TextInput
-            style={{ fontSize: 14, marginLeft: 15, fontWeight: fontWeight }}
+            style={{
+               fontSize: sizeFont,
+               color: fontColor,
+               marginLeft: 15,
+               width: width,
+               fontWeight: fontWeight,
+            }}
             value={value}
             placeholder={placeholder}
             onChangeText={onChangeText}
             autoCapitalize={autoCapitalize ? autoCapitalize : "none"}
-            keyboardType={type === "normal" ? null : "email-address"}
+            keyboardType={
+               type === "normal"
+                  ? null
+                  : type === "number-pad"
+                  ? "decimal-pad"
+                  : "email-address"
+            }
             autoCorrect={false}
             maxLength={maxLength}
          />
+         {children}
       </View>
    );
 }

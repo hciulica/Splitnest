@@ -148,7 +148,7 @@ export default InputField = ({ name, value, onChangeText, width, height }) => {
                      autoCapitalize="none"
                      keyboardType="email-address"
                      autoCorrect={false}
-                     maxLength={20}
+                     maxLength={18}
                      onChangeText={(text) => onChangeText(text)}
                   ></TextInput>
                </View>

@@ -15,6 +15,7 @@ const TouchableWithAnimation = ({
    onPress,
    disabled,
    style,
+   key,
 }) => {
    const animatePress = useRef(new Animated.Value(1)).current;
 
@@ -36,6 +37,7 @@ const TouchableWithAnimation = ({
 
    return (
       <TouchableWithoutFeedback
+         key={key}
          onPressIn={() => animateIn()}
          onPressOut={() => animateOut()}
          onPress={onPress}

@@ -183,7 +183,13 @@ const AddFriendScreen = ({ navigation }) => {
                      style={{ marginLeft: 15, fontSize: 14 }}
                      value={credentials}
                      placeholder="Search by email or username"
-                     onChangeText={(text) => setCredentials(text)}
+                     onChangeText={(text) => {
+                        if (text !== "") setCredentials(text);
+                        else {
+                           setCredentials(text);
+                           searchFilter("");
+                        }
+                     }}
                      autoCapitalize="none"
                      keyboardType="email-address"
                      autoCorrect={false}

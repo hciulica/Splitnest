@@ -23,6 +23,10 @@ export default function FlatInput({
    children,
    fontSize,
    fontColor,
+   isFocused,
+   onBlur,
+   onFocus,
+   editable,
 }) {
    const sizeFont = fontSize ? fontSize : 14;
    return (
@@ -36,12 +40,15 @@ export default function FlatInput({
                fontWeight: fontWeight,
             }}
             value={value}
+            isFocused={isFocused}
+            onBlur={onBlur}
+            editable={editable}
             placeholder={placeholder}
             onChangeText={onChangeText}
             autoCapitalize={autoCapitalize ? autoCapitalize : "none"}
             keyboardType={
-               type === "normal"
-                  ? null
+               type === "default"
+                  ? "default"
                   : type === "number-pad"
                   ? "decimal-pad"
                   : "email-address"
@@ -61,6 +68,7 @@ const styles = StyleSheet.create({
       height: 44,
       alignSelf: "center",
       justifyContent: "center",
+
       backgroundColor: "rgba(49,101,255,0.05)",
    },
 });

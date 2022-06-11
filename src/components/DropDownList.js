@@ -12,38 +12,48 @@ import {
 } from "react-native";
 
 import AngleDown from "../../assets/icons/expensescreen/angle-down.svg";
+import XIcon from "../../assets/icons/general/xIcon.svg";
 
-const DropDownList = ({ list }) => {
-   const [dropDown, setDropDown] = useState(false);
-   const [displayIn, setDisplayIn] = useState({
-      name: "None selected",
-      image: null,
-   });
+const DropDownList = ({ list, display, choiceSelected, disabled }) => {
+   const [dropDown, setDropDown] = useState(null);
+   const [selectedGroup, setSelectedGroup] = useState({});
 
-   let borderBottom = 0;
+   const selectGroup = (item) => {
+      setDropDown(false);
+      setSelectedGroup(item);
+      choiceSelected(item);
+   };
+
+   useEffect(() => {
+      list.map((groupAdded, index) => {
+         if (groupAdded.uid != selectedGroup.uid) {
+            setSelectedGroup({ name: "Select group", image: null, uid: null });
+            choiceSelected({ name: "Select group", image: null, uid: null });
+         }
+      });
+
+      if (list.length === 0) {
+         setSelectedGroup({ name: "Select group", image: null, uid: null });
+         setDropDown(false);
+      }
+   }, [list]);
 
    const renderItem = ({ item, last, index }) => {
-      const isEnd = index === list.length - 1;
       return (
          <TouchableOpacity
             activeOpacity={0.6}
             onPress={() => {
-               setDisplayIn({ name: item.name, image: item.image });
-               setDropDown(false);
+               selectGroup(item);
             }}
             style={styles.elementDropDown}
          >
             <Image
-               source={
-                  item.image
-                     ? { uri: item.image }
-                     : require("../../assets/images/CameraIcon.png")
-               }
+               source={item.image ? { uri: item.image } : null}
                style={{
                   height: 15,
                   width: 15,
                   borderRadius: 10,
-                  marginLeft: 15,
+                  marginLeft: item.image ? 15 : 0,
                }}
             />
             <Text style={{ fontSize: 13, marginLeft: 10 }}>{item.name}</Text>
@@ -52,7 +62,7 @@ const DropDownList = ({ list }) => {
    };
 
    return (
-      <>
+      <View>
          <TouchableOpacity
             style={[
                styles.container,
@@ -65,54 +75,66 @@ const DropDownList = ({ list }) => {
                   borderLeftWidth: 1,
                   borderRightWidth: 1,
                   borderBottomWidth: dropDown ? 0.5 : 1,
-                  //   justifyContent: "space-evenly",
                },
             ]}
             activeOpacity={0.6}
-            onPress={() => setDropDown(!dropDown)}
+            onPress={() => {
+               if (list.length != 0) setDropDown(!dropDown);
+            }}
          >
-            <Image
-               source={
-                  displayIn.image
-                     ? { uri: displayIn.image }
-                     : require("../../assets/images/CameraIcon.png")
-               }
-               style={{
-                  height: 15,
-                  width: 15,
-                  borderRadius: 10,
-                  marginLeft: 10,
-               }}
-            />
+            {selectedGroup.image ? (
+               <Image
+                  source={
+                     selectedGroup.image !== null
+                        ? { uri: selectedGroup.image }
+                        : null
+                  }
+                  style={{
+                     height: 15,
+                     width: 15,
+                     borderRadius: 10,
+                     marginLeft: 10,
+                  }}
+               />
+            ) : null}
             <Text
                style={{
-                  fontWeight: "700",
+                  fontWeight: "500",
                   width: 120,
-                  textAlign: "center",
-                  marginLeft: 10,
+                  textAlign: "left",
+                  marginLeft: selectedGroup.image ? 10 : 10,
+
                   //   fontSize
                }}
             >
-               {displayIn.name}
+               {selectedGroup.name ? selectedGroup.name : "None selected"}
             </Text>
 
             <AngleDown
                width={15}
                height={7}
                fill="black"
-               style={{ marginLeft: 5 }}
+               style={{
+                  marginLeft: selectedGroup.image ? 5 : 30,
+                  transform: [{ rotate: dropDown ? "180deg" : "0deg" }],
+               }}
             ></AngleDown>
          </TouchableOpacity>
 
          {dropDown ? (
             <View
                style={{
-                  height: 90,
+                  height: list.length <= 3 ? list.length * 40 : 125,
                   width: 185,
                   borderWidth: 1,
                   borderBottomLeftRadius: 10,
                   borderBottomRightRadius: 10,
-                  borderColor: "#979797",
+                  borderColor: "rgba(151,151,151,0.5)",
+                  position: "absolute",
+                  backgroundColor: "white",
+                  top: 35,
+                  elevation: 0.1,
+                  zIndex: 1,
                }}
             >
                <FlatList
@@ -121,10 +143,11 @@ const DropDownList = ({ list }) => {
                   keyExtractor={(item) => item.uid}
                   showsVerticalScrollIndicator={false}
                   alwaysBounceVertical={false}
+                  contentContainerStyle={{}}
                />
             </View>
          ) : null}
-      </>
+      </View>
    );
 };
 
@@ -134,7 +157,7 @@ const styles = StyleSheet.create({
       height: 35,
       backgroundColor: "rgba(49,101,255, 0.02)",
 
-      borderColor: "#979797",
+      borderColor: "rgba(151,151,151,0.5)",
       flexDirection: "row",
       alignItems: "center",
       //   justifyContent: "space-evenly",
@@ -146,7 +169,7 @@ const styles = StyleSheet.create({
       //   borderWidth: 0.5,
       borderLeftWidth: 0,
       borderRightWidth: 0,
-      borderColor: "#979797",
+      borderColor: "rgba(151,151,151,0.5)",
       flexDirection: "row",
       alignItems: "center",
    },

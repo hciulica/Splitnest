@@ -8,6 +8,7 @@ import {
    TouchableWithoutFeedback,
    TouchableOpacity,
    Alert,
+   Image,
 } from "react-native";
 import {
    createUserWithEmailAndPassword,

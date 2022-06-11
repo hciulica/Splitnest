@@ -62,16 +62,20 @@ import {
    getDownloadURL,
 } from "firebase/storage";
 
+import { CommonActions } from "@react-navigation/native";
+
 const { width, height } = Dimensions.get("window");
 const user = authentication.currentUser;
 
-const InviteFriendsScreen = ({ navigation, route }) => {
+const InviteFriendsScreen = ({
+   navigation,
+   route,
+   navigation: { setParams },
+}) => {
    const [numberAdded, setNumberAdded] = useState(0);
    const [friendsAdded, setFriendsAdded] = useState([]);
    const [results, setResults] = useState([]);
-   const [clear, setClear] = useState(false);
    const [friendsResults, setFriendsResults] = useState([]);
-   // const [friends, loading] = useFriendsList();
    const [loadingScreen, setLoadingScreen] = useState(false);
 
    const setFriends = async () => {
@@ -112,18 +116,61 @@ const InviteFriendsScreen = ({ navigation, route }) => {
       setLoadingScreen(false);
    };
 
+   const getGroupDataFromUid = async (uid) => {
+      setLoadingScreen(true);
+      let members = [];
+      let member = {};
+      const groupRef = doc(db, "Groups", uid);
+      const groupSnap = await getDoc(groupRef);
+
+      if (groupSnap.exists()) {
+         const refMembers = groupSnap.data().Members;
+
+         let members = [];
+         let member = {};
+
+         if (refMembers)
+            for (let i = 0; i < refMembers.length; i++) {
+               const docGroupMembers = await getDoc(refMembers[i]);
+               if (docGroupMembers.exists()) {
+                  const memberInfo = {
+                     email: docGroupMembers.data().Account.email,
+                     username: docGroupMembers.data().Account.username,
+                     image: docGroupMembers.data().Account.image,
+                  };
+                  member = memberInfo;
+                  member.email = docGroupMembers.id;
+
+                  if (member.email != authentication.currentUser.email)
+                     members.push(member);
+               }
+            }
+         setFriendsResults(members);
+      } else {
+         console.log("No such document");
+      }
+      setLoadingScreen(false);
+   };
+
    useEffect(() => {
-      setFriends();
-   }, [route.params?.groupMembers]);
+      const unsubscribe = navigation.addListener("focus", () => {
+         //setFriends in invite friend from individualGroupScreen or GroupScreen
+         if (route.params?.uidGroupFiltered) {
+            //And getGroupDataFromUid when you want to filter group members for that expense
+            getGroupDataFromUid(route.params?.uidGroupFiltered);
+         } else setFriends();
+      });
+      return unsubscribe;
+   }, [route.params?.groupMembers, route.params?.uidGroupFiltered]);
 
    group = route.params?.groupMembers;
 
    const backHandle = () => {
+      // navigation.goBack();
       navigation.goBack();
    };
 
    const addInvited = (item) => {
-      setClear(false);
       const friend = {
          username: item.username,
          email: item.email,
@@ -136,7 +183,6 @@ const InviteFriendsScreen = ({ navigation, route }) => {
    };
 
    const removeInvited = (item) => {
-      setClear(false);
       const friend = {
          username: item.username,
          email: item.email,
@@ -146,6 +192,11 @@ const InviteFriendsScreen = ({ navigation, route }) => {
          friendsAdded.filter((friend) => friend.email != item.email)
       );
       setNumberAdded(numberAdded - 1);
+   };
+
+   const clearAll = () => {
+      setFriendsAdded([]);
+      setNumberAdded(0);
    };
 
    const renderItem = ({ item }) => {
@@ -158,7 +209,7 @@ const InviteFriendsScreen = ({ navigation, route }) => {
             added={item.added}
             add={() => addInvited(item)}
             remove={() => removeInvited(item)}
-            clear={clear}
+            // checked={(state) => console.log(state)}
             radioButtonActive
          />
       );
@@ -177,11 +228,34 @@ const InviteFriendsScreen = ({ navigation, route }) => {
    const clearAdded = () => {
       setFriendsAdded([]);
       setNumberAdded(0);
-      setClear(true);
    };
 
    const display = () => {
       console.log(JSON.stringify(friendsAdded, null, 3));
+   };
+
+   const handleConfirm = () => {
+      console.log();
+      if (route.params?.uidGroupFiltered) {
+         route.params?.onPlaceChosen({
+            groupFiltered: friendsAdded,
+         }),
+            navigation.goBack();
+      } else {
+         navigation.navigate({
+            name: route.params?.groupMembers
+               ? "GroupIndividual"
+               : // : route.params?.uidGroupFiltered
+                 // ? "Add"
+                 "CreateGroup",
+            params: route.params?.groupMembers
+               ? { groupInvited: friendsAdded }
+               : // : route.params?.uidGroupFiltered
+                 // ? { groupFiltered: friendsAdded }
+                 { groupParticipants: friendsAdded },
+            merge: true,
+         });
+      }
    };
 
    return (
@@ -203,66 +277,39 @@ const InviteFriendsScreen = ({ navigation, route }) => {
                style={{
                   justifyContent: "center",
                   alignItems: "center",
-                  marginHorizontal: 65,
+                  marginHorizontal: route.params?.uidGroupFiltered ? 55 : 65,
                }}
             >
-               {route.params?.groupMembers ? (
-                  <Text
-                     style={{
-                        fontSize: 17,
-                        fontWeight: "bold",
-                     }}
-                  >
-                     Invite Friends
-                  </Text>
-               ) : (
-                  <Text
-                     style={{
-                        fontSize: 17,
-                        fontWeight: "bold",
-                     }}
-                  >
-                     Add Members
-                  </Text>
-               )}
-               {route.params?.groupMembers ? (
-                  <Text
-                     style={{
-                        fontSize: 12,
-                        fontWeight: "500",
-                        color: "#979797",
-                        marginTop: 10,
-                     }}
-                  >
-                     Select friends to invite
-                  </Text>
-               ) : (
-                  <Text
-                     style={{
-                        fontSize: 12,
-                        fontWeight: "500",
-                        color: "#979797",
-                        marginTop: 10,
-                     }}
-                  >
-                     Select friends to add
-                  </Text>
-               )}
+               <Text
+                  style={{
+                     fontSize: 17,
+                     fontWeight: "bold",
+                  }}
+               >
+                  {route.params?.groupMembers
+                     ? "Invite Friends"
+                     : route.params?.uidGroupFiltered
+                     ? "Split expense"
+                     : "Add Members"}
+               </Text>
+
+               <Text
+                  style={{
+                     fontSize: 12,
+                     fontWeight: "500",
+                     color: "#979797",
+                     marginTop: 10,
+                  }}
+               >
+                  {route.params?.groupMembers
+                     ? "Select friends to invite"
+                     : route.params?.uidGroupFiltered
+                     ? "Select members from group"
+                     : "Select friends to add"}
+               </Text>
             </View>
             {numberAdded !== 0 ? (
-               <TouchableWithAnimation
-                  onPress={() =>
-                     navigation.navigate({
-                        name: route.params?.groupMembers
-                           ? "GroupIndividual"
-                           : "CreateGroup",
-                        params: route.params?.groupMembers
-                           ? { groupInvited: friendsAdded }
-                           : { groupParticipants: friendsAdded },
-                        merge: true,
-                     })
-                  }
-               >
+               <TouchableWithAnimation onPress={() => handleConfirm()}>
                   <CheckIcon />
                </TouchableWithAnimation>
             ) : null}
@@ -288,18 +335,34 @@ const InviteFriendsScreen = ({ navigation, route }) => {
                >
                   <TouchableOpacity onPress={() => display()}>
                      <Text style={{ fontSize: 17, fontWeight: "bold" }}>
-                        {route.params?.groupMembers ? "Invited" : "Added"}
+                        {route.params?.groupMembers
+                           ? "Invited"
+                           : route.params?.uidGroupFiltered
+                           ? "Selected"
+                           : "Added"}
                      </Text>
                   </TouchableOpacity>
                   <Text
                      style={{
                         fontSize: 17,
-                        fontWeight: "900",
+                        fontWeight:
+                           numberAdded === friendsResults.length
+                              ? "900"
+                              : route.params?.uidGroupFiltered
+                              ? "bold"
+                              : "900",
                         marginLeft: 5,
-                        color: "#3165FF",
+                        color:
+                           numberAdded === friendsResults.length
+                              ? "#3165FF"
+                              : route.params?.uidGroupFiltered
+                              ? "black"
+                              : "#3165FF",
                      }}
                   >
-                     {numberAdded}
+                     {route.params?.uidGroupFiltered
+                        ? numberAdded + "/" + friendsResults.length
+                        : numberAdded}
                   </Text>
                </View>
                <FlatList
@@ -330,7 +393,7 @@ const InviteFriendsScreen = ({ navigation, route }) => {
                   >
                      Your friends
                   </Text>
-                  {/* <TouchableOpacity onPress={() => clearAdded()}>
+                  {/* <TouchableOpacity onPress={() => clearAll()}>
                      <Text
                         style={{
                            marginLeft: 180,

@@ -14,7 +14,6 @@ import {
 import AvatarAdded from "../components/AvatarAdded";
 import CalendarIcon from "../../assets/icons/groupsscreen/calendarIcon.svg";
 import Shoppingicon from "../../assets/icons/groupsscreen/shoppingCartIcon.svg";
-import CameraIcon from "../../assets/icons/groupsscreen/addCameraIcon.svg";
 import CameraDefaultGroup from "../../assets/images/CameraDefaultGroup.png";
 
 import CircularProgress from "react-native-circular-progress-indicator";
@@ -27,9 +26,11 @@ const GroupCard = ({
    image,
    style,
    onPress,
+   key,
 }) => {
    return (
       <TouchableWithAnimation
+         key={key}
          duration={150}
          pressAnimation={0.96}
          style={[styles.card, style]}
@@ -51,12 +52,7 @@ const GroupCard = ({
                      }}
                      style={styles.imageStyle}
                   />
-               ) : (
-                  <Image
-                     source={require("../../assets/images/CameraIcon.png")}
-                     style={styles.imageStyle}
-                  />
-               )}
+               ) : null}
                <Text style={styles.title}>{name}</Text>
             </View>
             <View

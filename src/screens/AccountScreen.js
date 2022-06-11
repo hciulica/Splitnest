@@ -393,7 +393,7 @@ const AccountScreen = ({ navigation }) => {
                      name="username"
                      value={username}
                      onChangeText={(text) => setUsername(text)}
-                     maxLength={20}
+                     maxLength={18}
                      color={isEditable ? "#3165FF" : null}
                   ></TextInput>
 

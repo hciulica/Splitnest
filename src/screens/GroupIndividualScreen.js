@@ -28,6 +28,7 @@ import MountainIcon from "../../assets/icons/groupsscreen/mountainIcon.svg";
 import Feather from "react-native-vector-icons/Feather";
 
 import CameraIcon from "../../assets/images/CameraIcon.png";
+import AddCameraIcon from "../../assets/icons/groupsscreen/addCameraIcon.svg";
 import PlusIcon from "../../assets/icons/general/plus.svg";
 import PencilEditIcon from "../../assets/icons/general/pencilEdit.svg";
 
@@ -124,7 +125,6 @@ const GroupIndividualScreen = ({ navigation, route }) => {
 
    useEffect(() => {
       const unsubscribe = navigation.addListener("focus", () => {
-         //  console.log("Ceva");
          navigation.navigate("Expenses");
       });
       setGroupMembers();
@@ -515,9 +515,7 @@ const GroupIndividualScreen = ({ navigation, route }) => {
                            style={styles.imageStyle}
                         />
                      ) : (
-                        <Image
-                           source={require("../../assets/images/CameraIcon.png")}
-                        />
+                        <AddCameraIcon />
                      )}
                      {loading ? (
                         <View style={{ position: "absolute", bottom: 18 }}>

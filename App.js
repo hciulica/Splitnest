@@ -30,6 +30,8 @@ import AddFriendScreen from "./src/screens/AddFriendScreen";
 import CreateGroupScreen from "./src/screens/CreateGroupScreen";
 import InviteFriendsScreen from "./src/screens/InviteFriendsScreen";
 import GroupIndividualScreen from "./src/screens/GroupIndividualScreen";
+import PayerScreen from "./src/screens/PayerScreen";
+import SplitScreen from "./src/screens/SplitScreen";
 
 import { LogBox } from "react-native";
 import { YellowBox } from "react-native";
@@ -56,6 +58,10 @@ LogBox.ignoreLogs([
 
 LogBox.ignoreLogs([
    "[@react-native-async-storage/async-storage Warning: Async Storage has been extracted from react-native core",
+]);
+
+LogBox.ignoreLogs([
+   "Non-serializable values were found in the navigation state",
 ]);
 
 const Stack = createStackNavigator();
@@ -181,13 +187,32 @@ const App = () => {
                   <Stack.Screen
                      component={AddExpenseScreen}
                      name="Add"
+                     gestureDirection="horizontal-inverted"
                      options={{
                         tabBarStyle: { display: "none" },
                         headerShown: false,
                         gestureDirection: "vertical",
-                        cardStyleInterpolator:
-                           CardStyleInterpolators.forVerticalIOS,
                         animationTypeForReplace: "pop",
+                     }}
+                  />
+
+                  <Stack.Screen
+                     component={PayerScreen}
+                     name="Payer"
+                     options={{
+                        tabBarStyle: { display: "none" },
+                        headerShown: false,
+                        gestureDirection: "vertical",
+                     }}
+                  />
+
+                  <Stack.Screen
+                     component={SplitScreen}
+                     name="Split"
+                     options={{
+                        tabBarStyle: { display: "none" },
+                        headerShown: false,
+                        gestureDirection: "vertical",
                      }}
                   />
                </Stack.Navigator>

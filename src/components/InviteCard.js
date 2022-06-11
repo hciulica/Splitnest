@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
    StyleSheet,
    TouchableOpacity,
@@ -52,15 +52,29 @@ export default function InviteCard({
    add,
    remove,
    radioButtonActive,
+   check,
    you,
+   value,
+   checked,
+   clearSelected,
 }) {
    const [imageURL, setImageURL] = useState(image);
    const [selected, setSelected] = useState(false);
 
+   // useEffect(() => {
+   //    console.log(clearSelected);
+   //    if (clearSelected === true) setSelected(false);
+   // }, [clearSelected]);
+
    const cardSelected = () => {
+      // const isChecked = !selected;
+      // checked(isChecked);
+
       if (!selected) add();
       else remove();
       setSelected(!selected);
+
+      // checked(isChecked);
    };
 
    return (
@@ -72,7 +86,11 @@ export default function InviteCard({
          </View>
          {radioButtonActive ? (
             <TouchableOpacity onPress={() => cardSelected()}>
-               {selected ? <RadioButtonActive /> : <RadioButtonInactive />}
+               {selected || check ? (
+                  <RadioButtonActive />
+               ) : (
+                  <RadioButtonInactive />
+               )}
             </TouchableOpacity>
          ) : null}
          {/* <View>You</View> */}

@@ -135,11 +135,6 @@ const TopBarNavigator = ({ navigation }) => {
                      year: year,
                   };
                   const refMembers = docGroupDetails.data().Members;
-                  console.log(
-                     "Pentru numele grupului ",
-                     docGroupDetails.data().Details.name,
-                     ":"
-                  );
 
                   let members = [];
                   let member = {};
@@ -148,7 +143,13 @@ const TopBarNavigator = ({ navigation }) => {
                      for (let i = 0; i < refMembers.length; i++) {
                         const docGroupMembers = await getDoc(refMembers[i]);
                         if (docGroupMembers.exists()) {
-                           member = docGroupMembers.data().Account;
+                           const memberInfo = {
+                              email: docGroupMembers.data().Account.email,
+                              username: docGroupMembers.data().Account.username,
+                              phone: docGroupMembers.data().Account.phone,
+                              image: docGroupMembers.data().Account.image,
+                           };
+                           member = memberInfo;
                            member.email = docGroupMembers.id;
                            members.push(member);
                         }
@@ -162,6 +163,8 @@ const TopBarNavigator = ({ navigation }) => {
                      type: docGroupDetails.data().Details.type,
                      members: members,
                   };
+                  console.log(JSON.stringify(group, null, 3));
+                  console.log();
                }
                groups.push(group);
             }
@@ -221,6 +224,7 @@ const TopBarNavigator = ({ navigation }) => {
       return (
          <GroupCard
             style={{ alignSelf: "center", marginTop: 20 }}
+            key={item.email}
             name={item.name}
             createdAt={item.createdAt}
             type={item.type}

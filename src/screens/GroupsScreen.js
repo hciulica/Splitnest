@@ -154,6 +154,20 @@ const TopBarNavigator = ({ navigation }) => {
                            members.push(member);
                         }
                      }
+                  let numberExpenses = 0;
+                  let totalSumExpenses = 0;
+
+                  if (docGroupDetails.data().Expenses) {
+                     numberExpenses = docGroupDetails.data().Expenses.length;
+                     groupExpenses = docGroupDetails.data().Expenses;
+
+                     groupExpenses.forEach((expense) => {
+                        totalSumExpenses =
+                           totalSumExpenses + parseFloat(expense.price);
+                     });
+                  }
+
+                  console.log(JSON.stringify(totalSumExpenses, null, 3));
 
                   group = {
                      uid: docGroupDetails.id,
@@ -162,8 +176,10 @@ const TopBarNavigator = ({ navigation }) => {
                      image: docGroupDetails.data().Details.image,
                      type: docGroupDetails.data().Details.type,
                      members: members,
+                     numberExpenses: numberExpenses,
+                     total: totalSumExpenses,
                   };
-                  console.log(JSON.stringify(group, null, 3));
+                  // console.log(JSON.stringify(group, null, 3));
                   console.log();
                }
                groups.push(group);
@@ -184,12 +200,14 @@ const TopBarNavigator = ({ navigation }) => {
    useEffect(() => {
       const unsubscribe = navigation.addListener("focus", () => {
          onRefresh(true);
+         searchFilter("");
+         setSearchBarActive(false);
       });
       return unsubscribe;
    }, [navigation]);
 
    const handlePressCard = (item) => {
-      console.log(JSON.stringify(item));
+      // console.log(JSON.stringify(item, null, 3));
       navigation.navigate({
          name: "GroupIndividual",
          params: { group: item },
@@ -230,6 +248,8 @@ const TopBarNavigator = ({ navigation }) => {
             type={item.type}
             image={item.image ? item.image : "none"}
             members={item.members}
+            numberExpenses={item.numberExpenses}
+            total={item.total}
             onPress={() => handlePressCard(item)}
          ></GroupCard>
       );

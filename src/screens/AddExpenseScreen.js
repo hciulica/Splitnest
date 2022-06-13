@@ -390,7 +390,7 @@ const AddExpenseScreen = ({ navigation, route }) => {
 
          group.members.forEach((member) => {
             if (member.email != group.payer.email) {
-               const refMember = doc(db, "Users", member.email);
+               const refMember = member.email;
                const payMember = member.pay;
                const memberObject = {
                   reference: refMember,
@@ -400,7 +400,7 @@ const AddExpenseScreen = ({ navigation, route }) => {
             }
          });
 
-         const refPayer = doc(db, "User", group.payer.email);
+         const refPayer = group.payer.email;
 
          const expense = {
             expenseName: expenseName,

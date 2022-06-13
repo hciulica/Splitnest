@@ -92,6 +92,7 @@ const CreateGroupScreen = ({ navigation, route }) => {
                   name: groupName,
                   type: chipSelected,
                   createdAt: Timestamp.now(),
+                  progress: 0,
                },
             });
             console.log(groupRef.id);

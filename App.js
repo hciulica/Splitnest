@@ -32,6 +32,7 @@ import InviteFriendsScreen from "./src/screens/InviteFriendsScreen";
 import GroupIndividualScreen from "./src/screens/GroupIndividualScreen";
 import PayerScreen from "./src/screens/PayerScreen";
 import SplitScreen from "./src/screens/SplitScreen";
+import ConfirmPayScreen from "./src/screens/ConfirmPayScreen";
 
 import { LogBox } from "react-native";
 import { YellowBox } from "react-native";
@@ -149,7 +150,6 @@ const App = () => {
                         animationEnabled: false,
                      }}
                   />
-
                   <Stack.Screen
                      component={SettingsScreen}
                      name="Settings"
@@ -160,7 +160,6 @@ const App = () => {
                      name="InviteFriends"
                      options={{ headerShown: false, gestureEnabled: false }}
                   />
-
                   <Stack.Screen
                      component={AddFriendScreen}
                      name="AddFriend"
@@ -185,6 +184,13 @@ const App = () => {
                      }}
                   />
                   <Stack.Screen
+                     component={ConfirmPayScreen}
+                     name="ConfirmPay"
+                     options={{
+                        headerShown: false,
+                     }}
+                  />
+                  <Stack.Screen
                      component={AddExpenseScreen}
                      name="Add"
                      gestureDirection="horizontal-inverted"
@@ -195,7 +201,6 @@ const App = () => {
                         animationTypeForReplace: "pop",
                      }}
                   />
-
                   <Stack.Screen
                      component={PayerScreen}
                      name="Payer"
@@ -205,7 +210,6 @@ const App = () => {
                         gestureDirection: "vertical",
                      }}
                   />
-
                   <Stack.Screen
                      component={SplitScreen}
                      name="Split"

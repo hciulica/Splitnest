@@ -1,0 +1,183 @@
+import React, { useState, useEffect, useRef } from "react";
+import {
+   StyleSheet,
+   TouchableOpacity,
+   TouchableWithoutFeedback,
+   TouchableHighlight,
+   Text,
+   View,
+   Animated,
+   Image,
+} from "react-native";
+
+import TouchableWithAnimation from "../components/TouchableWithAnimation";
+
+import {
+   doc,
+   onSnapshot,
+   setDoc,
+   getDoc,
+   updateDoc,
+   getDocs,
+   collection,
+   arrayUnion,
+   arrayRemove,
+   serverTimestamp,
+   increment,
+   autoRefresh,
+   Timestamp,
+} from "firebase/firestore";
+
+import { authentication, db } from "../api/firebase/firebase-config";
+
+import ExpenseIcon from "../../assets/icons/individualscreen/expenseIcon.svg";
+
+const ExpenseCard = ({ style, addedAt, name, payer, price, members }) => {
+   const [sumPay, setSumPay] = useState(parseFloat(0).toFixed(2));
+
+   useEffect(() => {
+      //If you are the payer
+      var sum = 0;
+      if (payer.email === authentication.currentUser.email) {
+         members.forEach((member) => {
+            sum = parseFloat(sum) + parseFloat(member.pay);
+         });
+
+         setSumPay(sum.toFixed(4));
+      } else {
+         members.forEach((member) => {
+            if (member.memberInfo.email === authentication.currentUser.email) {
+               setSumPay(member.pay);
+            }
+         });
+      }
+   }, [members]);
+
+   return (
+      <TouchableWithAnimation
+         style={[styles.containerCard, style]}
+         duration={150}
+         pressAnimation={0.97}
+      >
+         <View style={styles.dateStyle}>
+            <Text style={styles.monthStyle}>{addedAt.month}</Text>
+            <Text style={styles.dayStyle}>{addedAt.day}</Text>
+         </View>
+         <ExpenseIcon style={{ marginLeft: 10 }}></ExpenseIcon>
+         <View style={{ marginLeft: 17, width: 145 }}>
+            <Text style={styles.expenseNameStyle}>{name}</Text>
+            <View
+               style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  marginTop: 3,
+               }}
+            >
+               <Text style={styles.payerStyle}>
+                  {payer.email === authentication.currentUser.email
+                     ? "You"
+                     : payer.username.substring(
+                          0,
+                          payer.username.indexOf(" ")
+                       ) !== ""
+                     ? payer.username.substring(0, payer.username.indexOf(" "))
+                     : payer.username.substring(0, 8)}{" "}
+                  paid
+               </Text>
+               <Text style={styles.pricePayerStyle}>{price}RON</Text>
+            </View>
+         </View>
+
+         <View style={{ alignItems: "flex-end", width: 85 }}>
+            <Text
+               style={[
+                  styles.textPayStyle,
+                  {
+                     color:
+                        payer.email === authentication.currentUser.email
+                           ? "rgba(49,101,255, 0.75)"
+                           : "rgba(255,97,87,1)",
+                  },
+               ]}
+            >
+               {payer.email === authentication.currentUser.email
+                  ? "You have to receive"
+                  : "You have to pay"}
+            </Text>
+            <Text
+               style={[
+                  styles.payValueStyle,
+                  {
+                     color:
+                        payer.email === authentication.currentUser.email
+                           ? "rgba(49,101,255, 0.75)"
+                           : "rgba(255,97,87,1)",
+                  },
+               ]}
+            >
+               {parseFloat(sumPay).toFixed(2)}RON
+            </Text>
+         </View>
+      </TouchableWithAnimation>
+   );
+};
+
+const styles = StyleSheet.create({
+   containerCard: {
+      width: 336,
+      height: 57,
+      backgroundColor: "white",
+      borderRadius: 15,
+      alignItems: "center",
+      flexDirection: "row",
+   },
+
+   monthStyle: {
+      color: "#979797",
+      fontWeight: "600",
+      fontSize: 11,
+   },
+
+   dayStyle: {
+      color: "#979797",
+      fontWeight: "600",
+      fontSize: 15,
+   },
+
+   dateStyle: {
+      alignItems: "center",
+      width: 30,
+      marginLeft: 10,
+   },
+
+   expenseNameStyle: {
+      fontWeight: "bold",
+      fontSize: 12,
+      color: "black",
+   },
+
+   payerStyle: {
+      fontWeight: "600",
+      fontSize: 10,
+      color: "rgba(0,0,0,0.32)",
+   },
+
+   pricePayerStyle: {
+      fontWeight: "900",
+      fontSize: 10,
+      color: "rgba(0,0,0,0.32)",
+      marginLeft: 3,
+   },
+
+   textPayStyle: {
+      fontWeight: "bold",
+      fontSize: 8,
+   },
+   payValueStyle: {
+      fontWeight: "bold",
+      fontSize: 11,
+      //   color: "rgba(255,97,87,1)",
+   },
+});
+
+export default ExpenseCard;

@@ -26,6 +26,8 @@ const GroupCard = ({
    image,
    style,
    onPress,
+   numberExpenses,
+   total,
    key,
 }) => {
    return (
@@ -74,7 +76,7 @@ const GroupCard = ({
                ></View>
                {/* Hardcoded need create a group with auto value on 0 */}
                <Text style={{ fontWeight: "600", color: "rgba(0,0,0,0.32)" }}>
-                  Total: 540 RON
+                  Total: {parseFloat(total).toFixed(2)} RON
                </Text>
             </View>
             {members.map((participant, index) => {
@@ -182,7 +184,7 @@ const GroupCard = ({
             >
                <Shoppingicon></Shoppingicon>
                <Text style={[styles.textSmall, { marginRight: 35 }]}>
-                  6 Expenses
+                  {numberExpenses} Expenses
                </Text>
             </View>
          </View>

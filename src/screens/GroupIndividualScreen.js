@@ -35,6 +35,8 @@ import PencilEditIcon from "../../assets/icons/general/pencilEdit.svg";
 import ImagePicker from "react-native-image-crop-picker";
 
 import InviteCard from "../components/InviteCard";
+import ExpenseCard from "../components/ExpenseCard";
+import SettleCard from "../components/SettleCard";
 
 import { authentication, db } from "../api/firebase/firebase-config";
 import { storage } from "../api/firebase/firebase-config";
@@ -89,11 +91,28 @@ const Tab = createMaterialTopTabNavigator();
 
 const GroupIndividualScreen = ({ navigation, route }) => {
    const [loadingMembers, setLoadingMembers] = useState(true);
-   var group;
+   const [loadingPay, setLoadingPay] = useState(false);
+   const [expensesList, setExpensesList] = useState(null);
+   const [payList, setPayList] = useState(null);
+   const [loading, setLoading] = useState(false);
 
+   var group;
    if (route.params?.group) {
       group = route.params?.group;
    }
+   const [groupName, setGroupName] = useState(group.name);
+   const [groupImage, setGroupImage] = useState(group.image);
+   const [editable, setEditable] = useState(false);
+
+   useEffect(() => {
+      const unsubscribe = navigation.addListener("focus", () => {
+         setGroupMembers();
+         navigation.navigate("Expenses");
+      });
+
+      return unsubscribe;
+   }, [route.params?.group, route.params?.groupInvited, navigation]);
+
    const setGroupMembers = () => {
       setLoadingMembers(true);
       groupInvited = route.params?.groupInvited;
@@ -113,45 +132,315 @@ const GroupIndividualScreen = ({ navigation, route }) => {
                "Account.numberGroups": increment(1),
             });
             group.members.push(member);
-            // console.log(member);
 
-            console.log(JSON.stringify(group, null, 3));
+            // console.log(JSON.stringify(group, null, 3));
          });
-         //Update current group members
-         //  group.members.push()
       }
       setLoadingMembers(false);
    };
 
-   useEffect(() => {
-      const unsubscribe = navigation.addListener("focus", () => {
-         navigation.navigate("Expenses");
-      });
-      setGroupMembers();
-      return unsubscribe;
-   }, [route.params?.group, route.params?.groupInvited, navigation]);
+   function extractTime(UNIX_timestamp) {
+      var a = new Date(UNIX_timestamp * 1000);
+      var months = [
+         "Jan",
+         "Feb",
+         "Mar",
+         "Apr",
+         "May",
+         "Jun",
+         "Jul",
+         "Aug",
+         "Sep",
+         "Oct",
+         "Nov",
+         "Dec",
+      ];
+      var year = a.getFullYear();
+      var month = months[a.getMonth()];
+      var date = a.getDate();
+      var hour = a.getHours();
+      var min = a.getMinutes();
+      var sec = a.getSeconds();
+      var time =
+         date + " " + month + " " + year + " " + hour + ":" + min + ":" + sec;
+      return [date, month, year];
+   }
 
-   const [groupName, setGroupName] = useState(group.name);
-   const [groupImage, setGroupImage] = useState(group.image);
-   const [editable, setEditable] = useState(false);
-   const [loading, setLoading] = useState(false);
+   const setGroupExpenses = async () => {
+      setLoading(true);
+      if (route.params?.group) {
+         let expensesArray = [];
+         let expenseObject = {};
+
+         group = route.params?.group;
+         console.log(group.uid);
+         const docRef = doc(db, "Groups", group.uid);
+         const groupSnap = await getDoc(docRef);
+
+         if (groupSnap.exists()) {
+            if (groupSnap.data().Expenses) {
+               const groupExpenses = groupSnap.data().Expenses;
+
+               groupExpenses.forEach(async (expense) => {
+                  const nanoSeconds = expense.addedAt.nanoseconds / 1000000000;
+
+                  const createdTimeSeconds =
+                     expense.addedAt.seconds + nanoSeconds;
+
+                  const [day, month, year] = extractTime(createdTimeSeconds);
+
+                  const addedAt = {
+                     day: day,
+                     month: month,
+                     year: year,
+                  };
+
+                  const nameExpense = expense.expenseName;
+
+                  // console.log(expense.payer);
+                  //Now take the payer
+
+                  if (expense.payer) {
+                     const expensePayerRef = doc(db, "Users", expense.payer);
+
+                     const payerSnap = await getDoc(expensePayerRef);
+
+                     let payerAccountInfo;
+
+                     if (payerSnap.exists()) {
+                        payerAccountInfo = {
+                           email: payerSnap.id,
+                           username: payerSnap.data().Account.username,
+                           image: payerSnap.data().Account.image,
+                           phone: payerSnap.data().Account.phone,
+                        };
+                        // payerAccountInfo = payerSnap.data().Account;
+                     } else console.log("No such document!");
+
+                     const priceExpense = expense.price;
+                     const splitTypeExpense = expense.splitType;
+
+                     if (expense.members != 0) {
+                        const expenseMembers = expense.members;
+
+                        let member = {};
+                        let members = [];
+
+                        expenseMembers.forEach(async (expenseMember) => {
+                           const payMember = parseFloat(
+                              expenseMember.pay
+                           ).toFixed(2);
+                           const expenseMemberRef = doc(
+                              db,
+                              "Users",
+                              expenseMember.reference
+                           );
+                           const expenseMemberSnap = await getDoc(
+                              expenseMemberRef
+                           );
+
+                           let memberAccountInfo;
+                           if (expenseMemberSnap.exists()) {
+                              memberAccountInfo = {
+                                 email: expenseMemberSnap.id,
+                                 username:
+                                    expenseMemberSnap.data().Account.username,
+                                 image: expenseMemberSnap.data().Account.image,
+                                 phone: expenseMemberSnap.data().Account.phone,
+                              };
+                           } else console.log("No such document");
+
+                           member = {
+                              pay: payMember,
+                              memberInfo: memberAccountInfo,
+                           };
+
+                           members.push(member);
+                        });
+
+                        expenseObject = {
+                           addedAt: addedAt,
+                           name: nameExpense,
+                           payer: payerAccountInfo,
+                           price: parseFloat(priceExpense).toFixed(2),
+                           splitType: splitTypeExpense,
+                           members: members,
+                        };
+                     }
+                  }
+                  expensesArray.push(expenseObject);
+
+                  // console.log(JSON.stringify(expenseObject, null, 3));
+               });
+            }
+         }
+         setExpensesList(expensesArray);
+
+         setTimeout(
+            () => setLoading(false),
+            groupSnap.data().Expenses.length * 20
+         );
+      }
+   };
 
    const Expenses = ({ navigation, params }) => {
+      useEffect(() => {
+         const unsubscribe = navigation.addListener("focus", () => {
+            setGroupExpenses();
+         });
+
+         return unsubscribe;
+      }, []);
+
+      const renderItem = ({ item }) => {
+         return (
+            <ExpenseCard
+               style={{ marginTop: 16 }}
+               addedAt={item.addedAt}
+               name={item.name}
+               payer={item.payer}
+               price={item.price}
+               members={item.members}
+            />
+         );
+      };
+
       return (
          <View
             style={{
                justifyContent: "center",
                alignItems: "center",
-               flex: 1,
             }}
          >
             {/* <Text>Groups all screen</Text> */}
-            <Text>Swim</Text>
+            {loading ? (
+               <View style={{ justifyContent: "center" }}>
+                  <MaterialIndicator
+                     size={40}
+                     color="rgba(49,101,255,0.80)"
+                  ></MaterialIndicator>
+               </View>
+            ) : (
+               <View>
+                  {expensesList !== null ? (
+                     <FlatList
+                        contentContainerStyle={{
+                           height:
+                              expensesList !== null
+                                 ? expensesList.length !== 0
+                                    ? 90 * group.numberExpenses
+                                    : null
+                                 : null,
+                           marginTop: 10,
+                        }}
+                        horizontal={false}
+                        data={expensesList.sort((a, b) =>
+                           a.name.localeCompare(b.name)
+                        )}
+                        renderItem={renderItem}
+                        // keyExtractor={(item) => item.email}
+                        showsVerticalScrollIndicator={false}
+                        alwaysBounceVertical={false}
+                     />
+                  ) : (
+                     <Text
+                        style={{
+                           fontWeight: "500",
+                           fontSize: 12,
+                           color: "#979797",
+                           marginTop: 75,
+                        }}
+                     >
+                        No expenses added yet
+                     </Text>
+                  )}
+               </View>
+            )}
          </View>
       );
    };
 
+   const setSettle = () => {
+      setLoadingPay(true);
+      let payersArray = [];
+      let resultsDisplay = [];
+
+      expensesList.forEach((expense) => {
+         if (expense.payer.email !== authentication.currentUser.email) {
+            payersArray.push(expense.payer);
+         }
+      });
+
+      payersArray.forEach((payer) => {
+         var sum = 0;
+         expensesList.forEach((expense) => {
+            if (payer.email === expense.payer.email) {
+               expense.members.forEach((member) => {
+                  if (
+                     member.memberInfo.email ===
+                     authentication.currentUser.email
+                  ) {
+                     sum = parseFloat(sum) + parseFloat(member.pay);
+                  }
+               });
+            }
+         });
+
+         if (sum != parseFloat(0)) {
+            console.log("You need to pay to", sum, payer.email);
+
+            const settleObject = {
+               sumPay: sum,
+               payer: payer,
+            };
+            resultsDisplay.push(settleObject);
+         }
+      });
+
+      const resultSettle = resultsDisplay.filter(
+         (thing, index, self) =>
+            index ===
+            self.findIndex(
+               (t) =>
+                  t.sumPay === thing.sumPay &&
+                  t.payer.email === thing.payer.email
+            )
+      );
+      console.log(JSON.stringify(resultSettle, null, 3));
+
+      setPayList(resultSettle);
+      setLoadingPay(false);
+   };
+
    const Pay = ({ navigation, params }) => {
+      useEffect(() => {
+         const unsubscribe = navigation.addListener("focus", () => {
+            setSettle();
+         });
+
+         return unsubscribe;
+      }, []);
+
+      const onPressCard = (item) => {
+         navigation.navigate("ConfirmPay", {
+            paymentInfo: item,
+            groupUid: route.params?.group.uid,
+         });
+      };
+
+      const renderItem = ({ item }) => {
+         return (
+            <SettleCard
+               style={{ marginTop: 15 }}
+               name={item.payer.username}
+               email={item.payer.email}
+               image={item.payer.image}
+               sumPay={item.sumPay}
+               handlePress={() => onPressCard(item)}
+            />
+         );
+      };
+
       return (
          <View
             style={{
@@ -160,13 +449,34 @@ const GroupIndividualScreen = ({ navigation, route }) => {
                flex: 1,
             }}
          >
-            {/* <Text>Groups all screen</Text> */}
-            <Text>Pay</Text>
+            {!loadingPay ? (
+               <FlatList
+                  contentContainerStyle={{
+                     marginTop: 15,
+                  }}
+                  horizontal={false}
+                  data={payList}
+                  renderItem={renderItem}
+                  keyExtractor={(item) => item.payer.email}
+                  showsVerticalScrollIndicator={false}
+                  //  alwaysBounceVertical={false}
+               />
+            ) : (
+               <MaterialIndicator
+                  size={40}
+                  color="rgba(49,101,255,0.80)"
+                  style={{ marginBottom: 230 }}
+               ></MaterialIndicator>
+            )}
          </View>
       );
    };
 
    const Members = ({ navigation }) => {
+      useEffect(() => {
+         setGroupMembers();
+      }, []);
+
       if (!loadingMembers) {
          return (
             <View
@@ -382,6 +692,7 @@ const GroupIndividualScreen = ({ navigation, route }) => {
                backgroundColor: "blue",
                borderRadius: 15,
                marginTop: 15,
+               marginBottom: 10,
                alignItems: "center",
                justifyContent: "space-between",
                backgroundColor: "white",
@@ -475,7 +786,13 @@ const GroupIndividualScreen = ({ navigation, route }) => {
             <View style={styles.topContainer}>
                <View style={styles.topButtons}>
                   <BackButton onPress={() => navigation.goBack()}></BackButton>
-                  <ThreeDotsIcon style={{ marginLeft: 260 }}></ThreeDotsIcon>
+                  <TouchableWithAnimation
+                     onPress={() =>
+                        console.log(JSON.stringify(expensesList, null, 3))
+                     }
+                  >
+                     <ThreeDotsIcon style={{ marginLeft: 260 }}></ThreeDotsIcon>
+                  </TouchableWithAnimation>
                </View>
                <View style={styles.header}>
                   <View style={styles.titlePosition}>
@@ -547,7 +864,7 @@ const GroupIndividualScreen = ({ navigation, route }) => {
                      <Text
                         style={{
                            fontSize: 12,
-                           fontWeight: "800",
+                           fontWeight: "700",
                            bottom: 25,
                         }}
                      >
@@ -744,9 +1061,11 @@ const GroupIndividualScreen = ({ navigation, route }) => {
                      style={{
                         fontSize: 12,
                         fontWeight: "bold",
+                        marginLeft: 36,
+                        width: 140,
                      }}
                   >
-                     Spent: 530RON
+                     Spent: {parseFloat(group.total).toFixed(2)}RON
                   </Text>
                </View>
 
@@ -832,13 +1151,15 @@ const styles = StyleSheet.create({
    typeGroupStyle: {
       flexDirection: "row",
       alignItems: "center",
+      width: 150,
+      marginLeft: 53,
    },
 
    bottomContainer: {
       marginTop: 23,
       flexDirection: "row",
       alignItems: "center",
-      justifyContent: "space-evenly",
+      // justifyContent: "space-evenly",
    },
 });
 

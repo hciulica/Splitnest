@@ -224,7 +224,7 @@ const SplitScreen = ({ navigation, route, navigation: { setParams } }) => {
 
          membersAdjust.forEach((element) => {
             if (element.pay !== Number.parseFloat(0).toFixed(2)) {
-               element.pay = Number.parseFloat(price / numberRemain).toFixed(2);
+               element.pay = Number.parseFloat(price / numberRemain).toFixed(4);
                console.log(price / numberRemain);
             }
          });
@@ -243,7 +243,7 @@ const SplitScreen = ({ navigation, route, navigation: { setParams } }) => {
                element.pay !== Number.parseFloat(0).toFixed(2) ||
                element.email === email
             ) {
-               element.pay = Number.parseFloat(price / numberRemain).toFixed(2);
+               element.pay = Number.parseFloat(price / numberRemain).toFixed(4);
                console.log(price / numberRemain);
             }
          });
@@ -283,7 +283,7 @@ const SplitScreen = ({ navigation, route, navigation: { setParams } }) => {
          membersAdjust.forEach((element) => {
             element.pay = Number.parseFloat(
                price / membersAdjust.length
-            ).toFixed(2);
+            ).toFixed(4);
          });
          setSelectedChoice(0);
          setMembersSelected(membersAdjust.length);

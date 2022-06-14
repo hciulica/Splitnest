@@ -38,9 +38,14 @@ import {
    collection,
    query,
    arrayUnion,
+   arrayRemove,
    serverTimestamp,
+   collectionGroup,
    Timestamp,
    increment,
+   where,
+   set,
+   deleteField,
 } from "firebase/firestore";
 
 import { authentication, db } from "../api/firebase/firebase-config";
@@ -48,7 +53,6 @@ import BackButton from "../components/BackButton";
 import CheckIcon from "../../assets/icons/groupsscreen/checkIcon.svg";
 import TouchableWithAnimation from "../components/TouchableWithAnimation";
 import FlatInput from "../components/FlatInput";
-
 import ArrowIcon from "../../assets/icons/individualscreen/arrowIcon.svg";
 
 const ConfirmPayScreen = ({ navigation, route }) => {
@@ -62,12 +66,10 @@ const ConfirmPayScreen = ({ navigation, route }) => {
    useEffect(() => {
       if (route.params?.paymentInfo) {
          setLoading(true);
-
-         console.log(JSON.stringify(route.params?.paymentInfo, null, 3));
-         console.log("POKER");
-         //  setResults(route.params?.paymentInfo);
          setLoading(false);
+
          paymentInfo = route.params?.paymentInfo;
+         console.log(paymentInfo.payer.email);
       }
    }, [route.params?.paymentInfo, route.params?.groupUid]);
 
@@ -75,20 +77,71 @@ const ConfirmPayScreen = ({ navigation, route }) => {
       const paymentInfo = route.params?.paymentInfo;
       const groupUid = route.params?.groupUid;
 
-      const docRef = doc(db, "Groups", groupUid);
+      console.log(paymentInfo);
 
-      const docSub = await addDoc(collection(db, docRef), {
-         name: "Tokyo",
-         country: "Japan",
+      const expensesRef = query(
+         collection(db, "Groups", groupUid, "Expenses"),
+         where("payer", "==", paymentInfo.payer.email)
+      );
+      const querySnapshot = await getDocs(expensesRef);
+
+      await querySnapshot.forEach(async (expenses) => {
+         const expenseRef = doc(
+            db,
+            "Groups",
+            groupUid,
+            "Expenses",
+            expenses.id
+         );
+
+         const expenseInfo = await getDoc(expenseRef);
+
+         let memberList = [];
+         if (expenseInfo.exists()) {
+            memberList = expenseInfo.data().members;
+         }
+
+         const resultFiltered = memberList.filter((item) => {
+            return item.reference !== authentication.currentUser.email;
+         });
+
+         console.log(JSON.stringify(resultFiltered, null, 3));
+
+         await updateDoc(expenseRef, {
+            members: deleteField(),
+         });
+
+         await updateDoc(expenseRef, {
+            members: resultFiltered,
+         });
+
+         const userConnectedRef = doc(
+            db,
+            "Users",
+            authentication.currentUser.email
+         );
+
+         let valueSpent;
+         let paymentsMade;
+         const docSnap = await getDoc(userConnectedRef);
+         if (docSnap.exists()) {
+            valueSpent = parseFloat(
+               docSnap.data().Account.spentToday.spent
+            ).toFixed(4);
+
+            paymentsMade = docSnap.data().Account.paymentsMade;
+         }
+         const totalSpent =
+            parseFloat(valueSpent) + parseFloat(paymentInfo.sumPay);
+
+         await updateDoc(userConnectedRef, {
+            "Account.spentToday.spent": totalSpent,
+            "Account.paymentsMade": increment(1),
+         });
       });
 
-      await updateDoc(docRef, {
-         Expenses2: docSub,
-      });
-
-      console.log(paymentInfo, groupUid);
+      navigation.goBack();
    };
-
    return (
       <SafeAreaView style={styles.container}>
          <View style={styles.headerContainer}>
@@ -204,7 +257,9 @@ const ConfirmPayScreen = ({ navigation, route }) => {
                   style={{ width: 150, height: 53, marginTop: 38 }}
                   type="number-pad"
                   editable={false}
-                  value={route.params?.paymentInfo.sumPay.toString()}
+                  value={parseFloat(route.params?.paymentInfo.sumPay)
+                     .toFixed(2)
+                     .toString()}
                   fontSize={
                      route.params?.paymentInfo.sumPay >= parseFloat(1000) &&
                      route.params?.paymentInfo.sumPay >= parseFloat(9999)

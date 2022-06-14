@@ -90,11 +90,13 @@ const { width, height } = Dimensions.get("window");
 const Tab = createMaterialTopTabNavigator();
 
 const GroupIndividualScreen = ({ navigation, route }) => {
+   const [loadingExpenses, setLoadingExpenses] = useState(false);
    const [loadingMembers, setLoadingMembers] = useState(true);
    const [loadingPay, setLoadingPay] = useState(false);
    const [expensesList, setExpensesList] = useState(null);
    const [payList, setPayList] = useState(null);
    const [loading, setLoading] = useState(false);
+   const [percentage, setPercentage] = useState(null);
 
    var group;
    if (route.params?.group) {
@@ -167,126 +169,141 @@ const GroupIndividualScreen = ({ navigation, route }) => {
    }
 
    const setGroupExpenses = async () => {
-      setLoading(true);
+      setLoadingExpenses(true);
       if (route.params?.group) {
          let expensesArray = [];
          let expenseObject = {};
 
          group = route.params?.group;
-         console.log(group.uid);
-         const docRef = doc(db, "Groups", group.uid);
-         const groupSnap = await getDoc(docRef);
 
-         if (groupSnap.exists()) {
-            if (groupSnap.data().Expenses) {
-               const groupExpenses = groupSnap.data().Expenses;
+         // const expenseRef = query(
+         //    collection(db, "Groups", doc.id, "Expenses"),
+         //    where("payer", "!=", authentication.currentUser.email)
+         // );
 
-               groupExpenses.forEach(async (expense) => {
-                  const nanoSeconds = expense.addedAt.nanoseconds / 1000000000;
+         // const querySnapshotExpenses = await getDocs(expenseRef);
 
-                  const createdTimeSeconds =
-                     expense.addedAt.seconds + nanoSeconds;
+         const groupExpenses = await getDocs(
+            collection(db, "Groups", group.uid, "Expenses")
+         );
 
-                  const [day, month, year] = extractTime(createdTimeSeconds);
+         groupExpenses.forEach(async (groupExpense) => {
+            const expense = groupExpense.data();
+            const nanoSeconds = expense.addedAt.nanoseconds / 1000000000;
 
-                  const addedAt = {
-                     day: day,
-                     month: month,
-                     year: year,
+            const createdTimeSeconds = expense.addedAt.seconds + nanoSeconds;
+
+            const [day, month, year] = extractTime(createdTimeSeconds);
+
+            const addedAt = {
+               day: day,
+               month: month,
+               year: year,
+            };
+            const nameExpense = expense.expenseName;
+            //Now take the payer
+
+            if (expense.payer) {
+               const expensePayerRef = doc(db, "Users", expense.payer);
+               const payerSnap = await getDoc(expensePayerRef);
+               let payerAccountInfo;
+               if (payerSnap.exists()) {
+                  payerAccountInfo = {
+                     email: payerSnap.id,
+                     username: payerSnap.data().Account.username,
+                     image: payerSnap.data().Account.image,
+                     phone: payerSnap.data().Account.phone,
                   };
+               } else console.log("No such document!");
 
-                  const nameExpense = expense.expenseName;
+               const priceExpense = expense.price;
+               const splitTypeExpense = expense.splitType;
 
-                  // console.log(expense.payer);
-                  //Now take the payer
+               if (expense.members.length != 0) {
+                  const expenseMembers = expense.members;
 
-                  if (expense.payer) {
-                     const expensePayerRef = doc(db, "Users", expense.payer);
+                  let member = {};
+                  let members = [];
 
-                     const payerSnap = await getDoc(expensePayerRef);
+                  expenseMembers.forEach(async (expenseMember) => {
+                     const payMember = parseFloat(expenseMember.pay).toFixed(4);
+                     const expenseMemberRef = doc(
+                        db,
+                        "Users",
+                        expenseMember.reference
+                     );
+                     const expenseMemberSnap = await getDoc(expenseMemberRef);
 
-                     let payerAccountInfo;
-
-                     if (payerSnap.exists()) {
-                        payerAccountInfo = {
-                           email: payerSnap.id,
-                           username: payerSnap.data().Account.username,
-                           image: payerSnap.data().Account.image,
-                           phone: payerSnap.data().Account.phone,
+                     let memberAccountInfo;
+                     if (expenseMemberSnap.exists()) {
+                        memberAccountInfo = {
+                           email: expenseMemberSnap.id,
+                           username: expenseMemberSnap.data().Account.username,
+                           image: expenseMemberSnap.data().Account.image,
+                           phone: expenseMemberSnap.data().Account.phone,
                         };
-                        // payerAccountInfo = payerSnap.data().Account;
-                     } else console.log("No such document!");
+                     } else console.log("No such document");
 
-                     const priceExpense = expense.price;
-                     const splitTypeExpense = expense.splitType;
+                     member = {
+                        pay: payMember,
+                        memberInfo: memberAccountInfo,
+                     };
 
-                     if (expense.members != 0) {
-                        const expenseMembers = expense.members;
+                     members.push(member);
+                  });
 
-                        let member = {};
-                        let members = [];
-
-                        expenseMembers.forEach(async (expenseMember) => {
-                           const payMember = parseFloat(
-                              expenseMember.pay
-                           ).toFixed(2);
-                           const expenseMemberRef = doc(
-                              db,
-                              "Users",
-                              expenseMember.reference
-                           );
-                           const expenseMemberSnap = await getDoc(
-                              expenseMemberRef
-                           );
-
-                           let memberAccountInfo;
-                           if (expenseMemberSnap.exists()) {
-                              memberAccountInfo = {
-                                 email: expenseMemberSnap.id,
-                                 username:
-                                    expenseMemberSnap.data().Account.username,
-                                 image: expenseMemberSnap.data().Account.image,
-                                 phone: expenseMemberSnap.data().Account.phone,
-                              };
-                           } else console.log("No such document");
-
-                           member = {
-                              pay: payMember,
-                              memberInfo: memberAccountInfo,
-                           };
-
-                           members.push(member);
-                        });
-
-                        expenseObject = {
-                           addedAt: addedAt,
-                           name: nameExpense,
-                           payer: payerAccountInfo,
-                           price: parseFloat(priceExpense).toFixed(2),
-                           splitType: splitTypeExpense,
-                           members: members,
-                        };
-                     }
-                  }
-                  expensesArray.push(expenseObject);
-
-                  // console.log(JSON.stringify(expenseObject, null, 3));
-               });
+                  expenseObject = {
+                     addedAt: addedAt,
+                     name: nameExpense,
+                     payer: payerAccountInfo,
+                     price: parseFloat(priceExpense).toFixed(4),
+                     splitType: splitTypeExpense,
+                     members: members,
+                  };
+               }
             }
-         }
+            expensesArray.push(expenseObject);
+         });
+
          setExpensesList(expensesArray);
 
-         setTimeout(
-            () => setLoading(false),
-            groupSnap.data().Expenses.length * 20
-         );
+         setTimeout(() => setLoadingExpenses(false), 200);
       }
    };
 
    const Expenses = ({ navigation, params }) => {
+      const calculateProgress = async () => {
+         const expensesRef = query(
+            collection(db, "Groups", group.uid, "Expenses")
+         );
+         const querySnapshot = await getDocs(expensesRef);
+         let totalOwedPay = 0;
+         await querySnapshot.forEach(async (expenses) => {
+            console.log(expenses.data());
+            const expense = expenses.data();
+            expense.members.forEach((member) => {
+               totalOwedPay = parseFloat(totalOwedPay) + parseFloat(member.pay);
+            });
+         });
+         // console.log(parseFloat(totalOwedPay).toFixed(4));
+         const divideResult =
+            parseFloat(totalOwedPay) / parseFloat(group.total);
+         const percentageResult = divideResult * 100;
+         console.log(parseFloat(percentageResult).toFixed(2));
+         const finalResult = 100 - percentageResult;
+         setPercentage(finalResult);
+
+         const docGroupRef = doc(db, "Groups", group.uid);
+
+         await updateDoc(docGroupRef, {
+            "Details.progress": finalResult,
+         });
+      };
+
       useEffect(() => {
          const unsubscribe = navigation.addListener("focus", () => {
             setGroupExpenses();
+            calculateProgress();
          });
 
          return unsubscribe;
@@ -313,7 +330,7 @@ const GroupIndividualScreen = ({ navigation, route }) => {
             }}
          >
             {/* <Text>Groups all screen</Text> */}
-            {loading ? (
+            {loadingExpenses ? (
                <View style={{ justifyContent: "center" }}>
                   <MaterialIndicator
                      size={40}
@@ -322,7 +339,7 @@ const GroupIndividualScreen = ({ navigation, route }) => {
                </View>
             ) : (
                <View>
-                  {expensesList !== null ? (
+                  {expensesList ? (
                      <FlatList
                         contentContainerStyle={{
                            height:
@@ -387,7 +404,7 @@ const GroupIndividualScreen = ({ navigation, route }) => {
          });
 
          if (sum != parseFloat(0)) {
-            console.log("You need to pay to", sum, payer.email);
+            // console.log("You need to pay to", sum, payer.email);
 
             const settleObject = {
                sumPay: sum,
@@ -406,9 +423,11 @@ const GroupIndividualScreen = ({ navigation, route }) => {
                   t.payer.email === thing.payer.email
             )
       );
-      console.log(JSON.stringify(resultSettle, null, 3));
+      // console.log(JSON.stringify(resultSettle, null, 3));
 
       setPayList(resultSettle);
+      if (resultSettle === null) console.log("NULL PROSTULE");
+      else console.log("RESULT SETTLE", resultSettle);
       setLoadingPay(false);
    };
 
@@ -450,17 +469,32 @@ const GroupIndividualScreen = ({ navigation, route }) => {
             }}
          >
             {!loadingPay ? (
-               <FlatList
-                  contentContainerStyle={{
-                     marginTop: 15,
-                  }}
-                  horizontal={false}
-                  data={payList}
-                  renderItem={renderItem}
-                  keyExtractor={(item) => item.payer.email}
-                  showsVerticalScrollIndicator={false}
-                  //  alwaysBounceVertical={false}
-               />
+               <View>
+                  {payList ? (
+                     <FlatList
+                        contentContainerStyle={{
+                           marginTop: 15,
+                        }}
+                        horizontal={false}
+                        data={payList}
+                        renderItem={renderItem}
+                        keyExtractor={(item) => item.payer.email}
+                        showsVerticalScrollIndicator={false}
+                        alwaysBounceVertical={false}
+                     />
+                  ) : (
+                     <Text
+                        style={{
+                           fontWeight: "500",
+                           fontSize: 12,
+                           color: "#979797",
+                           marginBottom: 200,
+                        }}
+                     >
+                        No payments
+                     </Text>
+                  )}
+               </View>
             ) : (
                <MaterialIndicator
                   size={40}
@@ -493,14 +527,14 @@ const GroupIndividualScreen = ({ navigation, route }) => {
                <FlatList
                   contentContainerStyle={{
                      marginTop: 15,
-                     height: 85 * group.members.length,
+                     height: 100 * group.members.length,
                   }}
                   horizontal={false}
                   data={group.members}
                   renderItem={renderItem}
                   keyExtractor={(item) => item.email}
                   showsVerticalScrollIndicator={false}
-                  //  alwaysBounceVertical={false}
+                  alwaysBounceVertical={false}
                />
             </View>
          );
@@ -710,7 +744,8 @@ const GroupIndividualScreen = ({ navigation, route }) => {
                }}
                onPress={() => {
                   // Navigate using the `navigation` prop that you received
-                  navigation.navigate("Expenses");
+
+                  if (isFocused !== 0) navigation.navigate("Expenses");
                }}
             >
                <Text
@@ -734,8 +769,7 @@ const GroupIndividualScreen = ({ navigation, route }) => {
                   justifyContent: "center",
                }}
                onPress={() => {
-                  // Navigate using the `navigation` prop that you received
-                  navigation.navigate("Pay");
+                  if (isFocused !== 1) navigation.navigate("Pay");
                }}
             >
                <Text
@@ -760,7 +794,7 @@ const GroupIndividualScreen = ({ navigation, route }) => {
                }}
                onPress={() => {
                   // Navigate using the `navigation` prop that you received
-                  navigation.navigate("Members");
+                  if (isFocused !== 2) navigation.navigate("Members");
                }}
             >
                <Text
@@ -785,7 +819,11 @@ const GroupIndividualScreen = ({ navigation, route }) => {
          <View style={styles.container}>
             <View style={styles.topContainer}>
                <View style={styles.topButtons}>
-                  <BackButton onPress={() => navigation.goBack()}></BackButton>
+                  <BackButton
+                     onPress={() => {
+                        navigation.goBack();
+                     }}
+                  ></BackButton>
                   <TouchableWithAnimation
                      onPress={() =>
                         console.log(JSON.stringify(expensesList, null, 3))
@@ -847,7 +885,11 @@ const GroupIndividualScreen = ({ navigation, route }) => {
                </View>
                <View style={styles.subtitleContainer}>
                   <CircularProgress
-                     value={76}
+                     value={
+                        percentage === null
+                           ? route.params.group.progress
+                           : parseFloat(percentage).toFixed(2)
+                     }
                      inActiveStrokeColor={"rgba(49,101,255,0.8)"}
                      inActiveStrokeOpacity={0.15}
                      progressValueColor={"rgba(0,0,0,0.6)"}

@@ -15,6 +15,7 @@ import AvatarAdded from "../components/AvatarAdded";
 import CalendarIcon from "../../assets/icons/groupsscreen/calendarIcon.svg";
 import Shoppingicon from "../../assets/icons/groupsscreen/shoppingCartIcon.svg";
 import CameraDefaultGroup from "../../assets/images/CameraDefaultGroup.png";
+import ProgressComplete from "../../assets/icons/homescreen/progressComplete.svg";
 
 import CircularProgress from "react-native-circular-progress-indicator";
 
@@ -29,6 +30,7 @@ const GroupCard = ({
    numberExpenses,
    total,
    key,
+   progress,
 }) => {
    return (
       <TouchableWithAnimation
@@ -136,20 +138,26 @@ const GroupCard = ({
                   marginLeft: 230,
                }}
             >
-               <CircularProgress
-                  style={{ marginLeft: 10 }}
-                  value={76}
-                  inActiveStrokeColor={"#2ecc71"}
-                  inActiveStrokeOpacity={0.15}
-                  progressValueColor={"rgba(0,0,0,0.6)"}
-                  valueSuffix={"%"}
-                  size={100}
-                  titleFontSize={9}
-                  radius={40}
-                  progressValueFontSize={16}
-                  activeStrokeWidth={10}
-                  inActiveStrokeWidth={10}
-               />
+               {parseInt(progress) !== parseInt(100) ? (
+                  <CircularProgress
+                     style={{ marginLeft: 10 }}
+                     value={parseInt(progress)}
+                     inActiveStrokeColor={"#2ecc71"}
+                     inActiveStrokeOpacity={0.15}
+                     progressValueColor={"rgba(0,0,0,0.6)"}
+                     valueSuffix={"%"}
+                     size={100}
+                     titleFontSize={9}
+                     radius={40}
+                     progressValueFontSize={16}
+                     activeStrokeWidth={10}
+                     inActiveStrokeWidth={10}
+                  />
+               ) : (
+                  <ProgressComplete
+                     style={{ marginLeft: 10 }}
+                  ></ProgressComplete>
+               )}
             </View>
          </View>
 

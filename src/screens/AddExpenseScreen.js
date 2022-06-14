@@ -52,6 +52,7 @@ import ImageNew from "../../assets/images/calculator-front-color.png";
 import {
    doc,
    onSnapshot,
+   addDoc,
    setDoc,
    getDoc,
    updateDoc,
@@ -197,7 +198,7 @@ const AddExpenseScreen = ({ navigation, route }) => {
 
             const pricePerMember = parseFloat(
                price / (selectedGroups[i].members.length - 1)
-            ).toFixed(2);
+            ).toFixed(4);
 
             selectedGroups[i].members.forEach((member) => {
                if (member.email !== payerSelect.email)
@@ -239,7 +240,7 @@ const AddExpenseScreen = ({ navigation, route }) => {
             if (group.uid === selectedChoice.uid) {
                const pricePerMember = parseFloat(
                   price / (group.members.length - 1)
-               ).toFixed(2);
+               ).toFixed(4);
 
                group.members.forEach((member) => {
                   if (member.email !== payerSelect.email)
@@ -341,7 +342,7 @@ const AddExpenseScreen = ({ navigation, route }) => {
          if (refMembers && refMembers.length !== 0) {
             const pricePerMembers = Number.parseFloat(
                price / (refMembers.length - 1)
-            ).toFixed(2);
+            ).toFixed(4);
 
             for (let i = 0; i < refMembers.length; i++) {
                const docGroupMembers = await getDoc(refMembers[i]);
@@ -411,9 +412,12 @@ const AddExpenseScreen = ({ navigation, route }) => {
             members: membersArray,
          };
 
-         await updateDoc(groupRef, {
-            Expenses: arrayUnion(expense),
-         });
+         const subColRef = collection(groupRef, "Expenses");
+         await addDoc(subColRef, expense);
+
+         // await updateDoc(groupRef, {
+         //    Expenses: arrayUnion(expense),
+         // });
       });
    };
 

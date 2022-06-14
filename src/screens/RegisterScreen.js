@@ -109,12 +109,18 @@ const RegisterScreen = ({ navigation }) => {
 
    const addToFirestoreForAuthentication = async () => {
       try {
+         const spentToday = {
+            date: new Date(),
+            spent: 0,
+         };
          await setDoc(doc(db, "Users", authentication.currentUser.email), {
             Account: {
                username: username,
                phone: parseInt(phone, 10),
                numberFriends: 0,
                numberGroups: 0,
+               spentToday: spentToday,
+               paymentsMade: 0,
             },
          });
       } catch (err) {
@@ -147,6 +153,7 @@ const RegisterScreen = ({ navigation }) => {
                      setLoading(false);
                   })
                   .catch((error) => {
+                     setLoading(false);
                      const errorCode = re.code;
                      Alert.alert(error);
                   });

@@ -48,7 +48,9 @@ const SettleCard = ({ style, name, email, image, sumPay, handlePress }) => {
 
             <View style={{ alignItems: "center" }}>
                <Text style={styles.totalStyle}>Total</Text>
-               <Text style={styles.priceStyle}>{sumPay}RON</Text>
+               <Text style={styles.priceStyle}>
+                  {parseFloat(sumPay).toFixed(2)}RON
+               </Text>
             </View>
          </View>
       </TouchableWithAnimation>

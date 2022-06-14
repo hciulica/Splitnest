@@ -33,23 +33,43 @@ import { authentication, db } from "../api/firebase/firebase-config";
 import ExpenseIcon from "../../assets/icons/individualscreen/expenseIcon.svg";
 
 const ExpenseCard = ({ style, addedAt, name, payer, price, members }) => {
-   const [sumPay, setSumPay] = useState(parseFloat(0).toFixed(2));
+   const [sumPay, setSumPay] = useState(null);
+
+   async function getResult() {
+      const result = calculateSum();
+      return result;
+   }
 
    useEffect(() => {
+      var result = new Promise((resolve, reject) => {
+         var sum = 0;
+         if (members && members.length) {
+            members.forEach((member, index, array) => {
+               sum = parseFloat(sum) + parseFloat(member.pay);
+               if (index === array.length - 1) resolve(sum.toFixed(4));
+            });
+         }
+      });
+
       //If you are the payer
       var sum = 0;
       if (payer.email === authentication.currentUser.email) {
-         members.forEach((member) => {
-            sum = parseFloat(sum) + parseFloat(member.pay);
-         });
+         //  const resultSum = getResult();
+         //  console.log(resultSum);
 
-         setSumPay(sum.toFixed(4));
-      } else {
-         members.forEach((member) => {
-            if (member.memberInfo.email === authentication.currentUser.email) {
-               setSumPay(member.pay);
-            }
+         result.then((sum) => {
+            setSumPay(sum);
+            // setSumPay(sum);
          });
+      } else {
+         if (members && members.length)
+            members.forEach((member) => {
+               if (
+                  member.memberInfo.email === authentication.currentUser.email
+               ) {
+                  setSumPay(member.pay);
+               }
+            });
       }
    }, [members]);
 
@@ -84,40 +104,54 @@ const ExpenseCard = ({ style, addedAt, name, payer, price, members }) => {
                      : payer.username.substring(0, 8)}{" "}
                   paid
                </Text>
-               <Text style={styles.pricePayerStyle}>{price}RON</Text>
+               <Text style={styles.pricePayerStyle}>
+                  {parseFloat(price).toFixed(2)}RON
+               </Text>
             </View>
          </View>
-
-         <View style={{ alignItems: "flex-end", width: 85 }}>
+         {sumPay !== null ? (
+            <View style={{ alignItems: "flex-end", width: 85 }}>
+               <Text
+                  style={[
+                     styles.textPayStyle,
+                     {
+                        color:
+                           payer.email === authentication.currentUser.email
+                              ? "rgba(49,101,255, 0.75)"
+                              : "rgba(255,97,87,1)",
+                     },
+                  ]}
+               >
+                  {payer.email === authentication.currentUser.email
+                     ? "You have to receive"
+                     : "You have to pay"}
+               </Text>
+               <Text
+                  style={[
+                     styles.payValueStyle,
+                     {
+                        color:
+                           payer.email === authentication.currentUser.email
+                              ? "rgba(49,101,255, 0.75)"
+                              : "rgba(255,97,87,1)",
+                     },
+                  ]}
+               >
+                  {sumPay !== null ? parseFloat(sumPay).toFixed(2) : "0.00"}RON
+               </Text>
+            </View>
+         ) : (
             <Text
-               style={[
-                  styles.textPayStyle,
-                  {
-                     color:
-                        payer.email === authentication.currentUser.email
-                           ? "rgba(49,101,255, 0.75)"
-                           : "rgba(255,97,87,1)",
-                  },
-               ]}
+               style={{
+                  fontWeight: "bold",
+                  fontSize: 10,
+                  color: "green",
+                  marginLeft: 10,
+               }}
             >
-               {payer.email === authentication.currentUser.email
-                  ? "You have to receive"
-                  : "You have to pay"}
+               All settled up
             </Text>
-            <Text
-               style={[
-                  styles.payValueStyle,
-                  {
-                     color:
-                        payer.email === authentication.currentUser.email
-                           ? "rgba(49,101,255, 0.75)"
-                           : "rgba(255,97,87,1)",
-                  },
-               ]}
-            >
-               {parseFloat(sumPay).toFixed(2)}RON
-            </Text>
-         </View>
+         )}
       </TouchableWithAnimation>
    );
 };

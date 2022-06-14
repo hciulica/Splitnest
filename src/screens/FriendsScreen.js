@@ -234,7 +234,9 @@ const FriendsScreen = ({ navigation, route }) => {
                                     ? 80 * filteredResults.length
                                     : null,
                            }}
-                           data={filteredResults}
+                           data={filteredResults.sort((a, b) =>
+                              a.username.localeCompare(b.username)
+                           )}
                            renderItem={renderItem}
                            keyExtractor={(item) => item.email}
                            scrollEnabled

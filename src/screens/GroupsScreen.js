@@ -44,6 +44,8 @@ import ContentLoader, {
    Facebook,
 } from "react-content-loader/native";
 
+import { CommonActions } from "@react-navigation/native";
+
 import { authentication, db } from "../api/firebase/firebase-config";
 import {
    doc,
@@ -60,7 +62,7 @@ const Tab = createMaterialTopTabNavigator();
 
 const { width, height } = Dimensions.get("window");
 
-const TopBarNavigator = ({ navigation }) => {
+const TopBarNavigator = ({ navigation, route }) => {
    const [results, setResults] = useState([]);
    const [filteredResults, setFilteredResults] = useState([]);
    const [refreshing, setRefreshing] = useState(false);
@@ -134,6 +136,8 @@ const TopBarNavigator = ({ navigation }) => {
                      month: month,
                      year: year,
                   };
+
+                  const progress = docGroupDetails.data().Details.progress;
                   const refMembers = docGroupDetails.data().Members;
 
                   let members = [];
@@ -154,20 +158,20 @@ const TopBarNavigator = ({ navigation }) => {
                            members.push(member);
                         }
                      }
+                  const groupId = docGroupDetails.id;
                   let numberExpenses = 0;
                   let totalSumExpenses = 0;
 
-                  if (docGroupDetails.data().Expenses) {
-                     numberExpenses = docGroupDetails.data().Expenses.length;
-                     groupExpenses = docGroupDetails.data().Expenses;
+                  const groupExpenses = await getDocs(
+                     collection(db, "Groups", groupId, "Expenses")
+                  );
 
-                     groupExpenses.forEach((expense) => {
-                        totalSumExpenses =
-                           totalSumExpenses + parseFloat(expense.price);
-                     });
-                  }
+                  groupExpenses.forEach((expense) => {
+                     totalSumExpenses =
+                        totalSumExpenses + parseFloat(expense.data().price);
 
-                  console.log(JSON.stringify(totalSumExpenses, null, 3));
+                     numberExpenses++;
+                  });
 
                   group = {
                      uid: docGroupDetails.id,
@@ -178,6 +182,7 @@ const TopBarNavigator = ({ navigation }) => {
                      members: members,
                      numberExpenses: numberExpenses,
                      total: totalSumExpenses,
+                     progress: progress,
                   };
                   // console.log(JSON.stringify(group, null, 3));
                   console.log();
@@ -199,12 +204,25 @@ const TopBarNavigator = ({ navigation }) => {
 
    useEffect(() => {
       const unsubscribe = navigation.addListener("focus", () => {
-         onRefresh(true);
-         searchFilter("");
-         setSearchBarActive(false);
+         if (route.params?.redirectParams) {
+            console.log(JSON.stringify(route.params?.redirectParams, null, 3));
+            navigation.dispatch(
+               CommonActions.setParams({ redirectParams: null })
+            );
+
+            navigation.navigate({
+               name: "GroupIndividual",
+               params: { group: route.params?.redirectParams },
+               merge: true,
+            });
+         } else {
+            onRefresh(true);
+            searchFilter("");
+            setSearchBarActive(false);
+         }
       });
       return unsubscribe;
-   }, [navigation]);
+   }, [navigation, route.params?.redirectParams]);
 
    const handlePressCard = (item) => {
       // console.log(JSON.stringify(item, null, 3));
@@ -250,6 +268,7 @@ const TopBarNavigator = ({ navigation }) => {
             members={item.members}
             numberExpenses={item.numberExpenses}
             total={item.total}
+            progress={item.progress}
             onPress={() => handlePressCard(item)}
          ></GroupCard>
       );

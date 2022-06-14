@@ -33,6 +33,18 @@ import {
    RecaptchaVerifier,
 } from "firebase/auth";
 
+import {
+   BallIndicator,
+   BarIndicator,
+   DotIndicator,
+   MaterialIndicator,
+   PacmanIndicator,
+   PulseIndicator,
+   SkypeIndicator,
+   UIActivityIndicator,
+   WaveIndicator,
+} from "react-native-indicators";
+
 import AnimatedInput from "react-native-animated-input";
 import FontAwesomeIcon from "react-native-vector-icons/FontAwesome";
 import { Sae } from "react-native-textinput-effects";
@@ -79,6 +91,7 @@ const LoginScreen = ({ navigation }) => {
                navigation.replace("Tab");
             })
             .catch((re) => {
+               setLoading(false);
                const errorCode = re.code;
                switch (errorCode) {
                   case "auth/missing-email":
@@ -153,6 +166,7 @@ const LoginScreen = ({ navigation }) => {
             navigation.navigate("Tab");
          })
          .catch((re) => {
+            setLoading(false);
             const errorCode = re.code;
             switch (errorCode) {
                case "auth/missing-email":
@@ -397,11 +411,16 @@ const LoginScreen = ({ navigation }) => {
                   </View>
                </>
             ) : (
-               <ActivityIndicator
+               /* <ActivityIndicator
                   style={{ width: width, height: 270 }}
                   size="large"
                   color="#3165FF"
-               />
+               /> */
+               <MaterialIndicator
+                  style={{ width: width, marginTop: 150 }}
+                  size={50}
+                  color="rgba(49,101,255,0.80)"
+               ></MaterialIndicator>
             )}
          </View>
       </KeyboardAvoidingView>

@@ -83,11 +83,6 @@ export default function FriendCard({
             authentication.currentUser.email
          );
          const refFriendFriends = doc(db, "Users", mail);
-         // Account: {
-         //    username: username,
-         //    phone: parseInt(phone, 10),
-         //    numberFriends: 0,
-         // },
          if (pressed) {
             await updateDoc(refUserFriends, {
                "Account.numberFriends": increment(1),

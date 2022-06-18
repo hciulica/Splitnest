@@ -380,6 +380,33 @@ const AddExpenseScreen = ({ navigation, route }) => {
       }
    };
 
+   function formatDateObject(today) {
+      const dayDate = today.getDate();
+      const monthDate = today.getMonth();
+      const yearDate = today.getFullYear();
+      var months = [
+         "Jan",
+         "Feb",
+         "Mar",
+         "Apr",
+         "May",
+         "Jun",
+         "Jul",
+         "Aug",
+         "Sep",
+         "Oct",
+         "Nov",
+         "Dec",
+      ];
+      const monthFormat = months[monthDate];
+      const objDate = {
+         day: dayDate,
+         month: monthFormat,
+         year: yearDate,
+      };
+      return objDate;
+   }
+
    const createExpenseForEachGroup = async () => {
       setAnimationCheck(true);
       console.log("Selected Groups for expense:");
@@ -403,21 +430,20 @@ const AddExpenseScreen = ({ navigation, route }) => {
 
          const refPayer = group.payer.email;
 
+         const today = new Date();
+         const resultAdded = formatDateObject(today);
+
          const expense = {
             expenseName: expenseName,
             price: parseFloat(price),
             splitType: group.splitType,
-            addedAt: Timestamp.now(),
+            addedAt: resultAdded,
             payer: refPayer,
             members: membersArray,
          };
 
          const subColRef = collection(groupRef, "Expenses");
          await addDoc(subColRef, expense);
-
-         // await updateDoc(groupRef, {
-         //    Expenses: arrayUnion(expense),
-         // });
       });
    };
 

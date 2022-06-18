@@ -108,8 +108,8 @@ const GroupIndividualScreen = ({ navigation, route }) => {
 
    useEffect(() => {
       const unsubscribe = navigation.addListener("focus", () => {
-         setGroupMembers();
          navigation.navigate("Expenses");
+         setGroupMembers();
       });
 
       return unsubscribe;
@@ -141,65 +141,21 @@ const GroupIndividualScreen = ({ navigation, route }) => {
       setLoadingMembers(false);
    };
 
-   function extractTime(UNIX_timestamp) {
-      var a = new Date(UNIX_timestamp * 1000);
-      var months = [
-         "Jan",
-         "Feb",
-         "Mar",
-         "Apr",
-         "May",
-         "Jun",
-         "Jul",
-         "Aug",
-         "Sep",
-         "Oct",
-         "Nov",
-         "Dec",
-      ];
-      var year = a.getFullYear();
-      var month = months[a.getMonth()];
-      var date = a.getDate();
-      var hour = a.getHours();
-      var min = a.getMinutes();
-      var sec = a.getSeconds();
-      var time =
-         date + " " + month + " " + year + " " + hour + ":" + min + ":" + sec;
-      return [date, month, year];
-   }
-
    const setGroupExpenses = async () => {
       setLoadingExpenses(true);
       if (route.params?.group) {
          let expensesArray = [];
          let expenseObject = {};
-
          group = route.params?.group;
-
-         // const expenseRef = query(
-         //    collection(db, "Groups", doc.id, "Expenses"),
-         //    where("payer", "!=", authentication.currentUser.email)
-         // );
-
-         // const querySnapshotExpenses = await getDocs(expenseRef);
-
          const groupExpenses = await getDocs(
             collection(db, "Groups", group.uid, "Expenses")
          );
 
          groupExpenses.forEach(async (groupExpense) => {
             const expense = groupExpense.data();
-            const nanoSeconds = expense.addedAt.nanoseconds / 1000000000;
 
-            const createdTimeSeconds = expense.addedAt.seconds + nanoSeconds;
+            const addedAt = expense.addedAt;
 
-            const [day, month, year] = extractTime(createdTimeSeconds);
-
-            const addedAt = {
-               day: day,
-               month: month,
-               year: year,
-            };
             const nameExpense = expense.expenseName;
             //Now take the payer
 
@@ -219,7 +175,7 @@ const GroupIndividualScreen = ({ navigation, route }) => {
                const priceExpense = expense.price;
                const splitTypeExpense = expense.splitType;
 
-               if (expense.members.length != 0) {
+               if (expense.members) {
                   const expenseMembers = expense.members;
 
                   let member = {};
@@ -252,6 +208,8 @@ const GroupIndividualScreen = ({ navigation, route }) => {
                      members.push(member);
                   });
 
+                  console.log(addedAt);
+
                   expenseObject = {
                      addedAt: addedAt,
                      name: nameExpense,
@@ -281,23 +239,27 @@ const GroupIndividualScreen = ({ navigation, route }) => {
          await querySnapshot.forEach(async (expenses) => {
             console.log(expenses.data());
             const expense = expenses.data();
-            expense.members.forEach((member) => {
-               totalOwedPay = parseFloat(totalOwedPay) + parseFloat(member.pay);
+            if (expense.members) {
+               expense.members.forEach((member) => {
+                  totalOwedPay =
+                     parseFloat(totalOwedPay) + parseFloat(member.pay);
+               });
+            }
+         });
+         if (group.total) {
+            const divideResult =
+               parseFloat(totalOwedPay) / parseFloat(group.total);
+            const percentageResult = divideResult * 100;
+            console.log(parseFloat(percentageResult).toFixed(2));
+            const finalResult = 100 - percentageResult;
+            setPercentage(finalResult);
+
+            const docGroupRef = doc(db, "Groups", group.uid);
+
+            await updateDoc(docGroupRef, {
+               "Details.progress": finalResult,
             });
-         });
-         // console.log(parseFloat(totalOwedPay).toFixed(4));
-         const divideResult =
-            parseFloat(totalOwedPay) / parseFloat(group.total);
-         const percentageResult = divideResult * 100;
-         console.log(parseFloat(percentageResult).toFixed(2));
-         const finalResult = 100 - percentageResult;
-         setPercentage(finalResult);
-
-         const docGroupRef = doc(db, "Groups", group.uid);
-
-         await updateDoc(docGroupRef, {
-            "Details.progress": finalResult,
-         });
+         }
       };
 
       useEffect(() => {
@@ -351,9 +313,7 @@ const GroupIndividualScreen = ({ navigation, route }) => {
                            marginTop: 10,
                         }}
                         horizontal={false}
-                        data={expensesList.sort((a, b) =>
-                           a.name.localeCompare(b.name)
-                        )}
+                        data={expensesList}
                         renderItem={renderItem}
                         // keyExtractor={(item) => item.email}
                         showsVerticalScrollIndicator={false}
@@ -383,24 +343,26 @@ const GroupIndividualScreen = ({ navigation, route }) => {
       let resultsDisplay = [];
 
       expensesList.forEach((expense) => {
-         if (expense.payer.email !== authentication.currentUser.email) {
-            payersArray.push(expense.payer);
-         }
+         if (expense.payer)
+            if (expense.payer.email !== authentication.currentUser.email) {
+               payersArray.push(expense.payer);
+            }
       });
 
       payersArray.forEach((payer) => {
          var sum = 0;
          expensesList.forEach((expense) => {
-            if (payer.email === expense.payer.email) {
-               expense.members.forEach((member) => {
-                  if (
-                     member.memberInfo.email ===
-                     authentication.currentUser.email
-                  ) {
-                     sum = parseFloat(sum) + parseFloat(member.pay);
-                  }
-               });
-            }
+            if (expense.payer)
+               if (payer.email === expense.payer.email) {
+                  expense.members.forEach((member) => {
+                     if (
+                        member.memberInfo.email ===
+                        authentication.currentUser.email
+                     ) {
+                        sum = parseFloat(sum) + parseFloat(member.pay);
+                     }
+                  });
+               }
          });
 
          if (sum != parseFloat(0)) {
@@ -423,7 +385,6 @@ const GroupIndividualScreen = ({ navigation, route }) => {
                   t.payer.email === thing.payer.email
             )
       );
-      // console.log(JSON.stringify(resultSettle, null, 3));
 
       setPayList(resultSettle);
       if (resultSettle === null) console.log("NULL PROSTULE");
@@ -470,7 +431,18 @@ const GroupIndividualScreen = ({ navigation, route }) => {
          >
             {!loadingPay ? (
                <View>
-                  {payList ? (
+                  {payList && payList.length === 0 ? (
+                     <Text
+                        style={{
+                           fontWeight: "500",
+                           fontSize: 12,
+                           color: "#979797",
+                           marginBottom: 250,
+                        }}
+                     >
+                        All your payments settled up
+                     </Text>
+                  ) : (
                      <FlatList
                         contentContainerStyle={{
                            marginTop: 15,
@@ -482,17 +454,6 @@ const GroupIndividualScreen = ({ navigation, route }) => {
                         showsVerticalScrollIndicator={false}
                         alwaysBounceVertical={false}
                      />
-                  ) : (
-                     <Text
-                        style={{
-                           fontWeight: "500",
-                           fontSize: 12,
-                           color: "#979797",
-                           marginBottom: 200,
-                        }}
-                     >
-                        No payments
-                     </Text>
                   )}
                </View>
             ) : (
@@ -826,7 +787,7 @@ const GroupIndividualScreen = ({ navigation, route }) => {
                   ></BackButton>
                   <TouchableWithAnimation
                      onPress={() =>
-                        console.log(JSON.stringify(expensesList, null, 3))
+                        console.log(JSON.stringify(payList, null, 3))
                      }
                   >
                      <ThreeDotsIcon style={{ marginLeft: 260 }}></ThreeDotsIcon>
@@ -902,6 +863,7 @@ const GroupIndividualScreen = ({ navigation, route }) => {
                      activeStrokeWidth={10}
                      inActiveStrokeWidth={10}
                   />
+
                   <View style={styles.membersContainer}>
                      <Text
                         style={{

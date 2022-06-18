@@ -16,6 +16,7 @@ const TouchableWithAnimation = ({
    disabled,
    style,
    key,
+   onLongPress,
 }) => {
    const animatePress = useRef(new Animated.Value(1)).current;
 
@@ -41,6 +42,7 @@ const TouchableWithAnimation = ({
          onPressIn={() => animateIn()}
          onPressOut={() => animateOut()}
          onPress={onPress}
+         onLongPress={onLongPress}
          disabled={disabled}
       >
          <Animated.View

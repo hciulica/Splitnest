@@ -8,6 +8,7 @@ import {
    View,
    Animated,
    Image,
+   Alert,
 } from "react-native";
 
 import TouchableWithAnimation from "../components/TouchableWithAnimation";
@@ -53,106 +54,142 @@ const ExpenseCard = ({ style, addedAt, name, payer, price, members }) => {
 
       //If you are the payer
       var sum = 0;
-      if (payer.email === authentication.currentUser.email) {
-         //  const resultSum = getResult();
-         //  console.log(resultSum);
+      if (payer)
+         if (payer.email === authentication.currentUser.email) {
+            //  const resultSum = getResult();
+            //  console.log(resultSum);
 
-         result.then((sum) => {
-            setSumPay(sum);
-            // setSumPay(sum);
-         });
-      } else {
-         if (members && members.length)
-            members.forEach((member) => {
-               if (
-                  member.memberInfo.email === authentication.currentUser.email
-               ) {
-                  setSumPay(member.pay);
-               }
+            result.then((sum) => {
+               setSumPay(sum);
+               // setSumPay(sum);
             });
-      }
+         } else {
+            if (members && members.length)
+               members.forEach((member) => {
+                  if (
+                     member.memberInfo.email ===
+                     authentication.currentUser.email
+                  ) {
+                     setSumPay(member.pay);
+                  }
+               });
+         }
    }, [members]);
 
    return (
-      <TouchableWithAnimation
-         style={[styles.containerCard, style]}
-         duration={150}
-         pressAnimation={0.97}
-      >
-         <View style={styles.dateStyle}>
-            <Text style={styles.monthStyle}>{addedAt.month}</Text>
-            <Text style={styles.dayStyle}>{addedAt.day}</Text>
-         </View>
-         <ExpenseIcon style={{ marginLeft: 10 }}></ExpenseIcon>
-         <View style={{ marginLeft: 17, width: 145 }}>
-            <Text style={styles.expenseNameStyle}>{name}</Text>
-            <View
-               style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  marginTop: 3,
-               }}
-            >
-               <Text style={styles.payerStyle}>
-                  {payer.email === authentication.currentUser.email
-                     ? "You"
-                     : payer.username.substring(
-                          0,
-                          payer.username.indexOf(" ")
-                       ) !== ""
-                     ? payer.username.substring(0, payer.username.indexOf(" "))
-                     : payer.username.substring(0, 8)}{" "}
-                  paid
-               </Text>
-               <Text style={styles.pricePayerStyle}>
-                  {parseFloat(price).toFixed(2)}RON
-               </Text>
-            </View>
-         </View>
-         {sumPay !== null ? (
-            <View style={{ alignItems: "flex-end", width: 85 }}>
-               <Text
-                  style={[
-                     styles.textPayStyle,
-                     {
-                        color:
-                           payer.email === authentication.currentUser.email
-                              ? "rgba(49,101,255, 0.75)"
-                              : "rgba(255,97,87,1)",
-                     },
-                  ]}
+      <>
+         {addedAt && name && payer && price && members ? (
+            <>
+               <TouchableWithAnimation
+                  style={[styles.containerCard, style]}
+                  duration={150}
+                  pressAnimation={0.97}
+                  onLongPress={() =>
+                     Alert.alert(
+                        name,
+                        "Are you sure you want to pay " +
+                           parseFloat(price).toFixed(2),
+                        [
+                           { text: "Cancel", style: "cancel" },
+                           {
+                              text: "Pay " + parseFloat(price).toFixed(2),
+                              onPress: () => console.log("You paid"),
+                              //   style: "destructive",
+                           },
+                           {
+                              text: "Delete",
+                              onPress: () => console.log("You paid"),
+                              style: "destructive",
+                           },
+                        ]
+                     )
+                  }
                >
-                  {payer.email === authentication.currentUser.email
-                     ? "You have to receive"
-                     : "You have to pay"}
-               </Text>
-               <Text
-                  style={[
-                     styles.payValueStyle,
-                     {
-                        color:
-                           payer.email === authentication.currentUser.email
-                              ? "rgba(49,101,255, 0.75)"
-                              : "rgba(255,97,87,1)",
-                     },
-                  ]}
-               >
-                  {sumPay !== null ? parseFloat(sumPay).toFixed(2) : "0.00"}RON
-               </Text>
-            </View>
-         ) : (
-            <Text
-               style={{
-                  fontWeight: "bold",
-                  fontSize: 10,
-                  color: "green",
-                  marginLeft: 10,
-               }}
-            >
-               All settled up
-            </Text>
-         )}
-      </TouchableWithAnimation>
+                  <View style={styles.dateStyle}>
+                     <Text style={styles.monthStyle}>{addedAt.month}</Text>
+                     <Text style={styles.dayStyle}>{addedAt.day}</Text>
+                  </View>
+                  <ExpenseIcon style={{ marginLeft: 10 }}></ExpenseIcon>
+                  <View style={{ marginLeft: 17, width: 145 }}>
+                     <Text style={styles.expenseNameStyle}>{name}</Text>
+                     <View
+                        style={{
+                           flexDirection: "row",
+                           alignItems: "center",
+                           marginTop: 3,
+                        }}
+                     >
+                        <Text style={styles.payerStyle}>
+                           {payer.email === authentication.currentUser.email
+                              ? "You"
+                              : payer.username.substring(
+                                   0,
+                                   payer.username.indexOf(" ")
+                                ) !== ""
+                              ? payer.username.substring(
+                                   0,
+                                   payer.username.indexOf(" ")
+                                )
+                              : payer.username.substring(0, 8)}{" "}
+                           paid
+                        </Text>
+                        <Text style={styles.pricePayerStyle}>
+                           {parseFloat(price).toFixed(2)}RON
+                        </Text>
+                     </View>
+                  </View>
+                  {sumPay !== null ? (
+                     <View style={{ alignItems: "flex-end", width: 85 }}>
+                        <Text
+                           style={[
+                              styles.textPayStyle,
+                              {
+                                 color:
+                                    payer.email ===
+                                    authentication.currentUser.email
+                                       ? "rgba(49,101,255, 0.75)"
+                                       : "rgba(255,97,87,1)",
+                              },
+                           ]}
+                        >
+                           {payer.email === authentication.currentUser.email
+                              ? "You have to receive"
+                              : "You have to pay"}
+                        </Text>
+                        <Text
+                           style={[
+                              styles.payValueStyle,
+                              {
+                                 color:
+                                    payer.email ===
+                                    authentication.currentUser.email
+                                       ? "rgba(49,101,255, 0.75)"
+                                       : "rgba(255,97,87,1)",
+                              },
+                           ]}
+                        >
+                           {sumPay !== null
+                              ? parseFloat(sumPay).toFixed(2)
+                              : "0.00"}
+                           RON
+                        </Text>
+                     </View>
+                  ) : (
+                     <Text
+                        style={{
+                           fontWeight: "bold",
+                           fontSize: 10,
+                           color: "green",
+                           marginLeft: 10,
+                        }}
+                     >
+                        All settled up
+                     </Text>
+                  )}
+               </TouchableWithAnimation>
+            </>
+         ) : null}
+      </>
    );
 };
 

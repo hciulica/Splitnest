@@ -224,10 +224,6 @@ const HomeScreen = ({ navigation, route }) => {
       return new Promise(parseFloat(a) + parseFloat(b));
    }
 
-   // var result = new Promise((resolve, reject) => {
-   //       var sum = 0;
-
-   // })
    const unionPrices = async () => {
       await fetchActivityList();
 
@@ -248,9 +244,6 @@ const HomeScreen = ({ navigation, route }) => {
                sw = 0;
                console.log("AICI");
 
-               // await sumFunct(element.pay, elementAfter.pay).then((result) => {
-               //    elementAfter.pay = result;
-               // });
                elementAfter.pay =
                   parseFloat(elementAfter.pay) + parseFloat(element.pay);
 
@@ -270,6 +263,7 @@ const HomeScreen = ({ navigation, route }) => {
    };
 
    const fetchActivityList = async () => {
+      setLoading(true);
       let payerLists = [];
       const groupsRef = query(collection(db, "Groups"));
       const querySnapshot = await getDocs(groupsRef);
@@ -300,6 +294,7 @@ const HomeScreen = ({ navigation, route }) => {
       });
 
       setTimeout(() => setActivityList(payerLists), 5);
+      setLoading(false);
    };
 
    const setResultActivityList = async () => {
@@ -307,32 +302,13 @@ const HomeScreen = ({ navigation, route }) => {
    };
 
    useEffect(() => {
-      setLoading(true);
       let today = new Date();
       const unsubscribe = navigation.addListener("focus", () => {
          fetchOwed();
          fetchDayUpdates();
          const resultDate = formatDate(today);
          setTodayDate(resultDate);
-
-         // resultPayerLists.then((list) => {
-         //    setTimeout(() => {
-         //       console.log(list);
-         //    }, 200);
-         // });
-
-         // setResultActivityList();
-
          fetchActivityList();
-         // unionPrices();
-
-         // setResultActivityList();
-
-         // fetchActivityList();
-
-         // console.log(JSON.stringify(activityList, null, 3));
-
-         setLoading(false);
       });
       return unsubscribe;
    }, [navigation]);
@@ -419,270 +395,299 @@ const HomeScreen = ({ navigation, route }) => {
 
    return (
       <>
-         <FlatList
-            ListHeaderComponent={
-               <>
-                  <View
-                     style={{
-                        width: width,
-                        height: 410,
-                        backgroundColor: "white",
-                        marginBottom: 60,
-                        borderRadius: 15,
-                     }}
-                  >
+         {!loading ? (
+            <FlatList
+               ListHeaderComponent={
+                  <>
                      <View
                         style={{
-                           marginLeft: 22,
-                           marginTop: 67,
-                           flexDirection: "row",
-                           alignItems: "center",
+                           width: width,
+                           height: 410,
+                           backgroundColor: "white",
+                           marginBottom: 60,
+                           borderRadius: 15,
                         }}
                      >
-                        <Text style={styles.dateStyle}>{todayDate}</Text>
-                        <CalendarIcon style={{ marginLeft: 12 }}></CalendarIcon>
-                     </View>
-                     <Text style={styles.todayStyle}>Today</Text>
-                     <View
-                        style={{
-                           alignItems: "center",
-                           justifyContent: "center",
-                           flexDirection: "row",
-                           marginTop: 20,
-                        }}
-                     >
-                        <TouchableWithAnimation
-                           // onPress={async () => await fetchOwed()}
-                           style={[
-                              styles.todayCardStyle,
-
-                              {
-                                 backgroundColor: "rgba(49, 101, 255, 0.75)",
-                                 alignItems: "center",
-                                 justifyContent: "center",
-                              },
-                           ]}
+                        <View
+                           style={{
+                              marginLeft: 22,
+                              marginTop: 67,
+                              flexDirection: "row",
+                              alignItems: "center",
+                           }}
                         >
-                           <PiggyIcon
-                              style={{
-                                 alignSelf: "flex-end",
+                           <Text style={styles.dateStyle}>{todayDate}</Text>
+                           <CalendarIcon
+                              style={{ marginLeft: 12 }}
+                           ></CalendarIcon>
+                        </View>
+                        <Text style={styles.todayStyle}>Today</Text>
+                        <View
+                           style={{
+                              alignItems: "center",
+                              justifyContent: "center",
+                              flexDirection: "row",
+                              marginTop: 20,
+                           }}
+                        >
+                           <TouchableWithAnimation
+                              // onPress={async () => await fetchOwed()}
+                              style={[
+                                 styles.todayCardStyle,
 
-                                 position: "absolute",
-                                 bottom: 0,
-                                 top: 12,
-                                 left: 112,
-                                 right: 0,
-                              }}
-                           ></PiggyIcon>
-                           <View
-                              style={{
-                                 flexDirection: "row",
-                                 alignItems: "flex-end",
-                                 justifyContent: "center",
-                              }}
+                                 {
+                                    backgroundColor: "rgba(49, 101, 255, 0.75)",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                 },
+                              ]}
                            >
+                              <PiggyIcon
+                                 style={{
+                                    alignSelf: "flex-end",
+
+                                    position: "absolute",
+                                    bottom: 0,
+                                    top: 12,
+                                    left: 112,
+                                    right: 0,
+                                 }}
+                              ></PiggyIcon>
+                              <View
+                                 style={{
+                                    flexDirection: "row",
+                                    alignItems: "flex-end",
+                                    justifyContent: "center",
+                                 }}
+                              >
+                                 <Text
+                                    style={[
+                                       styles.valueCardStyle,
+                                       {
+                                          fontSize:
+                                             parseInt(amountOwed) >= 0 &&
+                                             parseInt(amountOwed) <= 99
+                                                ? 30
+                                                : parseInt(amountOwed) >= 100 &&
+                                                  parseInt(amountOwed) <= 999
+                                                ? 28
+                                                : 22,
+                                       },
+                                    ]}
+                                 >
+                                    {parseFloat(amountOwed).toFixed(1)}
+                                 </Text>
+                                 <Text
+                                    style={[
+                                       styles.ronCardStyle,
+                                       { fontSize: 10 },
+                                    ]}
+                                 >
+                                    RON
+                                 </Text>
+                              </View>
+                              <Text style={styles.amountOwedStyle}>
+                                 Amount owed
+                              </Text>
+                           </TouchableWithAnimation>
+                           <TouchableWithAnimation
+                              onPress={() =>
+                                 console.log(
+                                    JSON.stringify(activityList, null, 3)
+                                 )
+                              }
+                              style={[
+                                 styles.todayCardStyle,
+                                 {
+                                    backgroundColor:
+                                       "rgba(255, 206, 147, 0.75)",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                 },
+                              ]}
+                           >
+                              <PayOweIcon
+                                 style={{
+                                    alignSelf: "flex-end",
+
+                                    position: "absolute",
+                                    bottom: 0,
+                                    top: 12,
+                                    left: 112,
+                                    right: 0,
+                                 }}
+                              ></PayOweIcon>
+
                               <Text
                                  style={[
                                     styles.valueCardStyle,
                                     {
                                        fontSize:
-                                          parseInt(amountOwed) >= 0 &&
-                                          parseInt(amountOwed) <= 99
+                                          parseInt(paymentsOwed) >= 0 &&
+                                          parseInt(paymentsOwed) <= 99
                                              ? 30
-                                             : parseInt(amountOwed) >= 100 &&
-                                               parseInt(amountOwed) <= 999
+                                             : parseInt(paymentsOwed) >= 100 &&
+                                               parseInt(paymentsOwed) <= 999
                                              ? 28
                                              : 22,
                                     },
                                  ]}
                               >
-                                 {amountOwed}
+                                 {paymentsOwed}
                               </Text>
-                              <Text
-                                 style={[styles.ronCardStyle, { fontSize: 10 }]}
-                              >
-                                 RON
+
+                              <Text style={styles.amountOwedStyle}>
+                                 Payments owed
                               </Text>
-                           </View>
-                           <Text style={styles.amountOwedStyle}>
-                              Amount owed
-                           </Text>
-                        </TouchableWithAnimation>
-                        <TouchableWithAnimation
-                           onPress={() =>
-                              console.log(JSON.stringify(activityList, null, 3))
-                           }
-                           style={[
-                              styles.todayCardStyle,
-                              {
-                                 backgroundColor: "rgba(255, 206, 147, 0.75)",
-                                 alignItems: "center",
-                                 justifyContent: "center",
-                              },
-                           ]}
+                           </TouchableWithAnimation>
+                        </View>
+                        <View
+                           style={{
+                              alignItems: "center",
+                              justifyContent: "center",
+                              flexDirection: "row",
+                           }}
                         >
-                           <PayOweIcon
-                              style={{
-                                 alignSelf: "flex-end",
-
-                                 position: "absolute",
-                                 bottom: 0,
-                                 top: 12,
-                                 left: 112,
-                                 right: 0,
-                              }}
-                           ></PayOweIcon>
-
-                           <Text
+                           <TouchableWithAnimation
+                              onPress={() => unionPrices()}
                               style={[
-                                 styles.valueCardStyle,
+                                 styles.todayCardStyle,
                                  {
-                                    fontSize:
-                                       parseInt(paymentsOwed) >= 0 &&
-                                       parseInt(paymentsOwed) <= 99
-                                          ? 30
-                                          : parseInt(paymentsOwed) >= 100 &&
-                                            parseInt(paymentsOwed) <= 999
-                                          ? 28
-                                          : 22,
+                                    backgroundColor: "rgba(97, 200, 119, 0.75)",
+                                    justifyContent: "center",
+                                    alignItems: "center",
                                  },
                               ]}
                            >
-                              {paymentsOwed}
-                           </Text>
+                              <CardIcon
+                                 style={{
+                                    alignSelf: "flex-end",
 
-                           <Text style={styles.amountOwedStyle}>
-                              Payments owed
-                           </Text>
-                        </TouchableWithAnimation>
-                     </View>
-                     <View
-                        style={{
-                           alignItems: "center",
-                           justifyContent: "center",
-                           flexDirection: "row",
-                        }}
-                     >
-                        <TouchableWithAnimation
-                           onPress={() => unionPrices()}
-                           style={[
-                              styles.todayCardStyle,
-                              {
-                                 backgroundColor: "rgba(97, 200, 119, 0.75)",
-                                 justifyContent: "center",
-                                 alignItems: "center",
-                              },
-                           ]}
-                        >
-                           <CardIcon
-                              style={{
-                                 alignSelf: "flex-end",
+                                    position: "absolute",
+                                    bottom: 0,
+                                    top: 12,
+                                    left: 112,
+                                    right: 0,
+                                 }}
+                              ></CardIcon>
 
-                                 position: "absolute",
-                                 bottom: 0,
-                                 top: 12,
-                                 left: 112,
-                                 right: 0,
-                              }}
-                           ></CardIcon>
-
-                           <Text
-                              style={[
-                                 styles.valueCardStyle,
-                                 {
-                                    fontSize:
-                                       paymentsMade >= 0 && paymentsMade <= 99
-                                          ? 30
-                                          : paymentsMade >= 100 &&
-                                            paymentsMade <= 999
-                                          ? 28
-                                          : 22,
-                                 },
-                              ]}
-                           >
-                              {paymentsMade}
-                           </Text>
-
-                           <Text style={styles.amountOwedStyle}>
-                              Payments made
-                           </Text>
-                        </TouchableWithAnimation>
-                        <TouchableWithAnimation
-                           style={[
-                              styles.todayCardStyle,
-                              {
-                                 backgroundColor: "rgba(255, 97, 87, 0.75)",
-                                 justifyContent: "center",
-                                 alignItems: "center",
-                              },
-                           ]}
-                        >
-                           <MoneyIcon
-                              style={{
-                                 alignSelf: "flex-end",
-
-                                 position: "absolute",
-                                 bottom: 0,
-                                 top: 12,
-                                 left: 112,
-                                 right: 0,
-                              }}
-                           ></MoneyIcon>
-                           <View
-                              style={{
-                                 flexDirection: "row",
-                                 alignItems: "flex-end",
-                                 justifyContent: "center",
-                              }}
-                           >
                               <Text
                                  style={[
                                     styles.valueCardStyle,
                                     {
                                        fontSize:
-                                          parseInt(spentToday) >= 0 &&
-                                          parseInt(spentToday) <= 99
+                                          paymentsMade >= 0 &&
+                                          paymentsMade <= 99
                                              ? 30
-                                             : parseInt(spentToday) >= 100 &&
-                                               parseInt(spentToday) <= 999
+                                             : paymentsMade >= 100 &&
+                                               paymentsMade <= 999
                                              ? 28
                                              : 22,
                                     },
                                  ]}
                               >
-                                 {parseInt(spentToday)}
+                                 {paymentsMade}
                               </Text>
-                              <Text
-                                 style={[
-                                    styles.ronCardStyle,
-                                    {
-                                       fontSize: 10,
-                                    },
-                                 ]}
+
+                              <Text style={styles.amountOwedStyle}>
+                                 Payments made
+                              </Text>
+                           </TouchableWithAnimation>
+                           <TouchableWithAnimation
+                              style={[
+                                 styles.todayCardStyle,
+                                 {
+                                    backgroundColor: "rgba(255, 97, 87, 0.75)",
+                                    justifyContent: "center",
+                                    alignItems: "center",
+                                 },
+                              ]}
+                           >
+                              <MoneyIcon
+                                 style={{
+                                    alignSelf: "flex-end",
+
+                                    position: "absolute",
+                                    bottom: 0,
+                                    top: 12,
+                                    left: 112,
+                                    right: 0,
+                                 }}
+                              ></MoneyIcon>
+                              <View
+                                 style={{
+                                    flexDirection: "row",
+                                    alignItems: "flex-end",
+                                    justifyContent: "center",
+                                 }}
                               >
-                                 RON
+                                 <Text
+                                    style={[
+                                       styles.valueCardStyle,
+                                       {
+                                          fontSize:
+                                             parseInt(spentToday) >= 0 &&
+                                             parseInt(spentToday) <= 99
+                                                ? 30
+                                                : parseInt(spentToday) >= 100 &&
+                                                  parseInt(spentToday) <= 999
+                                                ? 28
+                                                : 22,
+                                       },
+                                    ]}
+                                 >
+                                    {parseFloat(spentToday).toFixed(1)}
+                                 </Text>
+                                 <Text
+                                    style={[
+                                       styles.ronCardStyle,
+                                       {
+                                          fontSize: 10,
+                                       },
+                                    ]}
+                                 >
+                                    RON
+                                 </Text>
+                              </View>
+                              <Text style={styles.amountOwedStyle}>
+                                 Total spent
                               </Text>
-                           </View>
-                           <Text style={styles.amountOwedStyle}>
-                              Total spent
+                           </TouchableWithAnimation>
+                        </View>
+                        <Text style={styles.activityLabel}>Activity</Text>
+
+                        {activityList.length === [] ? (
+                           <Text
+                              style={{
+                                 fontSize: 12,
+                                 marginTop: 75,
+                                 alignSelf: "center",
+                                 color: "#979797",
+                              }}
+                           >
+                              No recent activity
                            </Text>
-                        </TouchableWithAnimation>
+                        ) : null}
                      </View>
-                     <Text style={styles.activityLabel}>Activity</Text>
-                  </View>
-               </>
-            }
-            // ListFooterComponent={}
-            style={{ marginBottom: 100 }}
-            ListFooterComponentStyle={{ marginLeft: 20 }}
-            nestedScrollEnabled={true}
-            horizontal={false}
-            data={activityList}
-            renderItem={renderItem}
-            showsVerticalScrollIndicator={false}
-            alwaysBounceVertical={false}
-            // scrollToOffset={}
-         />
+                  </>
+               }
+               // ListFooterComponent={}
+               style={{ marginBottom: 100 }}
+               ListFooterComponentStyle={{ marginLeft: 20 }}
+               nestedScrollEnabled={true}
+               horizontal={false}
+               data={activityList}
+               renderItem={renderItem}
+               showsVerticalScrollIndicator={false}
+               alwaysBounceVertical={false}
+               // scrollToOffset={}
+            />
+         ) : (
+            <MaterialIndicator
+               size={40}
+               color="rgba(49,101,255,0.80)"
+            ></MaterialIndicator>
+         )}
       </>
    );
 };

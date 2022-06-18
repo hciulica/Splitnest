@@ -92,12 +92,12 @@ const CreateGroupScreen = ({ navigation, route }) => {
                   name: groupName,
                   type: chipSelected,
                   createdAt: Timestamp.now(),
-                  progress: 0,
+                  progress: 100,
                },
             });
             console.log(groupRef.id);
 
-            //Add for every group member
+            //for group members
             route.params?.groupParticipants.forEach(async (member) => {
                const refMember = doc(db, "Users", member.email);
 
@@ -111,7 +111,7 @@ const CreateGroupScreen = ({ navigation, route }) => {
                });
             });
 
-            //Add for current user connected
+            //for current user connected
             const refCurrentUser = doc(
                db,
                "Users",

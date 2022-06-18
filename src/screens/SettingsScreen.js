@@ -116,9 +116,6 @@ const SettingsScreen = ({ navigation }) => {
    };
 
    const onChangePasswordPress = async () => {
-      // await reauthenticateUser(currentPassword).then(() => {
-      //     const user = authentication.currentUser;
-
       const user = authentication.currentUser;
       await updatePassword(user, newPassword)
          .then(() => {

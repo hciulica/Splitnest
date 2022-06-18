@@ -263,10 +263,6 @@ const AccountScreen = ({ navigation }) => {
       );
    };
 
-   const numberCall = () => {
-      Linking.openURL(`tel:0771583241`);
-   };
-
    return (
       <KeyboardAvoidingView style={styles.container}>
          <View style={[styles.topContainer, { width: width }]}>

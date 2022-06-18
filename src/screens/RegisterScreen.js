@@ -27,6 +27,18 @@ import SplitLogo from "../../assets/images/SplitLogo.png";
 import BasicImage from "../../assets/images/Image_profile.png";
 
 import {
+   BallIndicator,
+   BarIndicator,
+   DotIndicator,
+   MaterialIndicator,
+   PacmanIndicator,
+   PulseIndicator,
+   SkypeIndicator,
+   UIActivityIndicator,
+   WaveIndicator,
+} from "react-native-indicators";
+
+import {
    createUserWithEmailAndPassword,
    signInWithEmailAndPassword,
    signOut,
@@ -288,11 +300,11 @@ const RegisterScreen = ({ navigation }) => {
                </>
             ) : (
                <>
-                  <ActivityIndicator
-                     style={{ width: width, height: 270 }}
-                     size="large"
-                     color="#3165FF"
-                  />
+                  <MaterialIndicator
+                     style={{ width: width, marginTop: 150 }}
+                     size={50}
+                     color="rgba(49,101,255,0.80)"
+                  ></MaterialIndicator>
                </>
             )}
          </View>

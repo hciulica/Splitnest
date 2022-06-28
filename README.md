@@ -5,7 +5,7 @@ The application that facilitates an easier way to split the bill
 
 
 
-![Logo](https://github.com/hciulica/Splitnest/blob/main/assets/images/SplitLogo.png?raw=true)
+<img src="https://github.com/hciulica/Splitnest/blob/main/assets/images/SplitLogo.svg?raw=true" width="250" />
 
 ## Run Locally
 
@@ -59,9 +59,21 @@ Run the application with npm/yarn
 
 
 
+
+
 ## Screenshots
 
-<img src="https://github.com/hciulica/Splitnest/blob/main/assets/screenshots/HomeScreen.png?raw=true" width="200" height="400" />
+<p>
+  <img src="https://github.com/hciulica/Splitnest/blob/main/assets/screenshots/HomeScreen.png?raw=true" width="200" />
+  <img src="https://github.com/hciulica/Splitnest/blob/main/assets/screenshots/CreateGroup.png?raw=true" width="200" />
+  <img src="https://github.com/hciulica/Splitnest/blob/main/assets/screenshots/AddExpense.png?raw=true" width="200" />
+  <img src="https://github.com/hciulica/Splitnest/blob/main/assets/screenshots/AddMembers.png?raw=true" width="200" />
+  <img src="https://github.com/hciulica/Splitnest/blob/main/assets/screenshots/AdjustSplitEqually.png?raw=true" width="200" />
+  <img src="https://github.com/hciulica/Splitnest/blob/main/assets/screenshots/AdjustSplitPercentage.png?raw=true" width="200" />
+  <img src="https://github.com/hciulica/Splitnest/blob/main/assets/screenshots/ExpensesInGroup.png?raw=true" width="200" />
+  <img src="https://github.com/hciulica/Splitnest/blob/main/assets/screenshots/ConfirmPayment.png?raw=true" width="200" />
+  
+</p>
 
 ## Features
 

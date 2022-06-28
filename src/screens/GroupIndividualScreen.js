@@ -11,6 +11,7 @@ import {
    TextInput,
    FlatList,
    Modal,
+   TouchableWithoutFeedback,
 } from "react-native";
 
 import FlatButton from "../components/FlatButton";
@@ -69,6 +70,7 @@ import {
    updateDoc,
    getDocs,
    collection,
+   deleteDoc,
    query,
    arrayUnion,
    serverTimestamp,
@@ -97,6 +99,7 @@ const GroupIndividualScreen = ({ navigation, route }) => {
    const [payList, setPayList] = useState(null);
    const [loading, setLoading] = useState(false);
    const [percentage, setPercentage] = useState(null);
+   const [dropDownVisibile, setDropDownVisibile] = useState(false);
 
    var group;
    if (route.params?.group) {
@@ -106,10 +109,51 @@ const GroupIndividualScreen = ({ navigation, route }) => {
    const [groupImage, setGroupImage] = useState(group.image);
    const [editable, setEditable] = useState(false);
 
+   const calculateProgress = async () => {
+      const expensesRef = query(
+         collection(db, "Groups", group.uid, "Expenses")
+      );
+      const querySnapshot = await getDocs(expensesRef);
+      let totalOwedPay = 0;
+      await querySnapshot.forEach(async (expenses) => {
+         console.log(expenses.data());
+         const expense = expenses.data();
+         if (expense.members) {
+            expense.members.forEach((member) => {
+               totalOwedPay = parseFloat(totalOwedPay) + parseFloat(member.pay);
+            });
+         }
+      });
+      if (group.total) {
+         const divideResult =
+            parseFloat(totalOwedPay) / parseFloat(group.total);
+         const percentageResult = divideResult * 100;
+         console.log(parseFloat(percentageResult).toFixed(2));
+         const finalResult = 100 - percentageResult;
+         setPercentage(finalResult);
+
+         const docGroupRef = doc(db, "Groups", group.uid);
+
+         await updateDoc(docGroupRef, {
+            "Details.progress": finalResult,
+         });
+      }
+   };
+
+   const deleteGroup = async () => {
+      // await deleteDoc(doc(db, "Groups", group.uid));
+      group.members.forEach((member) => {
+         console.log(member.email);
+      });
+      // navigation.goBack();
+   };
+
    useEffect(() => {
       const unsubscribe = navigation.addListener("focus", () => {
          navigation.navigate("Expenses");
          setGroupMembers();
+         setGroupExpenses();
+         setTimeout(() => calculateProgress(), 200);
       });
 
       return unsubscribe;
@@ -265,7 +309,7 @@ const GroupIndividualScreen = ({ navigation, route }) => {
       useEffect(() => {
          const unsubscribe = navigation.addListener("focus", () => {
             setGroupExpenses();
-            calculateProgress();
+            setTimeout(() => calculateProgress(), 200);
          });
 
          return unsubscribe;
@@ -785,13 +829,9 @@ const GroupIndividualScreen = ({ navigation, route }) => {
                         navigation.goBack();
                      }}
                   ></BackButton>
-                  <TouchableWithAnimation
-                     onPress={() =>
-                        console.log(JSON.stringify(payList, null, 3))
-                     }
-                  >
-                     <ThreeDotsIcon style={{ marginLeft: 260 }}></ThreeDotsIcon>
-                  </TouchableWithAnimation>
+                  <TouchableWithoutFeedback onPress={() => deleteGroup()}>
+                     <ThreeDotsIcon style={{ marginLeft: 275 }}></ThreeDotsIcon>
+                  </TouchableWithoutFeedback>
                </View>
                <View style={styles.header}>
                   <View style={styles.titlePosition}>
@@ -1139,6 +1179,7 @@ const styles = StyleSheet.create({
       shadowRadius: 6.68,
 
       elevation: 11,
+      zIndex: 0,
    },
    subtitleContainer: {
       marginLeft: 42,

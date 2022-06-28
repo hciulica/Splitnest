@@ -58,6 +58,14 @@ Run the application with npm/yarn
 **Supported:** iOS only
 
 
+## Features
+
+- Account configuration
+- Friends list
+- Create group
+- Add one expense in multiple groups
+- Pay owed value
+- Statistics view
 
 
 
@@ -74,15 +82,6 @@ Run the application with npm/yarn
   <img src="https://github.com/hciulica/Splitnest/blob/main/assets/screenshots/ConfirmPayment.png?raw=true" width="200" />
   
 </p>
-
-## Features
-
-- Account configuration
-- Friends list
-- Create group
-- Add one expense in multiple groups
-- Pay owed value
-- Statistics view
 
 ## Demo
 

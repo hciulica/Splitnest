@@ -84,6 +84,9 @@ Run the application with npm/yarn
 - Pay owed value
 - Statistics view
 
+## Demo
+
+[![Watch the video](https://github.com/hciulica/Splitnest/blob/main/assets/screenshots/HomeScreenPlay.jpg?raw=true)](https://www.youtube.com/watch?v=yUtieAFUTfo)
 
 ## Feedback
 

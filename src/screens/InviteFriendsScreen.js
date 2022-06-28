@@ -420,7 +420,7 @@ const InviteFriendsScreen = ({
                      showsVerticalScrollIndicator={false}
                      alwaysBounceVertical={false}
                   />
-               ) : (
+               ) : loadingScreen ? (
                   <View
                      style={{
                         justifyContent: "center",
@@ -434,7 +434,17 @@ const InviteFriendsScreen = ({
                         style={{ marginTop: 230 }}
                      ></MaterialIndicator>
                   </View>
-               )}
+               ) : friendsResults.length === 0 ? (
+                  <View
+                     style={{
+                        justifyContent: "center",
+                        alignItems: "center",
+                        marginRight: 30,
+                     }}
+                  >
+                     <Text>No found</Text>
+                  </View>
+               ) : null}
             </View>
          </View>
       </SafeAreaView>

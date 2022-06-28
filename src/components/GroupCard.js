@@ -141,7 +141,7 @@ const GroupCard = ({
                {parseInt(progress) !== parseInt(100) ? (
                   <CircularProgress
                      style={{ marginLeft: 10 }}
-                     value={parseInt(progress)}
+                     value={parseFloat(progress).toFixed(2)}
                      inActiveStrokeColor={"#2ecc71"}
                      inActiveStrokeOpacity={0.15}
                      progressValueColor={"rgba(0,0,0,0.6)"}

@@ -127,43 +127,6 @@ const SplitScreen = ({ navigation, route, navigation: { setParams } }) => {
       });
    };
 
-   // const addInvited = (item) => {
-   //    const friend = {
-   //       username: item.username,
-   //       email: item.email,
-   //       image: item.image,
-   //    };
-
-   //    resultsMembers.push(friend);
-   //    setResultsMembers(resultsMembers);
-   // };
-
-   // const removeInvited = (item) => {
-   //    const friend = {
-   //       username: item.username,
-   //       email: item.email,
-   //       image: item.image,
-   //    };
-   //    setResultsMembers(
-   //       resultsMembers.filter((friend) => friend.email != item.email)
-   //    );
-   // };
-
-   // const pressCheckBox = (item) => {
-   //    console.log(resultsMembers);
-   //    for (let i = 0; i < resultsMembers.length; i++) {
-   //       if (item.email === resultsMembers[i].email) {
-   //          remainingArr = resultsMembers.filter(
-   //             (data) => data.email != item.email
-   //          );
-   //          setResultsMembers(remainingArr);
-   //       } else {
-   //          resultsMembers.push(item);
-   //          setResultsMembers(resultsMembers);
-   //       }
-   //    }
-   // };
-
    const addToSum = (value, email, name, image) => {
       for (i = 0; i < membersAdjust.length; i++) {
          if (email === membersAdjust[i].email) membersAdjust[i].pay = value;
@@ -221,7 +184,6 @@ const SplitScreen = ({ navigation, route, navigation: { setParams } }) => {
                console.log(numberRemain);
             }
          });
-
          membersAdjust.forEach((element) => {
             if (element.pay !== Number.parseFloat(0).toFixed(2)) {
                element.pay = Number.parseFloat(price / numberRemain).toFixed(4);
@@ -248,9 +210,7 @@ const SplitScreen = ({ navigation, route, navigation: { setParams } }) => {
             }
          });
       }
-
       setMembersSelected(numberRemain);
-      // if(state)
    };
 
    const renderItem = ({ item }) => {
@@ -591,7 +551,7 @@ const SplitScreen = ({ navigation, route, navigation: { setParams } }) => {
                                     }}
                                  >
                                     {parseFloat(price) - parseFloat(total) < 0
-                                       ? parseFloat(price - total).toFixed(2)
+                                       ? parseFloat(-(price - total)).toFixed(2)
                                        : parseFloat(price - total).toFixed(2)}
                                  </Text>
                                  <Text

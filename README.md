@@ -88,7 +88,7 @@ Run the application with npm/yarn
 https://www.youtube.com/watch?v=yUtieAFUTfo
 
 ## 🚀 About Me
-I am a fresh graduate student at the computer science faculty with a lot of potential who wants to enter the field of mobile development with enough knowledge about the native react and react framework. I developed the Splitnest application as a bachelor project in order to form a broad knowhow about everything that means the full stack part.
+I am a fresh computer science graduate student with a lot of potential who is eager to enter in the field of mobile development. I develop the application Splitnest as my bachelor thesis in order to gain and expand my knowledge about the fullstack development.
   
 ## Feedback
 

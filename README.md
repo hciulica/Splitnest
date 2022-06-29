@@ -85,7 +85,7 @@ Run the application with npm/yarn
 
 ## Demo
 
-https://www.youtube.com/watch?v=yUtieAFUTfo
+https://drive.google.com/file/d/1rIB18T_BhT0CSDigkk-wyzwTpTsGJVFJ/view?usp=sharing
 
 ## 🚀 About Me
 I am a fresh computer science graduate student with a lot of potential who is eager to enter in the field of mobile development. I develop the application Splitnest as my bachelor thesis in order to gain and expand my knowledge about the fullstack development.

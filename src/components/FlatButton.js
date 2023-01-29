@@ -9,6 +9,7 @@ import {
    Animated,
 } from "react-native";
 import TouchableWithAnimation from "../components/TouchableWithAnimation";
+import QrCodeIcon from "../../assets/icons/accscreen/QrCodeIcon.svg";
 
 export default function FlatButton({
    title,
@@ -46,9 +47,18 @@ export default function FlatButton({
          duration={duration}
          pressAnimation={pressAnimation}
       >
-         <Text style={[styles.buttonText, { fontSize: fontSizeText }]}>
-            {title}
-         </Text>
+         {title ? (
+            <Text style={[styles.buttonText, { fontSize: fontSizeText }]}>
+               {title}
+            </Text>
+         ) : (
+            <QrCodeIcon
+               style={styles.icon}
+               width={20}
+               height={20}
+               fill="white"
+            />
+         )}
       </TouchableWithAnimation>
    );
 }
@@ -64,5 +74,10 @@ const styles = StyleSheet.create({
       fontWeight: "bold",
       justifyContent: "center",
       textAlign: "center",
+   },
+
+   icon: {
+      justifyContent: "center",
+      alignSelf: "center",
    },
 });

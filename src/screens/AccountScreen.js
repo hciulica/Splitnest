@@ -10,6 +10,8 @@ import FlatButton from "../components/FlatButton";
 import CameraLogo from "../../assets/icons/accscreen/camera.svg";
 import * as Progress from "react-native-progress";
 import ExploreCard from "../components/ExploreCard";
+import FlipCard from "react-native-flip-card";
+import AccountQrCode from "../components/AccountQrCode";
 
 import {
    BallIndicator,
@@ -61,6 +63,8 @@ const AccountScreen = ({ navigation }) => {
    const [loading, setLoading] = useState(false);
    const [colorBorderPicture, setColorBorderPicture] = useState("#3165FF");
 
+   const [accountCardState, setAccountCardState] = useState(0);
+
    let colorBorderSelected = "#3165FF";
    const { width, height } = Dimensions.get("window");
 
@@ -79,6 +83,7 @@ const AccountScreen = ({ navigation }) => {
       const unsubscribe = navigation.addListener("focus", () => {
          setIsEditable(false);
          setUsername(authentication.currentUser.displayName);
+         setAccountCardState(0);
       });
       fetchDataFirestore();
 
@@ -265,176 +270,226 @@ const AccountScreen = ({ navigation }) => {
 
    return (
       <KeyboardAvoidingView style={styles.container}>
-         <View style={[styles.topContainer, { width: width }]}>
-            <Text
-               style={[
-                  styles.title,
-                  phone && imageURL ? { marginTop: 20 } : { marginBottom: 7 },
-               ]}
-            >
-               Account
-            </Text>
+         <FlipCard
+            flipHorizontal={true}
+            flipVertical={false}
+            flip={
+               accountCardState === 1 || accountCardState === 2 ? true : false
+            }
+            style={{ marginBottom: 30 }}
+            clickable={false}
+            onFlipEnd={() => {}}
+         >
+            {/* Face Side */}
+            <View style={[styles.topContainer, { width: width }]}>
+               <Text
+                  style={[
+                     styles.title,
+                     phone && imageURL
+                        ? { marginTop: 20 }
+                        : { marginBottom: 7 },
+                  ]}
+               >
+                  Account
+               </Text>
 
-            {phone && imageURL ? (
-               <>
-                  <View
-                     style={{
-                        justifyContent: "center",
-                        alignItems: "center",
-                        flexDirection: "row",
-                     }}
-                  >
-                     <View style={styles.groupText}>
-                        <Text style={styles.number}>{friendsNumber}</Text>
-                        <Text
-                           style={{
-                              color: "rgba(0,0,0,0.5)",
-                              fontWeight: "bold",
-                           }}
-                        >
-                           Friends
-                        </Text>
-                     </View>
-
-                     <TouchableOpacity
-                        duration={100}
-                        pressAnimation={0.96}
-                        activeOpacity={0.75}
-                        style={{ marginTop: 40 }}
-                        disabled={!isEditable}
-                        onPress={() => changeImageOrGallery()}
+               {phone && imageURL ? (
+                  <>
+                     <View
+                        style={{
+                           justifyContent: "center",
+                           alignItems: "center",
+                           flexDirection: "row",
+                        }}
                      >
-                        <Image
-                           source={{ uri: imageURL }}
-                           style={[styles.imageStyle, { borderTopWidth: 1 }]}
-                        />
-
-                        {isEditable ? (
-                           <View
+                        <View style={styles.groupText}>
+                           <Text style={styles.number}>{friendsNumber}</Text>
+                           <Text
                               style={{
-                                 position: "absolute",
-                                 top: 0,
-                                 left: 0,
-                                 right: 0,
-                                 bottom: 0,
-                                 justifyContent: "center",
-                                 alignItems: "center",
-                                 backgroundColor: loading
-                                    ? null
-                                    : "rgba(69,69,69,0.6)",
-                                 borderRadius: 75,
-                                 borderWidth: 3,
-
-                                 borderColor: "#3165FF",
+                                 color: "rgba(0,0,0,0.5)",
+                                 fontWeight: "bold",
                               }}
                            >
-                              <Text
+                              Friends
+                           </Text>
+                        </View>
+
+                        <TouchableOpacity
+                           duration={100}
+                           pressAnimation={0.96}
+                           activeOpacity={0.75}
+                           style={{ marginTop: 40 }}
+                           disabled={!isEditable}
+                           onPress={() => changeImageOrGallery()}
+                        >
+                           <Image
+                              source={{ uri: imageURL }}
+                              style={[styles.imageStyle, { borderTopWidth: 1 }]}
+                           />
+
+                           {isEditable ? (
+                              <View
                                  style={{
-                                    color: "white",
-                                    fontSize: 12,
-                                    fontWeight: "900",
+                                    position: "absolute",
+                                    top: 0,
+                                    left: 0,
+                                    right: 0,
+                                    bottom: 0,
+                                    justifyContent: "center",
+                                    alignItems: "center",
+                                    backgroundColor: loading
+                                       ? null
+                                       : "rgba(69,69,69,0.6)",
+                                    borderRadius: 75,
+                                    borderWidth: 3,
+
+                                    borderColor: "#3165FF",
                                  }}
                               >
-                                 Tap to change
-                              </Text>
-                           </View>
-                        ) : loading ? (
-                           <View
+                                 <Text
+                                    style={{
+                                       color: "white",
+                                       fontSize: 12,
+                                       fontWeight: "900",
+                                    }}
+                                 >
+                                    Tap to change
+                                 </Text>
+                              </View>
+                           ) : loading ? (
+                              <View
+                                 style={{
+                                    position: "absolute",
+                                    top: 0,
+                                    left: 0,
+                                    right: 0,
+                                    bottom: 0,
+                                    justifyContent: "center",
+                                    alignItems: "center",
+                                    backgroundColor: loading
+                                       ? null
+                                       : "rgba(69,69,69,0.6)",
+                                    borderRadius: 75,
+                                 }}
+                              >
+                                 <Progress.CircleSnail
+                                    size={150}
+                                    thickness={3}
+                                    indeterminate={true}
+                                    direction="clockwise"
+                                 />
+                              </View>
+                           ) : null}
+                        </TouchableOpacity>
+
+                        <View style={styles.groupText}>
+                           <Text style={styles.number}>{groupsNumber}</Text>
+                           <Text
                               style={{
-                                 position: "absolute",
-                                 top: 0,
-                                 left: 0,
-                                 right: 0,
-                                 bottom: 0,
-                                 justifyContent: "center",
-                                 alignItems: "center",
-                                 backgroundColor: loading
-                                    ? null
-                                    : "rgba(69,69,69,0.6)",
-                                 borderRadius: 75,
+                                 color: "rgba(0,0,0,0.5)",
+                                 fontWeight: "bold",
                               }}
                            >
-                              <Progress.CircleSnail
-                                 size={150}
-                                 thickness={3}
-                                 indeterminate={true}
-                                 direction="clockwise"
-                              />
-                           </View>
-                        ) : null}
-                     </TouchableOpacity>
-
-                     <View style={styles.groupText}>
-                        <Text style={styles.number}>{groupsNumber}</Text>
-                        <Text
-                           style={{
-                              color: "rgba(0,0,0,0.5)",
-                              fontWeight: "bold",
-                           }}
-                        >
-                           Groups
-                        </Text>
+                              Groups
+                           </Text>
+                        </View>
                      </View>
-                  </View>
 
-                  <TextInput
-                     editable={isEditable}
-                     style={[
-                        { fontSize: 30, marginTop: 18 },
-                        { fontWeight: "600" },
-                     ]}
-                     autoCapitalize="none"
-                     keyboardType="email-address"
-                     autoCorrect={false}
-                     name="username"
-                     value={username}
-                     onChangeText={(text) => setUsername(text)}
-                     maxLength={18}
-                     color={isEditable ? "#3165FF" : null}
-                  ></TextInput>
+                     <TextInput
+                        editable={isEditable}
+                        style={[
+                           { fontSize: 30, marginTop: 18 },
+                           { fontWeight: "600" },
+                        ]}
+                        autoCapitalize="none"
+                        keyboardType="email-address"
+                        autoCorrect={false}
+                        name="username"
+                        value={username}
+                        onChangeText={(text) => setUsername(text)}
+                        maxLength={18}
+                        color={isEditable ? "#3165FF" : null}
+                     ></TextInput>
 
-                  <Text
-                     style={{
-                        fontSize: 12,
-                        fontWeight: "700",
-                        marginTop: 12,
-                        color: "rgba(0,0,0,0.40)",
-                     }}
-                  >
-                     Email: {authentication.currentUser.email}
-                  </Text>
-                  <Text
-                     style={{
-                        fontSize: 12,
-                        fontWeight: "700",
-                        marginTop: 5,
-                        color: "rgba(0,0,0,0.40)",
-                     }}
-                  >
-                     Phone: {phone}
-                  </Text>
+                     <Text
+                        style={{
+                           fontSize: 12,
+                           fontWeight: "700",
+                           marginTop: 12,
+                           color: "rgba(0,0,0,0.40)",
+                        }}
+                     >
+                        Email: {authentication.currentUser.email}
+                     </Text>
+                     <Text
+                        style={{
+                           fontSize: 12,
+                           fontWeight: "700",
+                           marginTop: 5,
+                           color: "rgba(0,0,0,0.40)",
+                        }}
+                     >
+                        Phone: {phone}
+                     </Text>
+                     <View style={{ flexDirection: "row", marginTop: 19 }}>
+                        <FlatButton
+                           height={38}
+                           width={136}
+                           radius={10}
+                           fontSize={13}
+                           duration={75}
+                           pressAnimation={0.97}
+                           title={isEditable ? "Save" : "Edit profile"}
+                           onPress={() => editProfile()}
+                           disabled={!isEditable && loading}
+                        ></FlatButton>
+                        <FlatButton
+                           height={38}
+                           width={38}
+                           radius={10}
+                           fontSize={13}
+                           duration={75}
+                           pressAnimation={0.97}
+                           style={{ marginLeft: 10 }}
+                           onPress={() => setAccountCardState(1)}
+                           disabled={!isEditable && loading}
+                        ></FlatButton>
+                     </View>
+                  </>
+               ) : (
+                  <ActivityIndicator
+                     style={{ width: width, height: 300 }}
+                     size="large"
+                     color="#3165FF"
+                  />
+               )}
+            </View>
 
-                  <FlatButton
-                     height={38}
-                     width={136}
-                     radius={10}
-                     fontSize={13}
-                     duration={75}
-                     pressAnimation={0.97}
-                     title={isEditable ? "Save" : "Edit profile"}
-                     style={{ marginTop: 19 }}
-                     onPress={() => editProfile()}
-                     disabled={!isEditable && loading}
-                  ></FlatButton>
-               </>
-            ) : (
-               <ActivityIndicator
-                  style={{ width: width, height: 300 }}
-                  size="large"
-                  color="#3165FF"
+            {/* Back Side */}
+
+            <View style={[styles.topContainer, { width: width }]}>
+               <Text style={styles.scanQrTitle}>Scan to add</Text>
+               <AccountQrCode
+                  style={{ alignSelf: "center", marginTop: 20 }}
+                  size={220}
+                  logoSize={50}
+                  backgroundColor="white"
+                  color="black"
                />
-            )}
-         </View>
+               <FlatButton
+                  height={38}
+                  width={120}
+                  radius={10}
+                  fontSize={13}
+                  duration={75}
+                  pressAnimation={0.97}
+                  style={{ marginTop: 20 }}
+                  title="Done"
+                  onPress={() => setAccountCardState(0)}
+                  disabled={!isEditable && loading}
+               ></FlatButton>
+            </View>
+         </FlipCard>
 
          <View
             style={{ alignSelf: "flex-start", marginTop: 17, marginLeft: 30 }}
@@ -443,19 +498,23 @@ const AccountScreen = ({ navigation }) => {
          </View>
 
          <View style={styles.exploreContainer}>
-            <ExploreCard name="about" />
+            <View style={{ alignItems: "center", flexDirection: "column" }}>
+               <ExploreCard name="about" />
+               <ExploreCard name="logout" onPress={() => handleLogout()} />
+            </View>
             <ExploreCard
                name="settings"
                onPress={() => navigation.navigate("Settings")}
             />
-            <ExploreCard name="payments" />
+            <ExploreCard
+               name="payments"
+               onPress={() => setAccountCardState(0)}
+            />
          </View>
 
          <View
             style={{ alignSelf: "flex-start", marginLeft: 30, marginTop: -10 }}
-         >
-            <ExploreCard name="logout" onPress={() => handleLogout()} />
-         </View>
+         ></View>
       </KeyboardAvoidingView>
    );
 };
@@ -470,10 +529,15 @@ const styles = StyleSheet.create({
    exploreContainer: {
       flexDirection: "row",
       justifyContent: "space-around",
+      marginBottom: 145,
    },
 
    title: {
       marginRight: 210,
+      fontSize: 25,
+      fontWeight: "bold",
+   },
+   scanQrTitle: {
       fontSize: 25,
       fontWeight: "bold",
    },
@@ -491,6 +555,7 @@ const styles = StyleSheet.create({
    topContainer: {
       height: 450,
       borderRadius: 30,
+      paddingTop: 20,
       backgroundColor: "#FFFFFF",
       alignItems: "center",
       justifyContent: "center",

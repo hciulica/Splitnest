@@ -33,6 +33,7 @@ import GroupIndividualScreen from "./src/screens/GroupIndividualScreen";
 import PayerScreen from "./src/screens/PayerScreen";
 import SplitScreen from "./src/screens/SplitScreen";
 import ConfirmPayScreen from "./src/screens/ConfirmPayScreen";
+import AboutScreen from "./src/screens/AboutScreen";
 
 import { LogBox } from "react-native";
 import { YellowBox } from "react-native";
@@ -149,6 +150,11 @@ const App = () => {
                         gestureEnabled: false,
                         animationEnabled: false,
                      }}
+                  />
+                  <Stack.Screen
+                     component={AboutScreen}
+                     name="About"
+                     options={{ headerShown: false, gestureEnabled: true }}
                   />
                   <Stack.Screen
                      component={SettingsScreen}

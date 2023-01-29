@@ -111,3 +111,4 @@ build
 
 # Ignore firebase config directory
 src/api/firebase/firebase-config.js
+android/java_pid24998.hprof
